@@ -23,6 +23,7 @@ import { View, Text, Button, Image } from 'react-native';
 import { Alert } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Pressable } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
 
@@ -30,7 +31,7 @@ export default function Nav() {
 	return (
 		<NavigationContainer theme={DarkTheme}>
 			<Stack.Navigator
-				initialRouteName="LoginScreen"
+				initialRouteName="Dashboard"
 				allowFontScaling={false}
 				screenOptions={{
 				headerStyle: {
@@ -88,7 +89,7 @@ export default function Nav() {
 					options={({navigation}) => ({title: 'Dashboard', 
 						headerRight: () => (
 							<View style={{flexDirection: 'row'}}>
-								<Pressable style={{backgroundColor: 'lightgreen' , padding: 8,borderRadius: 5,marginVertical: 10,marginRight: 5}} onPress={() => {
+								<Pressable style={{backgroundColor: Colors.yellow , padding: 8,borderRadius: 5,marginVertical: 10,marginRight: 5}} onPress={() => {
 									navigation.navigate('Todayinvoices')
 								}}>
 									<Text style={{color: '#000'}}>Today's</Text>
@@ -97,6 +98,17 @@ export default function Nav() {
 									navigation.navigate('AllInvoice');
 								}} style={{backgroundColor: Colors.primary , padding: 8,borderRadius: 5,marginVertical: 10}} >
 									<Text style={{color: 'white'}}>All Invoices</Text>
+								</Pressable>
+							</View>
+						),
+						headerLeft: () => (
+							<View style={{flexDirection: 'row'}}>
+								<Pressable style={{backgroundColor: Colors.skyBlue , padding: 8,borderRadius: 5,marginVertical: 10,marginLeft: 5}} onPress={() => {
+									AsyncStorage.getItem('selectedVehicleNo').then((vehicheId) => {
+										navigation.navigate('Route' , {'vehicleNo' : vehicheId} )
+									})
+								}}>
+									<Text style={{color: '#fff'}}>My Routes</Text>
 								</Pressable>
 							</View>
 						),

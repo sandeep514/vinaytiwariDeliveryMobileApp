@@ -61,7 +61,9 @@ export default function Dashboard({navigation , route}) {
 			let selectedVehNo  = value;
 			AsyncStorage.getItem('user_id').then((value) => {
 				let driverId =  value;
+
 				getTodaySale(driverId,selectedVehNo).then((res) => {
+					console.log(res.data.data)
 					setSalesOfDay(res.data.data);
 					setTotalAmount(res.data.amount);
 				});
@@ -130,7 +132,7 @@ export default function Dashboard({navigation , route}) {
 											{l[0].buyer_rel.name}
 										</ListItem.Title>
 										<ListItem.Subtitle allowFontScaling={false} >
-											<Text style={{fontSize: 10}}>{l[0].sitem}</Text>
+											<Text style={{fontSize: 10}}>Invoice Number: {l[0].invoice}</Text>
 										</ListItem.Subtitle>
 										<ListItem.Subtitle allowFontScaling={false} >
 											<Text style={{fontSize: 11}}>{l[0].sale_price} x {l[0].qty}</Text>	

@@ -21,6 +21,7 @@ import {searchBuyerByInvoiceNumber, getSaleItemByInvoice} from '../api/apiServic
 import { ActivityIndicator } from 'react-native';
 import { useRef } from 'react';
 import { BluetoothManager,BluetoothEscposPrinter,BluetoothTscPrinter } from 'react-native-bluetooth-escpos-printer';
+import { StarPRNT } from 'react-native-star-prnt';
 
 const win = Dimensions.get('window');
 
@@ -36,6 +37,7 @@ let valuetem = '';
 let updatedValue= '';
 let initalPaymentStatus = 'cash';
 let unableToConnect = 0;
+let commandsArray = [];
 
 export default function AddQuantity({navigation}) {
 const [data, setData] = useState();
@@ -92,64 +94,88 @@ printReceipt = (data) => {
     let buyerAddress = data[0]['buyer_rel'].address;
     let buyerPhone = data[0]['buyer_rel'].contact_no;
     let invoiceNo = data[0].invoice_no;
-      AsyncStorage.getItem('user_id').then((res) => {
+    AsyncStorage.getItem('user_id').then((res) => {
             getDiverId(res).then((printerName) => {
                 setBluetoothName(printerName)
-                BluetoothManager.isBluetoothEnabled().then( (enabled) => {
-                    BluetoothManager.enableBluetooth().then( (r) => {
-                        
-                        setisBluetoothEnabled(true)
-                        if (r != undefined) {
-                            for (let i = 0; i < r.length; i++) {
-
-                                // AsyncStorage.getItem('printerName').then((res) => {
-                                    if(res != null && res != undefined){
-                                        if(JSON.parse(r[i]).name == printerName){
-                                            paired.push(JSON.parse(r[i]).name);
-                                            setDevice(JSON.parse(r[i]).address)
-
-                                            getSaleItemByInv(invoiceNo).then((res) => {
-                                                for(let i = 0 ; i < res.length ; i++){
-                                                    if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
-                                                        setHasVatProducts(true)
-                                                    }
-                                                    if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
-                                                        setHasNonVatProducts(true)
-
-                                                    }
-                                                    
-                                                }
-                                                BluetoothManager.connect(JSON.parse(r[i]).address).then( (ress) => {
-                                                    printDesign( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
-                                                },(e) => {
-                                                    console.log(e['Error']);
-                                                    alert(e)
-                                                    setPrintingIndicator(false);
-                                                });
-                                            },(error) => {
-                                                alert(error);
-                                            });
-                                        }
-                                    }else{
-                                        alert('No Printer available');
-                                    }
-                                
-                                // })
+                if( printerName.printerType == 'star'){
+                    if(res != null && res != undefined){
+                        getSaleItemByInv(invoiceNo).then((res) => {
+                            for(let i = 0 ; i < res.length ; i++){
+                                if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
+                                    setHasVatProducts(true)
+                                }
+                                if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
+                                    setHasNonVatProducts(true)
+                                }                                                    
                             }
-                        }else{
-                            alert('No Device detected');
-                        }
-                
-                    },(err) => {
-                        alert(err);
-                    });
-                },
-                    (err) => {
-                        alert(err);
+                            BluetoothManager.connect(JSON.parse(r[i]).address).then( (ress) => {
+                                alert("jhink")
+                                printDesignStarPrinter( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
+                                setPrintingIndicator(false);
+                            },(e) => {
+                                alert(e)
+                                setPrintingIndicator(false);
+                            });
+                        },(error) => {
+                            alert(error);
+                        });
+                    }
+                }else{
+                    BluetoothManager.isBluetoothEnabled().then( (enabled) => {
+                        BluetoothManager.enableBluetooth().then( (r) => {
+                            
+                            setisBluetoothEnabled(true)
+                            if (r != undefined) {
+                                for (let i = 0; i < r.length; i++) {
+    
+                                    AsyncStorage.getItem('printerName').then((res) => {
+                                        if(res != null && res != undefined){
+                                            if(JSON.parse(r[i]).name == printerName){
+                                                paired.push(JSON.parse(r[i]).name);
+                                                setDevice(JSON.parse(r[i]).address)
+    
+                                                getSaleItemByInv(invoiceNo).then((res) => {
+                                                    for(let i = 0 ; i < res.length ; i++){
+                                                        if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
+                                                            setHasVatProducts(true)
+                                                        }
+                                                        if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
+                                                            setHasNonVatProducts(true)
+                                                        }                                                    
+                                                    }
+                                                    BluetoothManager.connect(JSON.parse(r[i]).address).then( (ress) => {
+                                                        printDesign( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
+                                                        setPrintingIndicator(false);
+                                                    },(e) => {
+                                                        alert(e)
+                                                        setPrintingIndicator(false);
+                                                    });
+                                                },(error) => {
+                                                    alert(error);
+                                                });
+                                            }
+                                        }else{
+                                            alert('No Printer available');
+                                        }
+                                    
+                                    })
+                                }
+                            }else{
+                                alert('No Device detected');
+                            }
+                    
+                        },(err) => {
+                            alert(err);
+                        });
                     },
-                );
+                        (err) => {
+                            alert(err);
+                        },
+                    );
+                }
+               
             })
-        })
+    })
       
 };
 getPrinterNameByDriver = () => {
@@ -199,6 +225,241 @@ getPrinterNameByDriver = () => {
     })
     
 }
+
+printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) => {
+    let totalAmount = 0;
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({appendBitmapText: "UK Inch",fontSize:40});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: "Unit 12C, Bridge Industrial Estate,RH6 9HU\n"});
+    commandsArray.push({append: "Phone: 07917105510\n"});
+    commandsArray.push({append: "Email: Ukinch2@gmail.com\n"});
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'INVOICE: '+invoiceNo});
+    commandsArray.push({append: '\n'});
+    
+    //Customer Details
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({append: '--------------------------------\n'});
+
+    
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+    commandsArray.push({append: 'Date: '+data[0].idate });
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({append: '--------------------------------\n'});
+
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Customer \n'});
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Name: '});
+    commandsArray.push({append: buyerName});
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Address: '});
+    commandsArray.push({append: buyerName });
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Phone: '});
+    commandsArray.push({append: buyerPhone });
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({append: '--------------------------------\n'});
+    
+
+    if( hasNonVatProducts ){
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+        commandsArray.push({append: 'Qty  '});
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+        commandsArray.push({append: 'Price  '});
+        commandsArray.push({append: 'Amount '});
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
+        commandsArray.push({append: 'VAT  '});
+        commandsArray.push({append: 'Total'});
+
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '--------------------------------\n'});
+
+        let beforeVatPrice = 0;
+        for(let i = 0 ; i < savedOrderResonce.length ; i++){
+            if( savedOrderResonce[i]['sale_item_rel'].itemcategory == 'EGGS' || savedOrderResonce[i].has_vat == 1){
+                let sitem       = data[i]['sale_item_rel']['name'];
+                let salePrice   = data[i]['sale_price'];
+                let qty         = data[i]['qty'];
+                let vat = 0;
+                let amount = 0;
+                if( data[i]['sale_item_rel'].itemcategory != 'EGGS' ){
+                    vat = (( (( ( (data[i]['sale_price'] * data[i]['qty']) * 1.20 ) - (data[i]['sale_price'] * data[i]['qty']))) ).toFixed(2)).toString();
+    
+                    vatAmount = vatAmount + parseFloat(vat);
+                }
+                if( data[i]['sale_item_rel'].itemcategory == 'EGGS' ){
+                    amount = ((data[i]['sale_price'] * data[i]['qty']).toFixed(2)).toString();
+                }else{
+                    amount = (( (data[i]['sale_price'] * data[i]['qty']) * 1.20 ).toFixed(2)).toString();
+                    
+                }
+                beforeVatPrice = (beforeVatPrice + parseFloat((qty*salePrice)));
+
+                totalAmount = (parseFloat(totalAmount)+parseFloat(amount));
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: sitem+'\n'});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: (qty*1).toFixed(0)+'   '});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: salePrice+'   '});
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: (qty*salePrice).toFixed(2)+'   '});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: vat+'   '});
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: amount});
+                
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '--------------------------------\n'});
+            }
+        }
+
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+        commandsArray.push({append: 'Amount Before VAT: '});
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+        commandsArray.push({append: (beforeVatPrice).toFixed(2)+'\n'});
+
+        commandsArray.push({append: 'VAT: '});
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+        commandsArray.push({append: (vatAmount).toFixed(2)+'\n'});
+
+        commandsArray.push({append: 'Total: '});
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+        commandsArray.push({append: (beforeVatPrice + vatAmount).toFixed(2)+'\n'});
+
+    }
+    
+    if(hasNonVatProducts > 0){
+        commandsArray.push({append: '\n'});
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+        commandsArray.push({append: '*************************'});
+        
+        commandsArray.push({append: '\n'});
+        
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+        commandsArray.push({append: 'Qty'+'     '});
+        commandsArray.push({append: 'Price'+'       '});
+        commandsArray.push({append: 'Amt'});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '--------------------------------\n'});
+        
+        for(let i = 0 ; i < savedOrderResonce.length ; i++){
+            if( savedOrderResonce[i]['sale_item_rel'].itemcategory != 'EGGS' && !savedOrderResonce[i]['has_vat'] ){
+                let sitem = data[i]['sale_item_rel']['name'];
+                let salePrice = data[i]['sale_price'];
+                let qty = data[i]['qty'];
+                let amount = ((data[i]['sale_price'] * data[i]['qty']).toFixed(2)).toString();
+                let vat = 0;
+                nonVatTotal = (nonVatTotal + parseFloat(amount));
+
+                totalAmount = (parseFloat(totalAmount));
+
+                
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: sitem});
+                commandsArray.push({append: '\n'});
+                
+                commandsArray.push({ append: (qty*1).toFixed(0)+'       ' });
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({ append: salePrice+'       ' });
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({ append: amount });
+                
+                commandsArray.push({append: '\n'});
+            }
+        }
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+        commandsArray.push({ append: 'Total: ' });
+
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+
+        commandsArray.push({ append: (nonVatTotal).toFixed(2) });
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '--------------------------------\n'});
+    }
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+    commandsArray.push({ append: '  ' });
+    commandsArray.push({ append: '  ' });
+    commandsArray.push({ append: 'Grand Total: ' });
+
+    commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+    commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+    commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+    commandsArray.push({appendBytes:[0x9c]});
+
+    commandsArray.push({ append: (totalAmount+nonVatTotal).toFixed(2) });        
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    print();
+};
+
+async function print() {
+    try {
+        var printResult = await StarPRNT.print('StarPRNT', commandsArray, 'BT:');
+        alert(printResult); // Success!
+    } catch (e) {
+        alert(e);
+    }
+}
+
+
 printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) => {
     let totalAmount = 0;
 
@@ -214,7 +475,7 @@ printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) =>
             fonttype: 1,
         });
         await BluetoothEscposPrinter.setBlob(0);
-        await BluetoothEscposPrinter.printText('94 Staceway Worth, Crawley, RH107YR\n\r', {
+        await BluetoothEscposPrinter.printText('Unit 12C, Bridge Industrial Estate,RH6 9HU\n', {
             encoding: 'GBK',
             codepage: 0,
             widthtimes: 0,
@@ -295,7 +556,7 @@ printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) =>
                 BluetoothEscposPrinter.ALIGN.CENTER,
                 BluetoothEscposPrinter.ALIGN.RIGHT,
             ],
-            ['Address:','', '',buyerAddress],
+            ['Address:','', '',buyerName],
         {},
     );
     let columnWidthsHeaderMobile = [9,1,1,20];

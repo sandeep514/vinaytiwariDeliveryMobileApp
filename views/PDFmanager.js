@@ -22,7 +22,6 @@ export default function PDFmanager({navigation , text, onOK}) {
     var totalAmountWithoutVat = 0;
     var AmountVat = 0;
     let commandsArray = [];
-    let commandsArray2 = [];
 
     const ref = useRef();
 	const win = Dimensions.get('window');
@@ -912,168 +911,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         print();
     };
 
-    printDesignStarPrinter2 = async (buyerData , ItemData, extraData) => {
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-        
-        commandsArray2.push({append: "UK Inch\n"});
-        commandsArray2.push({append: "Unit 12C, Bridge Industrial Estate,RH6 9HU\n"});
-        commandsArray2.push({append: "Phone: 07917105510\n"});
-        commandsArray2.push({append: "Email: Ukinch2@gmail.com\n"});
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-        commandsArray2.push({append: 'INVOICE: '+invoiceNumber});
-        commandsArray2.push({append: '\n'});
-        
-        //Customer Details
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-        commandsArray2.push({append: '--------------------------------\n'});
-
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-        commandsArray2.push({append: 'Customer'});
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-        commandsArray2.push({append: 'Date: '+savedOrderResonce[0]['ddate']});
-        commandsArray2.push({append: '\n'});
-
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-        commandsArray2.push({append: '--------------------------------\n'});
-
-
-
-
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-        commandsArray2.push({append: 'Name: '});
-        // commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-        commandsArray2.push({append: buyerData['name']});
-        commandsArray2.push({append: '\n'});
-
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-        commandsArray2.push({append: 'Address: '});
-        // commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-        commandsArray2.push({append: buyerData['address']});
-        commandsArray2.push({append: '\n'});
-
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-        commandsArray2.push({append: 'Phone: '});
-        // commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-        commandsArray2.push({append: buyerData['contact_no']});
-        commandsArray2.push({append: '\n'});
-
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-        commandsArray2.push({append: '--------------------------------\n'});
-        
-
-       
-        if( hasNonVatProducts ){
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-            commandsArray.push({append: 'Qty  '});
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-            commandsArray.push({append: 'Price   '});
-            commandsArray.push({append: 'Amount   '});
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
-            commandsArray.push({append: 'VAT   '});
-            commandsArray.push({append: 'Total'});
-
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-            commandsArray.push({append: '\n'});
-            commandsArray.push({append: '--------------------------------\n'});
-
-            for(let i = 0 ; i < savedOrderResonce.length ; i++){
-                if( savedOrderResonce[i]['sale_item_rel'].itemcategory == 'EGGS' || savedOrderResonce[i].has_vat == 1){
-                    let sitem = savedOrderResonce[i]['sale_item_rel']['name'];
-                    let salePrice = savedOrderResonce[i]['sale_price'];
-                    let qty = savedOrderResonce[i]['qty'];
-                    let vat = 0;
-                    let amount = 0;
-                    
-                    if( savedOrderResonce[i]['sale_item_rel'].itemcategory != 'EGGS' ){
-                        vat = (( (( ( (savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']) * 1.20 ) - (savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']))) ).toFixed(2)).toString();
-                    }
-                    if( savedOrderResonce[i]['sale_item_rel'].itemcategory == 'EGGS' ){
-                        amount = ((savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']).toFixed(2)).toString();
-                    }else{
-                        amount = (( (savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']) * 1.20 ).toFixed(2)).toString();
-                    }
-                    totalAmount = (parseFloat(totalAmount));
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-                    commandsArray.push({append: sitem+'\n'});
-
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-                    commandsArray.push({append: (qty*1).toFixed(0)+'   '});
-
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-                    commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858, append: '£'+salePrice+'   '});
-                    commandsArray.push({append: '£'+(qty*salePrice).toFixed(2)+'   '});
-
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-                    commandsArray.push({append: '£'+vat+'   '});
-                    commandsArray.push({append: '£'+amount+'   '});
-                    
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-                    commandsArray.push({append: '\n'});
-                    commandsArray.push({append: '--------------------------------\n'});
-                }
-            }
-
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-            commandsArray.push({append: 'Amount Before VAT: '+'£'+(VATTotal).toFixed(2)+'\n'});
-            commandsArray.push({append: 'VAT: '+'£'+(VatProductTotal-VATTotal).toFixed(2)+'\n'});
-            commandsArray.push({append:  'Total: '+'£'+(VatProductTotal).toFixed(2)+'\n'});
-        }
-        
-        if(WithoutVatProductTotal > 0){
-            commandsArray.push({append: '\n'});
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-            commandsArray.push({append: '*************************'});
-            
-            commandsArray.push({append: '\n'});
-            
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-            commandsArray.push({append: 'Qty'+'    '});
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-            commandsArray.push({append: 'Price'+'    '});
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-            commandsArray.push({append: 'Amount'});
-            commandsArray.push({append: '\n'});
-            commandsArray.push({append: '--------------------------------\n'});
-            
-            for(let i = 0 ; i < savedOrderResonce.length ; i++){
-                if( savedOrderResonce[i]['sale_item_rel'].itemcategory != 'EGGS' && !savedOrderResonce[i]['has_vat'] ){
-                    let sitem = savedOrderResonce[i]['sale_item_rel']['name'];
-                    let salePrice = savedOrderResonce[i]['sale_price'];
-                    let qty = savedOrderResonce[i]['qty'];
-                    let amount = ((savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']).toFixed(2)).toString();
-                    let vat = 0;
-                    totalAmount = (parseFloat(totalAmount));
-
-                    
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-                    commandsArray.push({append: sitem});
-                    commandsArray.push({append: '\n'});
-                    
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-                    commandsArray.push({ append: (qty*1).toFixed(0)+'    ' });
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-                    commandsArray.push({ append: '£'+salePrice+'    ' });
-                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-                    commandsArray.push({ append: '£'+amount });
-                    
-                    commandsArray.push({append: '\n'});
-                }
-            }
-            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
-            commandsArray.push({ append: 'Total: £'+(WithoutVatProductTotal).toFixed(2) });
-            commandsArray.push({append: '\n'});
-            commandsArray.push({append: '--------------------------------\n'});
-        }
-        commandsArray2.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-        commandsArray2.push({ append: '' });
-        commandsArray2.push({ append: '' });
-        commandsArray2.push({ append: 'Grand Total: ' });
-        commandsArray2.push({ append: '£'+(WithoutVatProductTotal+VatProductTotal).toFixed(2) });
-        
-        commandsArray2.push({append: '\n'});
-        print2();
-    };
-
+  
     async function portDiscovery() {
         try {
             let printers = await StarPRNT.portDiscovery('Bluetooth');
@@ -1086,15 +924,6 @@ export default function PDFmanager({navigation , text, onOK}) {
     async function print() {
         try {
             var printResult = await StarPRNT.print('StarPRNT', commandsArray, 'BT:');
-            alert(printResult); // Success!
-        } catch (e) {
-            alert(e);
-        }
-    }
-
-    async function print2() {
-        try {
-            var printResult = await StarPRNT.print('StarPRNT', commandsArray2, 'BT:');
             alert(printResult); // Success!
         } catch (e) {
             alert(e);
@@ -1138,79 +967,97 @@ export default function PDFmanager({navigation , text, onOK}) {
             setSaveOrderActivIndictor(true);  
             AsyncStorage.getItem('user_id').then((res) => {
             getDiverId(res).then((result) => {
-                setBluetoothName(result.printerName)
-                // BluetoothManager.isBluetoothEnabled().then( (enabled) => {
-                //     BluetoothManager.enableBluetooth().then( (r) => {
-                //         if (r != undefined) {
-                //             for (let i = 0; i < r.length; i++) {
-                //                 // AsyncStorage.getItem('result.printerName').then((res) => {
-                //                     if(res != null && res != undefined){
-                //                         if(JSON.parse(r[i]).name == result.printerName){
-                //                             hasPrinter = true;
-                //                             paired.push(JSON.parse(r[i]).name);
-                //                             setDevice(JSON.parse(r[i]).address)
+                if( result.printerType == 'star'){
+                    AsyncStorage.getItem('readyForOrder').then((result) => {
+                        let myData = JSON.parse(result)
+                        myData.push({'signature' : base64,'remarks' : remarks,'invoice_no' : invoiceNumber});
+                        myData.push({'remarks' : remarks});
+                        myData.push({'invoice_no' : invoiceNumber});
 
-                //                                 BluetoothManager.connect(JSON.parse(r[i]).address).then( (res) => {
-                                                    AsyncStorage.getItem('readyForOrder').then((result) => {
-                                                        let myData = JSON.parse(result)
-                                    
-                                                        myData.push({'signature' : base64,'remarks' : remarks,'invoice_no' : invoiceNumber});
-                                                        // myData.push({'remarks' : remarks});
-                                                        // myData.push({'invoice_no' : invoiceNumber});
-                                                        // return false;
-                                                        SaveOrder(JSON.stringify(myData)).then((res) => {
-                                                            setSaveOrderActivIndictor(false)
-                                                            // AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
-                                                            // AsyncStorage.setItem('orderSaveBuyer', JSON.stringify(res.data.buyer));
-                                                            showToast('Order has been placed successfully')
-                                                            if( selectedDriverId != 13 ){
+                        SaveOrder(JSON.stringify(myData)).then((res) => {
+                            setSaveOrderActivIndictor(false)
+                            AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
+                            AsyncStorage.setItem('orderSaveBuyer', JSON.stringify(res.data.buyer));
+                            if( selectedDriverId != 13 ){
+                                printDesignStarPrinter(res.data.buyer , res.data.data, res);                                
+                                setModalVisible(true)
+                            }
+                            showToast('Order has been placed successfully')
+                        })
+                    })
+
+                }else{
+                    setBluetoothName(result.printerName)
+                    BluetoothManager.isBluetoothEnabled().then( (enabled) => {
+                        BluetoothManager.enableBluetooth().then( (r) => {
+                            if (r != undefined) {
+                                for (let i = 0; i < r.length; i++) {
+                                    // AsyncStorage.getItem('result.printerName').then((res) => {
+                                        if(res != null && res != undefined){
+                                            if(JSON.parse(r[i]).name == result.printerName){
+                                                hasPrinter = true;
+                                                paired.push(JSON.parse(r[i]).name);
+                                                setDevice(JSON.parse(r[i]).address)
+
+                                                    BluetoothManager.connect(JSON.parse(r[i]).address).then( (res) => {
+                                                        AsyncStorage.getItem('readyForOrder').then((result) => {
+                                                            let myData = JSON.parse(result)
+                                        
+                                                            myData.push({'signature' : base64,'remarks' : remarks,'invoice_no' : invoiceNumber});
+                                                            myData.push({'remarks' : remarks});
+                                                            myData.push({'invoice_no' : invoiceNumber});
+
+                                                            SaveOrder(JSON.stringify(myData)).then((res) => {
+                                                                setSaveOrderActivIndictor(false)
+                                                                AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
+                                                                AsyncStorage.setItem('orderSaveBuyer', JSON.stringify(res.data.buyer));
+                                                                showToast('Order has been placed successfully')
                                                                 if( selectedDriverId != 13 ){
-                                                                    // if( result.printerType == 'general'){
-                                                                    //     printDesign(res.data.buyer , res.data.data, res);
-                                                                    // }else{
-                                                                        printDesignStarPrinter(res.data.buyer , res.data.data, res);
-                                                                    // }
-                                                                    // confirm('Order Places Successfully')
+                                                                    if( result.printerType == 'general'){
+                                                                        printDesign(res.data.buyer , res.data.data, res);
+                                                                    }
                                                                     setModalVisible(true)
                                                                 }
-                                                            }
+                                                            })
                                                         })
-                                                    })
-                //                                 },(e) => {
-                //                                     setSaveOrderActivIndictor(false); 
-                //                                     alert('Your Bluetooth printer is not connected.')
-                //                                 });
-                //                         }else{
-                //                             if( i == (r.length-1) && !hasPrinter){
-                //                                 setSaveOrderActivIndictor(false);  
-                //                                 alert("Printer "+result.printerName+" not available.");
-                //                             }
-                //                         }
-                //                     }else{
-                //                         alert('No Printer available');
-                //                                 setSaveOrderActivIndictor(false);  
+                                                    },(e) => {
+                                                        setSaveOrderActivIndictor(false); 
+                                                        alert('Your Bluetooth printer is not connected.')
+                                                    });
+                                            }else{
+                                                if( i == (r.length-1) && !hasPrinter){
+                                                    setSaveOrderActivIndictor(false);  
+                                                    alert("Printer "+result.printerName+" not available.");
+                                                }
+                                            }
+                                        }else{
+                                            alert('No Printer available');
+                                                    setSaveOrderActivIndictor(false);  
 
-                //                     }
-                                
-                //                 // })
-                //             }
-                //         }else{
-                //         setSaveOrderActivIndictor(false);  
+                                        }
+                                    
+                                    // })
+                                }
+                            }else{
+                            setSaveOrderActivIndictor(false);  
 
-                //             alert('No Device detected');
-                //         }
+                                alert('No Device detected');
+                            }
+                    
+                        },(err) => {
+                            setSaveOrderActivIndictor(false);  
+
+                            alert(err);
+                        });
+                    },
+                        (err) => {
+                            setSaveOrderActivIndictor(false);  
+                            alert(err);
+                        },
+                    );
+                }
+               
                 
-                //     },(err) => {
-                //         setSaveOrderActivIndictor(false);  
-
-                //         alert(err);
-                //     });
-                // },
-                    // (err) => {
-                    //     setSaveOrderActivIndictor(false);  
-                    //     alert(err);
-                    // },
-                // );
             });
         });
     }

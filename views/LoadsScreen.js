@@ -31,6 +31,8 @@ export default function LoadsScreen({navigation , route}) {
 
 	useEffect(() => {
 		getVehicleLoads().then((res) => {
+			console.log(res)
+			setActiveIndicatorLoader(false)
 			setSelectedLoadNumber(res);
 		} , (err) => {
 			setActiveIndicatorLoader(false)
