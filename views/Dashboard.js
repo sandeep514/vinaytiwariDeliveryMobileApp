@@ -116,6 +116,7 @@ export default function Dashboard({navigation , route}) {
 				<Text style={styles.detailBar} allowFontScaling={false}>
 					Sales for Today
 				</Text>
+
 				<Text style={styles.barText} allowFontScaling={false}>
 					{(TotalAmount != undefined) ? 'Total: £'+TotalAmount : <Text></Text> }
 				</Text>
@@ -139,7 +140,7 @@ export default function Dashboard({navigation , route}) {
 										</ListItem.Subtitle>
 									</ListItem.Content>
 									<View key={generateRandString()}>
-										<Text key={generateRandString()}>£ {(l[0].sale_price * l[0].qty).toFixed(2)}</Text>
+										<Text key={generateRandString()}>£ {(l.invoiceTotal).toFixed(2)}</Text>
 									</View>
 								</ListItem>
 							</TouchableHighlight>

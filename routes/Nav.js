@@ -31,7 +31,7 @@ export default function Nav() {
 	return (
 		<NavigationContainer theme={DarkTheme}>
 			<Stack.Navigator
-				initialRouteName="Dashboard"
+				initialRouteName="DashboardRoutes"
 				allowFontScaling={false}
 				screenOptions={{
 				headerStyle: {

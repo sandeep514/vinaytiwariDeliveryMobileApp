@@ -61,10 +61,8 @@ var paired = [];
 
 useEffect(() => {
     getListInvoice();
-    getPrinterNameByDriver()
-     
-
-} , [])
+    getPrinterNameByDriver();
+} , []);
 
 function getListInvoice(){
     AsyncStorage.getItem('selectedVehicleNo').then((value) => {
@@ -95,94 +93,26 @@ printReceipt = (data) => {
     let buyerPhone = data[0]['buyer_rel'].contact_no;
     let invoiceNo = data[0].invoice_no;
     AsyncStorage.getItem('user_id').then((res) => {
-            getDiverId(res).then((printerName) => {
-                setBluetoothName(printerName)
-                if( printerName.printerType == 'star'){
-                    if(res != null && res != undefined){
-                        getSaleItemByInv(invoiceNo).then((res) => {
-                            for(let i = 0 ; i < res.length ; i++){
-                                if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
-                                    setHasVatProducts(true)
-                                }
-                                if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
-                                    setHasNonVatProducts(true)
-                                }                                                    
+        getDiverId(res).then((printerName) => {
+            setBluetoothName(printerName)
+            if( printerName.printerType == 'star'){
+                if(res != null && res != undefined){
+                    getSaleItemByInv(invoiceNo).then((res) => {
+                        for(let i = 0 ; i < res.length ; i++){
+                            if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
+                                setHasVatProducts(true)
                             }
-                            BluetoothManager.connect(JSON.parse(r[i]).address).then( (ress) => {
-                                alert("jhink")
-                                printDesignStarPrinter( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
-                                setPrintingIndicator(false);
-                            },(e) => {
-                                alert(e)
-                                setPrintingIndicator(false);
-                            });
-                        },(error) => {
-                            alert(error);
-                        });
-                    }
-                }else{
-                    BluetoothManager.isBluetoothEnabled().then( (enabled) => {
-                        BluetoothManager.enableBluetooth().then( (r) => {
-                            
-                            setisBluetoothEnabled(true)
-                            if (r != undefined) {
-                                for (let i = 0; i < r.length; i++) {
-    
-                                    AsyncStorage.getItem('printerName').then((res) => {
-                                        if(res != null && res != undefined){
-                                            if(JSON.parse(r[i]).name == printerName){
-                                                paired.push(JSON.parse(r[i]).name);
-                                                setDevice(JSON.parse(r[i]).address)
-    
-                                                getSaleItemByInv(invoiceNo).then((res) => {
-                                                    for(let i = 0 ; i < res.length ; i++){
-                                                        if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
-                                                            setHasVatProducts(true)
-                                                        }
-                                                        if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
-                                                            setHasNonVatProducts(true)
-                                                        }                                                    
-                                                    }
-                                                    BluetoothManager.connect(JSON.parse(r[i]).address).then( (ress) => {
-                                                        printDesign( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
-                                                        setPrintingIndicator(false);
-                                                    },(e) => {
-                                                        alert(e)
-                                                        setPrintingIndicator(false);
-                                                    });
-                                                },(error) => {
-                                                    alert(error);
-                                                });
-                                            }
-                                        }else{
-                                            alert('No Printer available');
-                                        }
-                                    
-                                    })
-                                }
-                            }else{
-                                alert('No Device detected');
-                            }
-                    
-                        },(err) => {
-                            alert(err);
-                        });
-                    },
-                        (err) => {
-                            alert(err);
-                        },
-                    );
+                            if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
+                                setHasNonVatProducts(true)
+                            }                                                    
+                        }
+                        printDesignStarPrinter( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
+                        setPrintingIndicator(false);
+                    },(error) => {
+                        alert(error);
+                    });
                 }
-               
-            })
-    })
-      
-};
-getPrinterNameByDriver = () => {
-    return new Promise((resolve, reject) => {
-        AsyncStorage.getItem('user_id').then((res) => {
-            getDiverId(res).then((printerName) => {
-                setBluetoothName(printerName)
+            }else{
                 BluetoothManager.isBluetoothEnabled().then( (enabled) => {
                     BluetoothManager.enableBluetooth().then( (r) => {
                         
@@ -190,6 +120,65 @@ getPrinterNameByDriver = () => {
                         if (r != undefined) {
                             for (let i = 0; i < r.length; i++) {
 
+                                AsyncStorage.getItem('printerName').then((res) => {
+                                    if(res != null && res != undefined){
+                                        if(JSON.parse(r[i]).name == printerName){
+                                            paired.push(JSON.parse(r[i]).name);
+                                            setDevice(JSON.parse(r[i]).address)
+
+                                            getSaleItemByInv(invoiceNo).then((res) => {
+                                                for(let i = 0 ; i < res.length ; i++){
+                                                    if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
+                                                        setHasVatProducts(true)
+                                                    }
+                                                    if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
+                                                        setHasNonVatProducts(true)
+                                                    }                                                    
+                                                }
+                                                BluetoothManager.connect(JSON.parse(r[i]).address).then( (ress) => {
+                                                    printDesign( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
+                                                    setPrintingIndicator(false);
+                                                },(e) => {
+                                                    alert(e)
+                                                    setPrintingIndicator(false);
+                                                });
+                                            },(error) => {
+                                                alert(error);
+                                            });
+                                        }
+                                    }else{
+                                        alert('No Printer available');
+                                    }
+                                
+                                })
+                            }
+                        }else{
+                            alert('No Device detected');
+                        }
+                
+                    },(err) => {
+                        alert(err);
+                    });
+                },
+                    (err) => {
+                        alert(err);
+                    },
+                );
+            }
+        })
+    })
+};
+
+getPrinterNameByDriver = () => {
+    return new Promise((resolve, reject) => {
+        AsyncStorage.getItem('user_id').then((res) => {
+            getDiverId(res).then((printerName) => {
+                setBluetoothName(printerName)
+                BluetoothManager.isBluetoothEnabled().then( (enabled) => {
+                    BluetoothManager.enableBluetooth().then( (r) => {
+                        setisBluetoothEnabled(true)
+                        if (r != undefined) {
+                            for (let i = 0; i < r.length; i++) {
                                 // AsyncStorage.getItem('printerName').then((res) => {
                                     if(res != null && res != undefined){
                                         if(JSON.parse(r[i]).name == printerName){
@@ -204,13 +193,11 @@ getPrinterNameByDriver = () => {
                                     }else{
                                         alert('No Printer available');
                                     }
-                                
                                 // })
                             }
                         }else{
                             alert('No Device detected');
-                        }
-                
+                        }                
                     },(err) => {
                         alert(err);
                     });
@@ -223,12 +210,10 @@ getPrinterNameByDriver = () => {
             resolve();
         })
     })
-    
 }
 
 printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) => {
     let totalAmount = 0;
-
     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
     commandsArray.push({appendBitmapText: "UK Inch",fontSize:40});
     commandsArray.push({append: '\n'});
@@ -271,8 +256,8 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
 
     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
     commandsArray.push({append: '--------------------------------\n'});
+    let nonVatTotal = 0;
     
-
     if( hasNonVatProducts ){
         commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
         commandsArray.push({append: 'Qty  '});

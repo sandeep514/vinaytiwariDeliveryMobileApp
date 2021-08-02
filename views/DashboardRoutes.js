@@ -8,6 +8,60 @@ import {heightToDp} from '../utils/Responsive';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getPriorityDrivers } from '../api/apiService';
 import { Text } from 'react-native';
+import { BoardRepository , Board } from 'react-native-draganddrop-board'
+
+const data = [
+    {
+        id: 1,
+        rows: [
+            {
+                id: '1',
+                name: 'Analyze your audience',
+                // description: 'Learn more about the audience to whom you will be speaking'
+            },
+            {
+                id: '2',
+                name: 'Select a topic',
+                // description: 'Select a topic that is of interest to the audience and to you'
+            },
+            {
+                id: '3',
+                name: 'Define the objective',
+                // description: 'Write the objective of the presentation in a single concise statement'
+            },
+            {
+                id: '4',
+                name: 'Analyze your audience',
+                // description: 'Learn more about the audience to whom you will be speaking'
+            },
+            {
+                id: '5',
+                name: 'Select a topic',
+                // description: 'Select a topic that is of interest to the audience and to you'
+            },
+            {
+                id: '6',
+                name: 'Define the objective',
+                // description: 'Write the objective of the presentation in a single concise statement'
+            },{
+                id: '7',
+                name: 'Analyze your audience',
+                // description: 'Learn more about the audience to whom you will be speaking'
+            },
+            {
+                id: '8',
+                name: 'Select a topic',
+                // description: 'Select a topic that is of interest to the audience and to you'
+            },
+            {
+                id: '9',
+                name: 'Define the objective',
+                // description: 'Write the objective of the presentation in a single concise statement'
+            },
+        ]
+    }
+]
+const boardRepository = new BoardRepository(data);
 
 const list = [
         {
@@ -103,7 +157,14 @@ const list = [
                             <Icon name="refresh" type='font-awesome' color={Colors.primary}/>
                         </Pressable>
                     </View> */}
-                    <View style={styles.nextButton}>
+                    <Board
+                        boardRepository={boardRepository}
+                        open={() => {}}
+                        onDragEnd={() => {}}
+                        isWithCountBadge={ false }
+                        boardBackground="no"
+                    />
+                    {/* <View style={styles.nextButton}>
                         <Pressable onPress={ () => {
                             console.log(active)
                             if( active != undefined) {
@@ -115,7 +176,7 @@ const list = [
                         }}>
                             <Icon name="chevron-right" type='font-awesome' color="white" style={{padding: 10}}/>
                         </Pressable>
-                    </View>
+                    </View> */}
                     <View style={{padding: 0 , margin: 0}}>
                         <ScrollView >
                             { (hasRoutes != false && listRoutes != undefined) ?
