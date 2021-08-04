@@ -945,7 +945,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         navigation.push('Dashboard')
     }
 
-    printReceipt = () => {
+    function printReceipt() {
         setSaveOrderActivIndictor(true)
         if(selectedDriverId == 13){
             AsyncStorage.getItem('readyForOrder').then((result) => {
