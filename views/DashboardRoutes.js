@@ -6,75 +6,26 @@ import MainScreen from '../layout/MainScreen';
 import {heightToDp} from '../utils/Responsive';
 // import MapView, { Marker } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getPriorityDrivers } from '../api/apiService';
+import { getPriorityDrivers  } from '../api/apiService';
 import { Text } from 'react-native';
-import { BoardRepository , Board } from 'react-native-draganddrop-board'
+// import { BoardRepository , Board } from 'react-native-draganddrop-board'
 
 const data = [
     {
         id: 1,
+        name: "Today's routes",
         rows: [
             {
                 id: '1',
                 name: 'Analyze your audience',
                 // description: 'Learn more about the audience to whom you will be speaking'
             },
-            {
-                id: '2',
-                name: 'Select a topic',
-                // description: 'Select a topic that is of interest to the audience and to you'
-            },
-            {
-                id: '3',
-                name: 'Define the objective',
-                // description: 'Write the objective of the presentation in a single concise statement'
-            },
-            {
-                id: '4',
-                name: 'Analyze your audience',
-                // description: 'Learn more about the audience to whom you will be speaking'
-            },
-            {
-                id: '5',
-                name: 'Select a topic',
-                // description: 'Select a topic that is of interest to the audience and to you'
-            },
-            {
-                id: '6',
-                name: 'Define the objective',
-                // description: 'Write the objective of the presentation in a single concise statement'
-            },{
-                id: '7',
-                name: 'Analyze your audience',
-                // description: 'Learn more about the audience to whom you will be speaking'
-            },
-            {
-                id: '8',
-                name: 'Select a topic',
-                // description: 'Select a topic that is of interest to the audience and to you'
-            },
-            {
-                id: '9',
-                name: 'Define the objective',
-                // description: 'Write the objective of the presentation in a single concise statement'
-            },
+   
         ]
     }
 ]
-const boardRepository = new BoardRepository(data);
 
-const list = [
-        {
-            id: 1,
-            name: 'Route One',
-        },
-        {
-            id: 2,
-            name: 'Route Two',
-        },
-    ];
-
-    export default function DashboardRoutes({navigation}) {
+    export default function DashboardRoutes({navigation , route}) {
         const [coord , setCoord] = useState({
             latitude: 31.6206,
             longitude: 74.8801,
@@ -82,9 +33,12 @@ const list = [
             longitudeDelta: 1,
         })
         const [listRoutes , setListRoutes] = useState();
+        const [listRoute , setListRoute] = useState();
+        const [boardRepo , setBoardRepo] = useState();
         const [hasRoutes , setHasRoutes] = useState(false);
-
+        // let boardRepository = new BoardRepository(route.params.myRoutes);
         useEffect(() => {
+            AsyncStorage.removeItem('selectedLoadedItemsByQty');
             AsyncStorage.removeItem('cartItems')
             AsyncStorage.removeItem('itemsAddedInCart')
             AsyncStorage.setItem('selectedLoadedItemsByQty',JSON.stringify({}));
@@ -105,17 +59,15 @@ const list = [
             AsyncStorage.getItem('selectedRoute').then((routeId) => {
                 AsyncStorage.getItem('user_id').then((driverid) => {
                     getPriorityDrivers(driverid , routeId).then((res) => {
-                        console.log(res)
                         setHasRoutes(true)
-                        setListRoutes(res.data.data);
+                        setListRoute(res.data.data);
                     } , (err) =>{
-
+    
                     })
                 }) 
-            })
-            
+            })	
         }
-        
+
         const [coordinates ,setcoordinates] = useState([
             {
                 
@@ -128,72 +80,52 @@ const list = [
             }
         ]);
         const [active, setActive] = new useState();
+
         const listClicked = (listData) => {
             setActive(listData.id);
             AsyncStorage.setItem( 'selectedBuyerRouteId', (listData.id).toString());
-            setcoordinates([{} ,{    latitude: parseFloat(listData.latitude),
-                                    longitude: parseFloat(listData.longitude),
-                                    latitudeDelta: 1,
-                                    longitudeDelta: 1
-                                }])
+            // setcoordinates([{} ,{    latitude: parseFloat(listData.latitude),
+            //                         longitude: parseFloat(listData.longitude),
+            //                         latitudeDelta: 1,
+            //                         longitudeDelta: 1
+            //                     }])
+
+
         };
 
         return (
             <MainScreen>
                 <View style={styles.container}>
-                    
-                    <View style={styles.map} >
-                        {/* <MapView style={styles.maps} initialRegion={{ latitude: coord.latitude, longitude: coord.longitude, latitudeDelta: 0.0622, longitudeDelta: 0.0121 }}>
-                            <Marker coordinate={coord} >
-                                <Image source={ require('../images/MY19_M1CA46_SI_SR_9147_DS.png')} />
-                            </Marker>
-                            <Marker coordinate={coordinates[1]} ></Marker>
-                        </MapView> */}
-                    </View>
-
-
-                    {/* <View style={styles.refreshBottom}>
-                        <Pressable onPress={() => { getLocation() }}>
-                            <Icon name="refresh" type='font-awesome' color={Colors.primary}/>
-                        </Pressable>
-                    </View> */}
-                    <Board
-                        boardRepository={boardRepository}
-                        open={() => {}}
-                        onDragEnd={() => {}}
-                        isWithCountBadge={ false }
-                        boardBackground="no"
-                    />
-                    {/* <View style={styles.nextButton}>
+                        {/* <Board
+                            boardRepository={boardRepository}
+                            open={() => {}}
+                            onDragEnd={() => {}}
+                            isWithCountBadge={ true }
+                            boardBackground="no"
+                        /> */}
+                    <View style={styles.nextButton}>
                         <Pressable onPress={ () => {
-                            console.log(active)
                             if( active != undefined) {
                                 AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify({}))                         
-                                navigation.push('ItemsScreenWithQty') 
+                                navigation.push('ItemsScreenWithQty');
                             }else{
                                 alert("Please select any buyer");
                             }
                         }}>
                             <Icon name="chevron-right" type='font-awesome' color="white" style={{padding: 10}}/>
                         </Pressable>
-                    </View> */}
+                    </View>
                     <View style={{padding: 0 , margin: 0}}>
                         <ScrollView >
-                            { (hasRoutes != false && listRoutes != undefined) ?
-                                listRoutes.map((l, i) => (
+                            { (hasRoutes != false && listRoute != undefined) ?
+                                listRoute.map((l, i) => (
                                     <TouchableHighlight key={i} onPress={(event) => listClicked(l)}  >
                                         <ListItem containerStyle={(active == l.id) ? styles.active : styles.unactive} key={i} bottomDivider>
-                                        {/* <ListItem key={i} bottomDivider  > */}
                                             <Image source={require('../assets/images/map.png')} style={styles.Avatar} />
                                             <ListItem.Content>
                                                 <ListItem.Title>{l.name}</ListItem.Title>
                                                 <ListItem.Title style={{color: 'grey',fontSize: 12}}>{l.address}</ListItem.Title>
                                             </ListItem.Content>
-                                                {/* {( l.id == 76 ) ?
-                                                    <View style={{ backgroundColor: 'green' ,paddingHorizontal:10,paddingVertical: 10 , borderRadius: 100 }}><Text style={{color: 'white'}}>P</Text></View>
-                                                :
-                                                    <View></View>
-                                                } */}
                                         </ListItem>
                                     </TouchableHighlight>
                                 )) 
@@ -223,7 +155,8 @@ const list = [
             width: 70,
             height: 70,
             zIndex: 9999,
-            top: heightToDp('33.6%'),
+            bottom: 0,
+            right: 3,
             // padding: 18,
             backgroundColor: Colors.primary,
             borderRadius: 100,

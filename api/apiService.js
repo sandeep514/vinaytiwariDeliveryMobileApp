@@ -52,7 +52,6 @@ export const getRoutes = () => {
 export const getDiverId = (driverId) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get('get-printer-device/'+driverId).then((res) => {
-			console.log(res)
 			if( res.data.status == true){
 				resolve(res.data)
 			}else{
@@ -94,8 +93,6 @@ export const getVehicleLoads = () => {
 // 	})
 // }
 
-
-
 export const getItemsByVehicleAndLoads = ( vehicheId , load_numbers ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-load-items-by-vehicle-load' , { vehicle_id : vehicheId , load_numbers : JSON.parse(load_numbers)}).then((response) => {
@@ -107,10 +104,11 @@ export const getItemsByVehicleAndLoads = ( vehicheId , load_numbers ) => {
 		});
 	});
 };
+
+
 export const getVehicleLoadCount = ( vehicheId , load_numbers ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-count-by-vehicle-load' , { vehicle_id : vehicheId , load_numbers : JSON.parse(load_numbers)}).then((response) => {
-			console.log(response);
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -168,7 +166,6 @@ export const updatePaymentStatus = ( invoice , status ) => {
 
 //get Today sale
 export const getTodaySale = ( vehicheNumber , driverId ) => {
-	console.log(vehicheNumber , driverId)
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-today-sales/'+vehicheNumber+'/'+driverId ).then((response) => {
 			if(response.data.status == true){
@@ -186,6 +183,19 @@ export const getTodaySale = ( vehicheNumber , driverId ) => {
 export const getPriorityDrivers = ( driverId , routeId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-buyer-priortity-by-driver/'+driverId+'/'+routeId ).then((response) => {
+			if(response.data.status == true){
+				resolve(response);
+			}else{
+				reject(response.data.error);
+			}
+		});
+	});
+};
+
+
+export const getPrioritySortedDrivers = ( driverId , routeId ) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.get( 'get-buyer-priority-by-driver-sorted/'+driverId+'/'+routeId ).then((response) => {
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -268,10 +278,8 @@ export const SaveOrder = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('save-order' , { data : postedData}).then((response) => {
 			if(response.data.status == true){
-				console.log(response)
 				resolve(response);
 			}else{
-				console.log(response)
 				reject(response.data.error);
 			}
 		});

@@ -5,15 +5,17 @@
 	import Icon from 'react-native-vector-icons/FontAwesome';
 	import {Colors} from '../components/Colors';
 	import {widthToDp, heightToDp} from '../utils/Responsive';
-
 	let selectedLoadArray = {};
+
 	export default DashboardCard = ({ backgroundColor, cardName, imageUrl, onPress, styleData, qty, cardId ,loadName }) => {
+
 		const [ UpdateQtyofItem , setUpdateQtyofItem] = useState({});
 		const [ UpdateQtyofItems , setUpdateQtyofItems] = useState(0);
 		const [ cartData , setCartData ] = useState();
 		const win = Dimensions.get('window');
 		
 		useEffect(() => {
+			selectedLoadArray = {};
 			getPendingOrderResponce();
 			// AsyncStorage.getItem('itemsAddedInCart').then((data) => {
 			// 	if( data != null ){
@@ -75,13 +77,15 @@
 					setCartData(cartData)
 				}
 			}
-				if( selectedLoadArray[loadedName] != undefined ){
-					selectedLoadArray[loadedName].value = (selectedLoadArray[loadedName].value+1);
-					setUpdateQtyofItem(selectedLoadArray)
-				}else{
-					selectedLoadArray[loadName+'__'+cardId] = {'value' : 1 ,'cardId' : cardId,'VATstatus': false};
-					setUpdateQtyofItem(selectedLoadArray)
-				}
+			if( selectedLoadArray[loadedName] != undefined ){
+				selectedLoadArray[loadedName].value = (selectedLoadArray[loadedName].value+1);
+				setUpdateQtyofItem(selectedLoadArray)
+			}else{
+				AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
+					selectedLoadArray[loadName+'__'+cardId] = {'value' : 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
+				});
+				setUpdateQtyofItem(selectedLoadArray)
+			}
 			
 
 			if( UpdateQtyofItems == undefined ){
@@ -89,7 +93,7 @@
 			}else{
 				setUpdateQtyofItems((UpdateQtyofItems+1));
 			}
-		
+			console.log(selectedLoadArray)
 			AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 		}
 		function minusQtyItem(loadName , cardId){

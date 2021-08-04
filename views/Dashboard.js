@@ -17,7 +17,7 @@ import MainScreen from '../layout/MainScreen';
 import DashboardCard from '../components/DashboardCard';
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { generateRandString, getTodaySale, getVehicleLoadCount } from '../api/apiService';
+import { generateRandString, getPriorityDrivers, getPrioritySortedDrivers, getTodaySale, getVehicleLoadCount } from '../api/apiService';
 import { ActivityIndicator } from 'react-native';
 // import GetLocation from 'react-native-get-location'
 
@@ -27,6 +27,7 @@ export default function Dashboard({navigation , route}) {
 	const [ selectedVehicleCount ,setSelectedLoadCount ] = useState();
 	const [ SalesOfDay ,setSalesOfDay ] = useState();
 	const [ TotalAmount ,setTotalAmount ] = useState();
+	const [ listRoute ,setListRoute ] = useState();
 
 	function getLocation() {
 		// GetLocation.getCurrentPosition({enableHighAccuracy: true,timeout: 10000,
@@ -36,7 +37,18 @@ export default function Dashboard({navigation , route}) {
 		// 	const { code, message } = error;
 		// })
 	}
-	
+	function getRoutes(){
+		AsyncStorage.getItem('selectedRoute').then((routeId) => {
+			AsyncStorage.getItem('user_id').then((driverid) => {
+				getPriorityDrivers(driverid , routeId).then((res) => {
+					setListRoute(res.data.data);
+				} , (err) =>{
+
+				})
+			}) 
+		})	
+	}
+
 	useEffect(() => {
 		AsyncStorage.getItem('selectedVehicleNo').then((value) => {
 			let vehicheId = value;
@@ -63,13 +75,13 @@ export default function Dashboard({navigation , route}) {
 				let driverId =  value;
 
 				getTodaySale(driverId,selectedVehNo).then((res) => {
-					console.log(res.data.data)
 					setSalesOfDay(res.data.data);
 					setTotalAmount(res.data.amount);
 				});
 			})
 		})
-		getLocation()
+		getRoutes();
+		getLocation();
 	} , [])
 
 
@@ -107,7 +119,7 @@ export default function Dashboard({navigation , route}) {
 					cardName="ROUTES"
 					icon="map"
 					onPress={() => {
-						navigation.navigate('DashboardRoutes');
+						navigation.push('DashboardRoutes' , {'myRoutes' : listRoute});
 					}}
 				/>
 			</View>

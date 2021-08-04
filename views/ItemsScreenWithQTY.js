@@ -69,6 +69,7 @@ export default function ItemsScreenWithQty({navigation}) {
 			AsyncStorage.getItem('selectedLoadsNumbers').then((value) => { 
 				let load_numbers = value;
 				getItemsByVehicleAndLoads( vehicheId , load_numbers).then((res) => {
+
 					setListItems(res.data.data);
 					setActiveIndicatorLoader(false);
 				} ,(err) => {
@@ -154,7 +155,7 @@ export default function ItemsScreenWithQty({navigation}) {
 							// 		})
 							// 	}
 							// })
-							navigation.navigate('AddQuantity');
+							navigation.push('AddQuantity');
 						}else{
 							alert("No item selected.");
 						}

@@ -244,12 +244,13 @@ export default function PDFmanager({navigation , text, onOK}) {
         },
         );
         // BackHandler.addEventListener('hardwareBackPress', () => true)
-        return () =>{
+        return (
             // BackHandler.removeEventListener('hardwareBackPress', () => true)
-            AsyncStorage.setItem('orderSaveReponce' , JSON.stringify({}))
-            AsyncStorage.removeItem('selectedInvoiceId')
-            setSavedOrderResponce();
-        }
+            AsyncStorage.setItem('orderSaveReponce' , JSON.stringify({})),
+            AsyncStorage.removeItem('selectedInvoiceId'),
+            AsyncStorage.removeItem('selectedInvoiceId'),
+            setSavedOrderResponce()
+        )
     }, []);
     function handleBackButtonClick() {
         navigation.navigate('Dashboard');
@@ -281,7 +282,7 @@ export default function PDFmanager({navigation , text, onOK}) {
 		ToastAndroid.showWithGravityAndOffset(message,ToastAndroid.LONG,ToastAndroid.BOTTOM,0,20);
 	};
 
-    getPrinterNameByDriver = () => {
+    function getPrinterNameByDriver(){
         return new Promise((resolve, reject) => {
             AsyncStorage.getItem('user_id').then((res) => {
                 getDiverId(res).then((printerName) => {
@@ -332,7 +333,7 @@ export default function PDFmanager({navigation , text, onOK}) {
            alert(e);
         }
     }
-    printDesign = async (buyerData , ItemData, extraData) => {
+    async function printDesign (buyerData , ItemData, extraData) {
         
             await BluetoothEscposPrinter.printerAlign(
                 BluetoothEscposPrinter.ALIGN.CENTER,
@@ -695,7 +696,7 @@ export default function PDFmanager({navigation , text, onOK}) {
     };
 
 
-    printDesignStarPrinter = async (buyerData , ItemData, extraData) => {
+    async function printDesignStarPrinter (buyerData , ItemData, extraData) {
         
         commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
         commandsArray.push({appendBitmapText: "UK Inch",fontSize:40});
@@ -789,7 +790,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                     commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
                     commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
                     commandsArray.push({appendBytes:[0x9c]});
-                    commandsArray.push({append: (qty*salePrice).toFixed(2)+'   '});
+                    commandsArray.push({append: (qty*salePrice).toFixed(2)+' '});
 
                     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
 
@@ -797,7 +798,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                     commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
                     commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
                     commandsArray.push({appendBytes:[0x9c]});
-                    commandsArray.push({append: vat+'   '});
+                    commandsArray.push({append: vat+' '});
 
                     commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
                     commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
@@ -930,7 +931,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         }
     }
 
-    goToDashboard = () =>{
+    function goToDashboard (){
         AsyncStorage.removeItem('selectedLoadedItemsByQty')
         AsyncStorage.removeItem('VATStatus');   
         AsyncStorage.removeItem('UndeliveredItemsInCart');
@@ -957,7 +958,9 @@ export default function PDFmanager({navigation , text, onOK}) {
                     setSaveOrderActivIndictor(false)
                     // AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
                     // AsyncStorage.setItem('orderSaveBuyer', JSON.stringify(res.data.buyer));
-                    navigation.navigate('DashboardRoutes');
+                    
+                    navigation.navigate('Dashboard');
+
                     alert('Order has been placed successfully');
                     setModalVisible(true)
                 })
@@ -974,6 +977,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                         myData.push({'remarks' : remarks});
                         myData.push({'invoice_no' : invoiceNumber});
 
+
                         SaveOrder(JSON.stringify(myData)).then((res) => {
                             setSaveOrderActivIndictor(false)
                             AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
@@ -981,6 +985,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                             if( selectedDriverId != 13 ){
                                 printDesignStarPrinter(res.data.buyer , res.data.data, res);                                
                                 setModalVisible(true)
+
                             }
                             showToast('Order has been placed successfully')
                         })

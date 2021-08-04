@@ -25,13 +25,13 @@ export default function LoadsScreen({navigation , route}) {
 	const [ ActiveIndicatorValue , setActiveIndicatorValue ] = useState(false);
 	const [ selectedLoadedNumber , setSelectedLoadNumber ] = useState();
 	const [ selectedLoads , setSelectedLoads ] = useState();
+	
 	const showToast = (message) => {
 		ToastAndroid.showWithGravityAndOffset(message,ToastAndroid.LONG,ToastAndroid.BOTTOM,0,20);
 	};
 
 	useEffect(() => {
 		getVehicleLoads().then((res) => {
-			console.log(res)
 			setActiveIndicatorLoader(false)
 			setSelectedLoadNumber(res);
 		} , (err) => {

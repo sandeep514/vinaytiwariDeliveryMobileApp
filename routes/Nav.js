@@ -31,7 +31,7 @@ export default function Nav() {
 	return (
 		<NavigationContainer theme={DarkTheme}>
 			<Stack.Navigator
-				initialRouteName="DashboardRoutes"
+				initialRouteName="LoginScreen"
 				allowFontScaling={false}
 				screenOptions={{
 				headerStyle: {
@@ -136,7 +136,18 @@ export default function Nav() {
 				<Stack.Screen
 					title="Available Routes"
 					name="DashboardRoutes"
-					component={DashboardRoutes} // options={{headerShown: false}}
+					component={DashboardRoutes}
+					options={({navigation}) => ({title: 'Dashboard', 
+						headerLeft: () => (
+							<View style={{flexDirection: 'row'}}>
+								<Pressable onPress={() => { navigation.navigate('Dashboard')}}>
+									<Icon name="arrow-back" color={Colors.primary} style={{marginLeft: 10,padding: 10}} />
+								</Pressable>
+							</View>
+						),
+					})}
+					
+					// options={{headerShown: false}}
 				/>
 
 				<Stack.Screen

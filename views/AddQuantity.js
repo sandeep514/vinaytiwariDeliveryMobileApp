@@ -60,15 +60,12 @@
 		const [hasUndeliveredItems , setHasUndeliveredItems] = useState(true);
 
 		let undeliveredItems = {"LOAD-20-03-2021-246__134":{"value":5,"cardId":134,"VATstatus":false},"LOAD-20-03-2021-246__311":{"value":6,"cardId":311,"VATstatus":false}};
-
-
-		  const ref_input2 = useRef();
-
-
+		const ref_input2 = useRef();
 		useEffect(() => {
+			selectedLoadedItemsByQty();
 			totalAmountVatWithout = 0;
 			totalAmountVat = 0;
-			selectedLoadedItemsByQty();
+			setUpdatedDataArray = [];
 			
 			// return () => { 
 				// 	// AsyncStorage.removeItem('finalItems');
@@ -99,10 +96,13 @@
 			});
 			
 			AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
-				setLoadedData(JSON.parse(data));
+				console.log('_________');
+				setLoadedData(JSON.parse(data));	
+				console.log(data)
+				console.log('__________')
 				getCartItemDetails(data).then((res) => {
+
 					let productData = res.data.data;
-					
 					for(let i = 0; i < productData.length ; i++){
 						let myData = Object.values(productData)[i]; 
 
@@ -112,7 +112,6 @@
 							setHasVatProducts(true);
 						}
 					}
-
 					setData(productData);
 					let price = 0;
 					for(let i = 0; i < productData.length ; i++){
