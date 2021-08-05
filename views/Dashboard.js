@@ -75,6 +75,7 @@ export default function Dashboard({navigation , route}) {
 				let driverId =  value;
 
 				getTodaySale(driverId,selectedVehNo).then((res) => {
+					console.log(res)
 					setSalesOfDay(res.data.data);
 					setTotalAmount(res.data.amount);
 				});

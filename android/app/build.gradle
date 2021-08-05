@@ -138,6 +138,7 @@ android {
         versionName "1.0"
         multiDexEnabled true
     }
+
     signingConfigs
     {
         release
@@ -151,6 +152,7 @@ android {
             }
         }
     }
+
     splits {
         abi {
             reset()
@@ -159,6 +161,7 @@ android {
             include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -167,6 +170,7 @@ android {
             keyPassword 'android'
         }
     }
+    
     buildTypes {
         debug {
             signingConfig signingConfigs.debug

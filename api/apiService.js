@@ -168,6 +168,7 @@ export const updatePaymentStatus = ( invoice , status ) => {
 export const getTodaySale = ( vehicheNumber , driverId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-today-sales/'+vehicheNumber+'/'+driverId ).then((response) => {
+			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{

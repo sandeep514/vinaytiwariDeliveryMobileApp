@@ -66,7 +66,7 @@
 			totalAmountVatWithout = 0;
 			totalAmountVat = 0;
 			setUpdatedDataArray = [];
-			
+
 			// return () => { 
 				// 	// AsyncStorage.removeItem('finalItems');
 				// 	setUpdatedDataArray = [];
@@ -219,6 +219,7 @@
 		}
 
 		function updateVATStatusOfProduct(dnum , itemId){
+			
 			totalAmountVatWithout = 0;
 			totalAmountVat = 0;
 
@@ -243,22 +244,29 @@
 					setVATstatusForProducts( VATUpdatedStatus);
 				}
 			});
+
+			
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum].id == itemId){
-					if(myData[i][dnum].VATstatus == false){
-						myData[i][dnum].VATstatus = true;
-					}else{
-						myData[i][dnum].VATstatus = false;
+				if( myData[i][dnum] != undefined){
+					if( myData[i][dnum].id == itemId){
+						if(myData[i][dnum].VATstatus == false){
+							myData[i][dnum].VATstatus = true;
+						}else{
+							myData[i][dnum].VATstatus = false;
+						}
+						setData(myData);
 					}
-					setData(myData);
 				}
 			}
+
 			let price = 0;
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum]['VATstatus'] == true ){
-					price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-				}else{
-					price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+				if( myData[i][dnum] != undefined){
+					if( myData[i][dnum]['VATstatus'] == true ){
+						price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
+					}else{
+						price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+					}
 				}
 			}
 			setMyTotalPrice(price);
@@ -279,18 +287,23 @@
 				newQty = qty
 			}
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum].id == itemId){
-					myData[i][dnum].order_qty = newQty;
-					setData(myData)
+				if(myData[i][dnum] != undefined){
+					if( myData[i][dnum].id == itemId){
+						myData[i][dnum].order_qty = newQty;
+						setData(myData)
+					}
 				}
 			}
 			let price = 0;
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum]['VATstatus'] == true ){
-					price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-				}else{
-					price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+				if(myData[i][dnum] != undefined){
+					if( myData[i][dnum]['VATstatus'] == true ){
+						price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
+					}else{
+						price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+					}
 				}
+				
 			}
 			setMyTotalPrice(price);
 			setIsKeyboardOpen(false)
@@ -311,19 +324,23 @@
 				newQty = value
 			}
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum].id == itemId){
-					myData[i][dnum].sale_price = newQty;
-					
-					setData(myData)
+				if( myData[i][dnum] != undefined ){
+					if( myData[i][dnum].id == itemId){
+						myData[i][dnum].sale_price = newQty;
+						
+						setData(myData)
+					}
 				}
 			}
 			let price = 0;
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum]['VATstatus'] == true ){
-					price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-				}else{
-					price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
-				}
+				if( myData[i][dnum] != undefined ){
+					if( myData[i][dnum]['VATstatus'] == true ){
+						price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
+					}else{
+						price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+					}
+				}	
 			}
 			setMyTotalPrice(price);
 			setIsKeyboardOpen(false)

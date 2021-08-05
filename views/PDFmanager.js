@@ -942,7 +942,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         AsyncStorage.removeItem('currentVATstatus');
         AsyncStorage.removeItem('orderSaveReponce');
         AsyncStorage.removeItem('orderSaveBuyer');
-        navigation.push('Dashboard')
+        navigation.push('DashboardRoutes')
     }
 
     function printReceipt() {
@@ -1070,7 +1070,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         // setSaveOrderActivIndictor(false)
     }
     
-    printReceipt2 = () => {
+    function printReceipt2() {
         setSaveOrderActivIndictor(true)
         if(selectedDriverId == 13){
             AsyncStorage.getItem('readyForOrder').then((result) => {

@@ -80,11 +80,15 @@
 			if( selectedLoadArray[loadedName] != undefined ){
 				selectedLoadArray[loadedName].value = (selectedLoadArray[loadedName].value+1);
 				setUpdateQtyofItem(selectedLoadArray)
+				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+
 			}else{
 				AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
-					selectedLoadArray[loadName+'__'+cardId] = {'value' : 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
+					selectedLoadArray[loadName+'__'+cardId] = {value: 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
+
+					setUpdateQtyofItem(selectedLoadArray)
+					AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 				});
-				setUpdateQtyofItem(selectedLoadArray)
 			}
 			
 
@@ -94,7 +98,6 @@
 				setUpdateQtyofItems((UpdateQtyofItems+1));
 			}
 			console.log(selectedLoadArray)
-			AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 		}
 		function minusQtyItem(loadName , cardId){
 			let loadedName = loadName+'__'+cardId;

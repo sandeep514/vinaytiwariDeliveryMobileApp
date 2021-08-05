@@ -213,6 +213,7 @@ getPrinterNameByDriver = () => {
 }
 
 printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) => {
+    alert("here");
     let totalAmount = 0;
     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
     commandsArray.push({appendBitmapText: "UK Inch",fontSize:40});
@@ -273,8 +274,9 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
         commandsArray.push({append: '--------------------------------\n'});
 
         let beforeVatPrice = 0;
-        for(let i = 0 ; i < savedOrderResonce.length ; i++){
-            if( savedOrderResonce[i]['sale_item_rel'].itemcategory == 'EGGS' || savedOrderResonce[i].has_vat == 1){
+        let vatAmount = 0;
+        for(let i = 0 ; i < data.length ; i++){
+            if( data[i]['sale_item_rel'].itemcategory == 'EGGS' || data[i].has_vat == 1){
                 let sitem       = data[i]['sale_item_rel']['name'];
                 let salePrice   = data[i]['sale_price'];
                 let qty         = data[i]['qty'];
@@ -371,8 +373,8 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
         commandsArray.push({append: '\n'});
         commandsArray.push({append: '--------------------------------\n'});
         
-        for(let i = 0 ; i < savedOrderResonce.length ; i++){
-            if( savedOrderResonce[i]['sale_item_rel'].itemcategory != 'EGGS' && !savedOrderResonce[i]['has_vat'] ){
+        for(let i = 0 ; i < data.length ; i++){
+            if( data[i]['sale_item_rel'].itemcategory != 'EGGS' && !data[i]['has_vat'] ){
                 let sitem = data[i]['sale_item_rel']['name'];
                 let salePrice = data[i]['sale_price'];
                 let qty = data[i]['qty'];
