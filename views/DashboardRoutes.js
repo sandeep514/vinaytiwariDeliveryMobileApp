@@ -96,50 +96,95 @@ const data = [
         };
 
         return (
-            <MainScreen>
-                <View style={styles.container}>
-                        {/* <Board
+          <MainScreen>
+            <View style={styles.container}>
+              {/* <Board
                             boardRepository={boardRepository}
                             open={() => {}}
                             onDragEnd={() => {}}
                             isWithCountBadge={ true }
                             boardBackground="no"
                         /> */}
-                    <View style={styles.nextButton}>
-                        <Pressable onPress={ () => {
-                            if( active != undefined) {
-                                AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify({}))                         
-                                navigation.push('ItemsScreenWithQty');
-                            }else{
-                                alert("Please select any buyer");
-                            }
-                        }}>
-                            <Icon name="chevron-right" type='font-awesome' color="white" style={{padding: 10}}/>
-                        </Pressable>
+              <View style={styles.nextButton}>
+                <Pressable
+                  onPress={() => {
+                    if (active != undefined) {
+                      AsyncStorage.setItem(
+                        'selectedLoadedItemsByQty',
+                        JSON.stringify({}),
+                      );
+                      navigation.push('ItemsScreenWithQty');
+                    } else {
+                      alert('Please select any buyer');
+                    }
+                  }}>
+                  <Icon
+                    name="chevron-right"
+                    type="font-awesome"
+                    color="white"
+                    style={{padding: 10}}
+                  />
+                </Pressable>
+              </View>
+              <View style={{padding: 0, margin: 0}}>
+                <ScrollView>
+                  {hasRoutes != false && listRoute != undefined ? (
+                    listRoute.map((l, i) => (
+                      <TouchableHighlight
+                        key={i}
+                        onPress={event => listClicked(l)}>
+                        <ListItem
+                          containerStyle={
+                            active == l.id
+                              ? styles.active
+                              : l.delivery_status == 0
+                              ? {backgroundColor: '#f54949'}
+                              : l.delivery_status == 1
+                              ? {backgroundColor: 'white'}
+                              : {backgroundColor: 'blue'}
+                          }
+                          key={i}
+                          bottomDivider>
+                          <Image
+                            source={require('../assets/images/map.png')}
+                            style={styles.Avatar}
+                          />
+                          <ListItem.Content>
+                            <ListItem.Title
+                              style={
+                                l.delivery_status == 0
+                                  ? {color: 'white'}
+                                  : l.delivery_status == 1
+                                  ? null
+                                  : {color: 'white'}
+                              }>
+                              {l.name}
+                            </ListItem.Title>
+                            <ListItem.Title
+                              style={
+                                l.delivery_status == 0
+                                  ? {color: 'white', fontSize: 12}
+                                  : l.delivery_status == 1
+                                  ? null
+                                  : {color: 'white', fontSize: 12}
+                              }>
+                              {l.address}
+                            </ListItem.Title>
+                          </ListItem.Content>
+                        </ListItem>
+                      </TouchableHighlight>
+                    ))
+                  ) : (
+                    <View>
+                      <ActivityIndicator
+                        color={Colors.primary}
+                        size="large"></ActivityIndicator>
                     </View>
-                    <View style={{padding: 0 , margin: 0}}>
-                        <ScrollView >
-                            { (hasRoutes != false && listRoute != undefined) ?
-                                listRoute.map((l, i) => (
-                                    <TouchableHighlight key={i} onPress={(event) => listClicked(l)} >
-                                        <ListItem containerStyle={(active == l.id) ? styles.active : ( l.delivery_status == 0 )? {backgroundColor: 'red',} : (l.delivery_status == 1)? {backgroundColor: 'white' } : {backgroundColor: 'blue' } } key={i} bottomDivider>
-                                            <Image source={require('../assets/images/map.png')} style={styles.Avatar} />
-                                            <ListItem.Content>
-                                                <ListItem.Title style={ ( l.delivery_status == 0 )? {color: 'white',} : (l.delivery_status == 1)? null : {color: 'white' }   }>{l.name}</ListItem.Title>
-                                                <ListItem.Title style={ ( l.delivery_status == 0 )? {color: 'white',fontSize: 12,} : (l.delivery_status == 1)? null : {color: 'white',fontSize: 12 } }>{l.address}</ListItem.Title>
-                                            </ListItem.Content>
-                                        </ListItem>
-                                    </TouchableHighlight>
-                                )) 
-                            :
-                                <View>
-                                    <ActivityIndicator color={Colors.primary} size="large"></ActivityIndicator>
-                                </View>
-                            }
-                        </ScrollView>
-                    </View>
-                </View>
-            </MainScreen>
+                  )}
+                </ScrollView>
+              </View>
+            </View>
+          </MainScreen>
         );
     }
 
