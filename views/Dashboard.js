@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableHighlight,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import {Card, ListItem, Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -69,6 +70,12 @@ export default function Dashboard({navigation , route}) {
 			setselectedVehicle(value);
 		})
 
+		getSalesOfDay();
+		getRoutes();
+		getLocation();
+	} , [])
+
+	function getSalesOfDay(){
 		AsyncStorage.getItem('selectedVehicleNo').then((value) => {
 			let selectedVehNo  = value;
 			AsyncStorage.getItem('user_id').then((value) => {
@@ -81,10 +88,7 @@ export default function Dashboard({navigation , route}) {
 				});
 			})
 		})
-		getRoutes();
-		getLocation();
-	} , [])
-
+	}
 
 	return (
 		<MainScreen>
@@ -128,6 +132,9 @@ export default function Dashboard({navigation , route}) {
 			<View style={styles.barSection}>
 				<Text style={styles.detailBar} allowFontScaling={false}>
 					Sales for Today
+				</Text>
+				<Text style={styles.detailBar} allowFontScaling={false}>
+					<TouchableOpacity onPress={() => { getSalesOfDay() }}><Text style={styles.detailBar} allowFontScaling={false}>Refresh</Text></TouchableOpacity>
 				</Text>
 
 				<Text style={styles.barText} allowFontScaling={false}>

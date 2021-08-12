@@ -60,6 +60,8 @@ const data = [
                 AsyncStorage.getItem('user_id').then((driverid) => {
                     getPriorityDrivers(driverid , routeId).then((res) => {
                         setHasRoutes(true)
+                        console.log(res.data.data);
+                        
                         setListRoute(res.data.data);
                     } , (err) =>{
     
@@ -119,12 +121,12 @@ const data = [
                         <ScrollView >
                             { (hasRoutes != false && listRoute != undefined) ?
                                 listRoute.map((l, i) => (
-                                    <TouchableHighlight key={i} onPress={(event) => listClicked(l)}  >
-                                        <ListItem containerStyle={(active == l.id) ? styles.active : styles.unactive} key={i} bottomDivider>
+                                    <TouchableHighlight key={i} onPress={(event) => listClicked(l)} >
+                                        <ListItem containerStyle={(active == l.id) ? styles.active : ( l.delivery_status == 0 )? {backgroundColor: 'red',} : (l.delivery_status == 1)? {backgroundColor: 'white' } : {backgroundColor: 'blue' } } key={i} bottomDivider>
                                             <Image source={require('../assets/images/map.png')} style={styles.Avatar} />
                                             <ListItem.Content>
-                                                <ListItem.Title>{l.name}</ListItem.Title>
-                                                <ListItem.Title style={{color: 'grey',fontSize: 12}}>{l.address}</ListItem.Title>
+                                                <ListItem.Title style={ ( l.delivery_status == 0 )? {color: 'white',} : (l.delivery_status == 1)? null : {color: 'white' }   }>{l.name}</ListItem.Title>
+                                                <ListItem.Title style={ ( l.delivery_status == 0 )? {color: 'white',fontSize: 12,} : (l.delivery_status == 1)? null : {color: 'white',fontSize: 12 } }>{l.address}</ListItem.Title>
                                             </ListItem.Content>
                                         </ListItem>
                                     </TouchableHighlight>

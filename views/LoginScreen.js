@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image,ImageBackground,StyleSheet,Text,View,ToastAndroid,Keyboard,Pressable,ActivityIndicator} from 'react-native';
 import {Button, Input} from 'react-native-elements';
 import {Formik} from 'formik';
@@ -15,7 +15,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function LoginScreen({navigation}) {
 	const [ isLoaderActive ,setIsLoaderActive ] = useState(false);
 	
-	
+	useEffect(() => {
+	})
 
 	const formSubmitData = (data) => {
 		if (data.username === '' || data.username === null) {

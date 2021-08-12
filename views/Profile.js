@@ -170,7 +170,7 @@ export default function Profile({navigation}) {
 						onPress: () => {},
 						style: 'cancel',
 					},
-					{text: 'OK', onPress: () => navigation.push('Login')},
+					{text: 'OK', onPress: () => { AsyncStorage.clear(), navigation.push('Login')}},
 					],
 					{cancelable: false},
 				);

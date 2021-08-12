@@ -26,25 +26,49 @@ import { Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
-
 export default function Nav() {
+	const [user, setUser] = useState([]);
+	const [auth, setAuth] = useState(false);
+	const [userLoggedIn, isUserLoggedIn] = useState();
+
+	const authVerify = () => {
+		
+	};
+
+	useEffect(() => {
+		AsyncStorage.getItem('user_id').then(user => {
+			// user != null ? setAuth(true) : setAuth(false);
+			if( user ){
+				isUserLoggedIn("Dashboard");
+				console.log("Dashboard")
+			}else{
+				isUserLoggedIn("LoginScreen");
+				console.log("loginScreen")
+
+			}
+		});
+		
+	}, []);
+
 	return (
-		<NavigationContainer theme={DarkTheme}>
-			<Stack.Navigator
-				initialRouteName="LoginScreen"
-				allowFontScaling={false}
-				screenOptions={{
-				headerStyle: {
-					backgroundColor: '#fff',
-					elevation: 0,
-				},
-				headerTintColor: Colors.primary,
-				headerTitleStyle: {
-					fontWeight: 'bold',
-					width: '80%',
-					textAlign: 'center',
-				},
-			}}>
+		(userLoggedIn != null) ?
+			<NavigationContainer theme={DarkTheme}>
+				<Stack.Navigator
+					initialRouteName={userLoggedIn}
+					allowFontScaling={false}
+					screenOptions={{
+					headerStyle: {
+						backgroundColor: '#fff',
+						elevation: 0,
+					},
+					headerTintColor: Colors.primary,
+					headerTitleStyle: {
+						fontWeight: 'bold',
+						width: '80%',
+						textAlign: 'center',
+					},
+				}}>
+			
 				<Stack.Screen
 					name="Login"
 					component={LoginScreen}
@@ -176,6 +200,8 @@ export default function Nav() {
 					})}
 				/>
 			</Stack.Navigator>
-		</NavigationContainer>
+			</NavigationContainer>
+		:
+		null
 	);
 }

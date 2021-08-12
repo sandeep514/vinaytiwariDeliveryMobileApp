@@ -235,6 +235,7 @@ export const checkIfBuyerHasVAT = ( buyerId ) => {
 //add tp cart
 export const getCartItemDetails = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
+		console.log(postedData)
 		apiClient.post('get-cart-item-details' , { data : postedData}).then((response) => {
 			if(response.data.status == true){
 				resolve(response);

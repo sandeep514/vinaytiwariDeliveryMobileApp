@@ -96,10 +96,9 @@
 			});
 			
 			AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
-				console.log('_________');
 				setLoadedData(JSON.parse(data));	
-				console.log(data)
-				console.log('__________')
+			
+
 				getCartItemDetails(data).then((res) => {
 
 					let productData = res.data.data;
@@ -286,22 +285,28 @@
 			if( qty != '' ){
 				newQty = qty
 			}
+
 			for( let i= 0 ; i < myData.length; i++ ){
 				if(myData[i][dnum] != undefined){
 					if( myData[i][dnum].id == itemId){
 						myData[i][dnum].order_qty = newQty;
 						setData(myData)
+						// selectedLoadedItemsByQty();
 					}
 				}
 			}
+		
 			let price = 0;
 			for( let i= 0 ; i < myData.length; i++ ){
-				if(myData[i][dnum] != undefined){
-					if( myData[i][dnum]['VATstatus'] == true ){
-						price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-					}else{
-						price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+				if(Object.values(myData[i]).length > 0){
+					if(Object.values(myData[i])[0] != undefined){
+						if( Object.values(myData[i])[0]['VATstatus'] == true ){
+							price = price + ((Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])*1.20) ;
+						}else{
+							price = price + (Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])  ;
+						}
 					}
+	
 				}
 				
 			}
@@ -327,21 +332,36 @@
 				if( myData[i][dnum] != undefined ){
 					if( myData[i][dnum].id == itemId){
 						myData[i][dnum].sale_price = newQty;
-						
+						console.log("jnijnijnjk")
 						setData(myData)
 					}
 				}
 			}
 			let price = 0;
+			// for( let i= 0 ; i < myData.length; i++ ){
+			// 	if(Object.values(myData[i]).length > 0){
+			// 		if( myData[i][dnum] != undefined ){
+			// 			if( myData[i][dnum]['VATstatus'] == true ){
+			// 				price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
+			// 			}else{
+			// 				price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+			// 			}
+			// 		}
+			// 	}
+			// }
+
 			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum] != undefined ){
-					if( myData[i][dnum]['VATstatus'] == true ){
-						price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-					}else{
-						price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+				if(Object.values(myData[i]).length > 0){
+					if(Object.values(myData[i])[0] != undefined){
+						if( Object.values(myData[i])[0]['VATstatus'] == true ){
+							price = price + ((Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])*1.20) ;
+						}else{
+							price = price + (Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])  ;
+						}
 					}
-				}	
+				}				
 			}
+
 			setMyTotalPrice(price);
 			setIsKeyboardOpen(false)
 			
@@ -477,15 +497,15 @@
 												{valuetem = (val.order_qty).toString()}
 												{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val.sale_price) )}
 												
-												{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val.VATstatus ,"dnum":currentSelectedLoadName,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val.order_qty,"credit":"NO","sale_price":val.sale_price}) : ''}
+												{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val.VATstatus ,"dnum":val.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val.order_qty,"credit":"NO","sale_price":val.sale_price}) : ''}
 												return(
 													<View style={(win.width > 500) ? styles.mainBoxTab : styles.mainBox } key={generateRandString()}>
 														<View style={styles.itemBox} key={generateRandString()}>
 															{(val.itemcategory != "EGGS") ? 	
-																<Pressable onPress={() => {  updateVATStatusOfProduct(currentSelectedLoadName ,val.id ) }}>
+																<Pressable onPress={() => {  updateVATStatusOfProduct(val.loadId ,val.id ) }}>
 																	<CheckBox
 																		checked={val.VATstatus}
-																		onPress={() => {  updateVATStatusOfProduct(currentSelectedLoadName ,val.id ) }}
+																		onPress={() => {  updateVATStatusOfProduct(val.loadId ,val.id ) }}
 																	/>
 																</Pressable>
 															:
@@ -496,7 +516,7 @@
 																<Text key={generateRandString()} style={{ fontSize: 15, fontWeight: 'bold', }} allowFontScaling={false}>
 																	{((val.name.length > 20) ? (val.name).substring(0 , 20)+'..'  : val.name )}
 																</Text>
-																<Text style={{fontSize: 10}} allowFontScaling={false}> Available Stock </Text>
+																<Text style={{fontSize: 10}} allowFontScaling={false}> Available Stock {val.loadId} </Text>
 															</View>
 														</View>
 					
@@ -510,12 +530,12 @@
 														<View key={generateRandString()} style={styles.inputBox}>
 
 															<TextInput keyboardType="numeric" placeholder="Qty" defaultValue={valuetem} ref={(value) => {}} style={styles.textInput}
-															onPressIn={() => { setIsKeyboardOpen(true) }}
-															onEndEditing={(value) => { updateQty(currentSelectedLoadName ,val.id , value.nativeEvent.text) } }/>
+															// onPressIn={() => { setIsKeyboardOpen(true) }}
+															onEndEditing={(value) => { updateQty(val.loadId ,val.id , value.nativeEvent.text) } }/>
 
-															<TextInput keyboardType="numeric" placeholder="Price" defaultValue={val.sale_price} style={styles.textInput} 
-															onPressIn={() => { setIsKeyboardOpen(true) }}
-															onEndEditing={(value) => { updatePrice(currentSelectedLoadName ,val.id , value.nativeEvent.text) } } />
+															<TextInput keyboardType="numeric" placeholder="Price" defaultValue={val.sale_price} ref={(value) => {}} style={styles.textInput} 
+															// onPressIn={() => { setIsKeyboardOpen(true) }}
+															onEndEditing={(value) => { updatePrice(val.loadId ,val.id , value.nativeEvent.text) } } />
 
 															<Text style={{ minWidth:70,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>{ (valuetem * val.sale_price).toFixed(2) }</Text>
 
@@ -565,6 +585,7 @@
 							</View>
 						:
 							<Pressable style={{padding: 16,backgroundColor:Colors.primary,flexDirection: 'row',justifyContent: 'center'}} onPress={() => { SaveOrders() }}><Text style={{textAlign: 'center',color: 'white',fontSize: 20}} > Place order and print invoice £{(parseFloat(MyTotalPrice) ).toFixed(2)} </Text>
+
 							</Pressable>
 						}
 						{/* {setTotalAmount} */}
