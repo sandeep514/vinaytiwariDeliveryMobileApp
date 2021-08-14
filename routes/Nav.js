@@ -37,14 +37,25 @@ export default function Nav() {
 
 	useEffect(() => {
 		AsyncStorage.getItem('user_id').then(user => {
-			// user != null ? setAuth(true) : setAuth(false);
 			if( user ){
-				isUserLoggedIn("Dashboard");
-				console.log("Dashboard")
+				AsyncStorage.getItem('selectedLoadsNumbers').then(selectLoadNum => {
+					if( selectLoadNum != null && selectLoadNum != undefined ){
+						let selectedLoads = JSON.parse(selectLoadNum).length;
+						if( selectedLoads > 0 ){
+							isUserLoggedIn("Dashboard");
+							console.log("Dashboard")
+						}else{
+							isUserLoggedIn("LoginScreen");
+							console.log("loginScreen")
+						}
+					}else{
+						isUserLoggedIn("LoginScreen");
+						console.log("loginScreen")
+					}
+				});
 			}else{
 				isUserLoggedIn("LoginScreen");
 				console.log("loginScreen")
-
 			}
 		});
 		

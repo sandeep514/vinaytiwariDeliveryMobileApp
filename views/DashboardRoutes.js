@@ -51,6 +51,7 @@ const data = [
             //                 longitudeDelta: 1
             //             })
             // })
+            
 
             return ( AsyncStorage.removeItem('selectedInvoiceId'))
         } , [])
@@ -102,7 +103,7 @@ const data = [
                             boardRepository={boardRepository}
                             open={() => {}}
                             onDragEnd={() => {}}
-                            isWithCountBadge={ true }
+        cl                    isWithCountBadge={ true }
                             boardBackground="no"
                         /> */}
               <View style={styles.nextButton}>
@@ -138,7 +139,7 @@ const data = [
                             active == l.id
                               ? styles.active
                               : l.delivery_status == 0
-                              ? {backgroundColor: '#f54949'}
+                              ? {backgroundColor: '#ff6363'}
                               : l.delivery_status == 1
                               ? {backgroundColor: 'white'}
                               : {backgroundColor: 'blue'}

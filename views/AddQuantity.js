@@ -82,7 +82,6 @@
 		
 		function selectedLoadedItemsByQty() {
 			AsyncStorage.setItem('undeliveredItems' , JSON.stringify(undeliveredItems));
-
 			setLoadedActivityIndicator(true)
 			
 			AsyncStorage.getItem('VATStatus').then((data) => {
@@ -96,15 +95,16 @@
 			});
 			
 			AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
+				console.log('++++++++++++');
+				console.log(data);
+				console.log('++++++++++++');
+
 				setLoadedData(JSON.parse(data));	
-			
 
 				getCartItemDetails(data).then((res) => {
-
 					let productData = res.data.data;
 					for(let i = 0; i < productData.length ; i++){
 						let myData = Object.values(productData)[i]; 
-
 						if( Object.values(myData)[0]['itemcategory'] == 'EGGS' || Object.values(myData)[0]['itemcategory'] == 'eggs' ){
 							setHasNonVatProducts(true);
 						}else{

@@ -258,6 +258,11 @@ export default function PDFmanager({navigation , text, onOK}) {
     function parseIntt(string){
         return parseInt(string);
     }
+    
+    function parseFloatt(string){
+        return parseFloat(string);
+    }
+
     const handleSignature2 = signature => {
         let baseImage = (signature).replace('data:image/png;base64,' , '');
         setBase64Image = baseImage;
@@ -1176,11 +1181,11 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                             <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
                                                                 <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
                                                                 <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                    <Text style={{ }}>{parseIntt(value['qty'])}</Text>
+                                                                    <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
                                                                     <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                    <Text style={{ }}>£{(value['sale_price'] * parseIntt(value['qty'])).toFixed(2)}</Text>
+                                                                    <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
                                                                     <Text style={{ }}>£ 0</Text>
-                                                                    <Text style={{ }}>£{((value['sale_price'] * parseIntt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                                    <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
                                                                 </View>
                                                             </View>
                                                         :
@@ -1192,11 +1197,11 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                                     <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
                                                                     <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
                                                                         {/* <Text style={{ width: 90}}>{value['sale_item_rel'].name}</Text> */}
-                                                                        <Text style={{ }}>{parseIntt(value['qty'])}</Text>
+                                                                        <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
                                                                         <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                        <Text style={{ }}>£{(value['sale_price'] * parseIntt(value['qty'])).toFixed(2)}</Text>
-                                                                        <Text style={{ }}>£{((((parseIntt(value['qty']) * value['sale_price'])*1.20)) -  (parseIntt(value['qty']) * value['sale_price'])).toFixed(2)}</Text>
-                                                                        <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseIntt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
+                                                                        <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                        <Text style={{ }}>£{((((parseFloatt(value['qty']) * value['sale_price'])*1.20)) -  (parseFloatt(value['qty']) * value['sale_price'])).toFixed(2)}</Text>
+                                                                        <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
                                                                     </View>
                                                                 </View>
                                                                 {/* <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
@@ -1265,10 +1270,10 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                             <View key={key} style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
                                                                 <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}></Text>{value['sale_item_rel'].name}</Text>
                                                                 <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                    <Text style={{ }}>{(parseIntt(value['qty'])).toFixed(2)}</Text>
+                                                                    <Text style={{ }}>{(parseFloatt(value['qty'])).toFixed(2)}</Text>
                                                                     <Text style={{ }}>£{(value['sale_price'])}</Text>
                                                                     {/* <Text style={{ }}>£ 0</Text> */}
-                                                                    <Text style={{ }}>£{((value['sale_price'] * parseIntt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                                    <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
                                                                 </View>
                                                                 {/* <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
                                                                     <Text style={{ width: 90}}>{}</Text>
@@ -1333,8 +1338,8 @@ export default function PDFmanager({navigation , text, onOK}) {
                                 {(saveOrderActivIndictor)? <ActivityIndicator  color={Colors.primary} size="large" /> : 
                                 
                                 <View style={{flexDirection: 'column'}}>
-                                    <Pressable  onPress={() => {portDiscovery()}} style={{backgroundColor: 'black',padding: 10,marginBottom: 20}} ><Text style={{color: 'white',textAlign: 'center'}}>Get Ports</Text></Pressable>
-                                    <Pressable  onPress={() => {connect()}}  style={{backgroundColor: 'black',padding: 10,marginBottom: 20}}><Text style={{color: 'white',textAlign: 'center'}}>Connect</Text></Pressable>
+                                    {/* <Pressable  onPress={() => {portDiscovery()}} style={{backgroundColor: 'black',padding: 10,marginBottom: 20}} ><Text style={{color: 'white',textAlign: 'center'}}>Get Ports</Text></Pressable>
+                                    <Pressable  onPress={() => {connect()}}  style={{backgroundColor: 'black',padding: 10,marginBottom: 20}}><Text style={{color: 'white',textAlign: 'center'}}>Connect</Text></Pressable> */}
                                     <Button title="Print" onPress={() => { setSaveOrderActivIndictor(true);  printReceipt() }} />
                                     {/* <Button title="Print2" onPress={() => { setSaveOrderActivIndictor(true);  printReceipt2() }} /> */}
                                 </View>
@@ -1404,11 +1409,11 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                         <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
                                                             <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
                                                             <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                <Text style={{ }}>{parseIntt(value['qty'])}</Text>
+                                                                <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
                                                                 <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                <Text style={{ }}>£{(value['sale_price'] * parseIntt(value['qty'])).toFixed(2)}</Text>
+                                                                <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
                                                                 <Text style={{ }}>£ 0</Text>
-                                                                <Text style={{ }}>£{((value['sale_price'] * parseIntt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                                <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
                                                             </View>
                                                         </View>
                                                     :
@@ -1420,11 +1425,11 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                                 <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
                                                                 <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
                                                                     {/* <Text style={{ width: 90}}>{value['sale_item_rel'].name}</Text> */}
-                                                                    <Text style={{ }}>{parseIntt(value['qty'])}</Text>
+                                                                    <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
                                                                     <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                    <Text style={{ }}>£{(value['sale_price'] * parseIntt(value['qty'])).toFixed(2)}</Text>
-                                                                    <Text style={{ }}>£{((((parseIntt(value['qty']) * value['sale_price'])*1.20)) -  (parseIntt(value['qty']) * value['sale_price'])).toFixed(2)}</Text>
-                                                                    <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseIntt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
+                                                                    <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                    <Text style={{ }}>£{((((parseFloatt(value['qty']) * value['sale_price'])*1.20)) -  (parseFloatt(value['qty']) * value['sale_price'])).toFixed(2)}</Text>
+                                                                    <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
                                                                 </View>
                                                             </View>
                                                             {/* <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
@@ -1507,10 +1512,10 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                             <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}></Text>{value['sale_item_rel'].name}</Text>
                                                             <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
                                                                 {/* <Text style={{ }}>{(parseIntt(value['qty']))}</Text> */}
-                                                                <Text style={{ }}>{(parseIntt(value['qty'])).toFixed(2)}</Text>
+                                                                <Text style={{ }}>{(parseFloatt(value['qty'])).toFixed(2)}</Text>
                                                                 <Text style={{ }}>£{(value['sale_price'])}</Text>
                                                                 {/* <Text style={{ }}>£ 0</Text> */}
-                                                                <Text style={{ }}>£{((value['sale_price'] * parseIntt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                                <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
                                                             </View>
                                                             {/* <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
                                                                 <Text style={{ width: 90}}>{}</Text>

@@ -55,18 +55,29 @@
 			})
 		}
 		function DirectUpdateQTY(loadName , cardId ,qty){
+
+			if( qty.substring(0 ,1) == '.' ){
+				qty = '0'+qty;
+			}
+			console.log(parseFloat(qty));
+
 			if(cartData != undefined){
 				if(loadName+'_'+cardId in cartData){
 					cartData[loadName+'_'+cardId] = (qty).toString()
 					setCartData(cartData)
 				}
 			}
-			selectedLoadArray[loadName+'__'+cardId] = {'value' : (qty).toString(),'cardId' : cardId,'VATstatus': false};
-			setUpdateQtyofItem(selectedLoadArray)
-			
-			setUpdateQtyofItems((qty));
-			AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+
+			AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
+				selectedLoadArray[loadName+'__'+cardId] = {'value' : (qty).toString(),'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
+				setUpdateQtyofItem(selectedLoadArray)
+				
+				setUpdateQtyofItems((qty));
+				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+			});
+
 		}
+
 		function addQtyItem(loadName , cardId){
 			let loadedName = loadName+'__'+cardId;
 
@@ -77,11 +88,11 @@
 					setCartData(cartData)
 				}
 			}
+
 			if( selectedLoadArray[loadedName] != undefined ){
 				selectedLoadArray[loadedName].value = (selectedLoadArray[loadedName].value+1);
 				setUpdateQtyofItem(selectedLoadArray)
 				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
-
 			}else{
 				AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
 					selectedLoadArray[loadName+'__'+cardId] = {value: 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
@@ -91,7 +102,6 @@
 				});
 			}
 			
-
 			if( UpdateQtyofItems == undefined ){
 				setUpdateQtyofItems(1);
 			}else{
@@ -159,8 +169,8 @@
 							</View>
 							<View style={ (win.width > 550) ? {width: '60%'} : {width: '60%'} }>
 								<TextInput keyboardType="numeric"  
-	defaultValue={ (cartData != undefined && cartData[loadName+'_'+cardId] != undefined) ? cartData[loadName+'_'+cardId] : (UpdateQtyofItems != undefined) ? UpdateQtyofItems.toString() :'0'} 
-	key={cardId} placeholder="Qty" style={{textAlign: 'center',color: '#000'}} onChange={(value) => { (value.nativeEvent.text != '') ? DirectUpdateQTY( loadName , cardId , parseInt(value.nativeEvent.text)) : '' }} />
+									defaultValue={ (cartData != undefined && cartData[loadName+'_'+cardId] != undefined) ? cartData[loadName+'_'+cardId] : (UpdateQtyofItems != undefined) ? UpdateQtyofItems.toString() :'0'} 
+									key={cardId} placeholder="Qty" style={{textAlign: 'center',color: '#000'}} onChange={(value) => { (value.nativeEvent.text != '') ? DirectUpdateQTY(loadName , cardId , value.nativeEvent.text) : '' }} />
 							</View>
 							<View  style={ (win.width > 550) ? {width: '20%'} : {width: '20%'} }>
 								<Pressable onPress={ () => { addQtyItem( loadName , cardId ) } } style={{backgroundColor: Colors.primary,padding:7, height: 50}}>
@@ -218,15 +228,15 @@
 			borderRadius: 100,
 		},
 		cardBackgroundtab: {
-			width: widthToDp('18%'),
+			width: widthToDp('25%'),
 			height: heightToDp('12%'),
 			borderRadius: 8,
-			marginTop: 15,
+			marginTop: 20,
 			marginHorizontal: 5,
 			alignItems: 'center',
 			elevation: 2,
 			overflow: 'hidden',
-			height: 200
+			height: 230
 		},
 		cardBackground: {
 			width: widthToDp('30%'),
@@ -247,8 +257,8 @@
 		},
 		itemImageTab: {
 			// flex: 1,
-			height: heightToDp('10.7%'),
-			width: widthToDp('18%'),
+			height: heightToDp('12.7%'),
+			width: widthToDp('25%'),
 			// resizeMode: 'contain',
 		},
 		itemImageContainer: {

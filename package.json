@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.5",
-    "@react-navigation/native": "^5.9.4",
-    "@react-navigation/stack": "^5.14.5",
+    "@react-navigation/native": "^5.9.6",
+    "@react-navigation/stack": "^5.14.7",
     "apisauce": "^2.1.1",
     "formik": "^2.2.9",
     "react": "17.0.1",
@@ -22,19 +22,19 @@
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
-    "react-native-safe-area-context": "^3.2.0",
-    "react-native-screens": "^3.4.0",
-    "react-native-signature-canvas": "^4.2.0",
+    "react-native-safe-area-context": "^3.3.0",
+    "react-native-screens": "^3.5.0",
+    "react-native-signature-canvas": "^4.3.0",
     "react-native-star-prnt": "^1.1.0",
     "react-native-vector-icons": "^8.1.0",
-    "react-native-webview": "^11.6.5"
+    "react-native-webview": "^11.13.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.8",
-    "@babel/runtime": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/runtime": "^7.15.3",
     "@react-native-community/eslint-config": "^3.0.0",
     "babel-jest": "^27.0.6",
-    "eslint": "^7.31.0",
+    "eslint": "^7.32.0",
     "jest": "^27.0.6",
     "metro-react-native-babel-preset": "^0.66.2",
     "react-test-renderer": "17.0.1"
