@@ -238,7 +238,7 @@
 						VATUpdatedStatus.push(dnum+'__'+itemId);
 					}
 
-					// AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
+					AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
 					AsyncStorage.setItem('itemsForVAT' , JSON.stringify(VATUpdatedStatus))
 					setVATstatusForProducts( VATUpdatedStatus);
 				
@@ -255,9 +255,6 @@
 							myData[i][dnum].VATstatus = false;
 						}
 						setData(myData);
-						console.log('++++++')
-						console.log(myData)
-						console.log('++++++')
 					}
 				}
 			}
@@ -505,12 +502,10 @@
 													<View style={(win.width > 500) ? styles.mainBoxTab : styles.mainBox } key={generateRandString()}>
 														<View style={styles.itemBox} key={generateRandString()}>
 															{(val.itemcategory != "EGGS") ? 	
-																<Pressable onPress={() => {  updateVATStatusOfProduct(val.loadId ,val.id ) }}>
 																	<CheckBox
 																		checked={val.VATstatus}
 																		onPress={() => {  updateVATStatusOfProduct(val.loadId ,val.id ) }}
 																	/>
-																</Pressable>
 															:
 																<View style={{width: 60}} ></View>
 															}
