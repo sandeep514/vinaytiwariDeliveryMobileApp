@@ -77,6 +77,8 @@
 					totalAmountVatWithout = 0;
 					totalAmountVat = 0;
 					setUpdatedDataArray = [];
+					VATUpdatedStatus = [];
+
 					setSaveOrderActivIndictor(false)
 			}
 		} , [])
@@ -96,9 +98,6 @@
 			});
 			
 			AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
-				console.log('++++++++++++');
-				console.log(data);
-				console.log('++++++++++++');
 
 				setLoadedData(JSON.parse(data));	
 
@@ -148,7 +147,7 @@
 		}
 
 		function generateRandString(){
-			return (Math.random() * (9999 - 1) + 1).toFixed(0);
+			return (Math.random() * (999999999 - 1) + 1).toFixed(0);
 		}
 
 		function updateRecords(data){
@@ -239,9 +238,10 @@
 						VATUpdatedStatus.push(dnum+'__'+itemId);
 					}
 
-					AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
+					// AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
 					AsyncStorage.setItem('itemsForVAT' , JSON.stringify(VATUpdatedStatus))
 					setVATstatusForProducts( VATUpdatedStatus);
+				
 				}
 			});
 
@@ -255,6 +255,9 @@
 							myData[i][dnum].VATstatus = false;
 						}
 						setData(myData);
+						console.log('++++++')
+						console.log(myData)
+						console.log('++++++')
 					}
 				}
 			}
@@ -333,7 +336,6 @@
 				if( myData[i][dnum] != undefined ){
 					if( myData[i][dnum].id == itemId){
 						myData[i][dnum].sale_price = newQty;
-						console.log("jnijnijnjk")
 						setData(myData)
 					}
 				}

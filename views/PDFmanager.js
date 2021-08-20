@@ -1504,7 +1504,6 @@ export default function PDFmanager({navigation , text, onOK}) {
                                     
                                     {(savedOrderResonce != undefined) ?
                                         savedOrderResonce.map((value , key) => {
-                                            {console.log(value)}
                                             return (
                                                 <View key={key} >
                                                     {( value['sale_item_rel'].itemcategory != 'EGGS' && !value.has_vat  ) ?

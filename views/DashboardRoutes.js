@@ -61,7 +61,6 @@ const data = [
                 AsyncStorage.getItem('user_id').then((driverid) => {
                     getPriorityDrivers(driverid , routeId).then((res) => {
                         setHasRoutes(true)
-                        console.log(res.data.data);
                         
                         setListRoute(res.data.data);
                     } , (err) =>{

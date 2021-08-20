@@ -14,7 +14,6 @@ export const  generateRandString = () => {
 export const checkLogin = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('driver-login' , { username : postedData.username , password : postedData.password}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -66,7 +65,6 @@ export const getDiverId = (driverId) => {
 export const getVehicleLoads = () => {
 	return new Promise( (resolve , reject) => {
 		AsyncStorage.getItem('selectedVehicleNo').then((vehicleId) => {
-			console.log('get-demands-list-by-vehicle/'+vehicleId)
 			apiClient.get('get-demands-list-by-vehicle/'+vehicleId ).then( (response) => {
 				if(response.status == 200){
 					if( response.data.data.length > 0 ){
@@ -98,7 +96,6 @@ export const getVehicleLoads = () => {
 export const getItemsByVehicleAndLoads = ( vehicheId , load_numbers ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-load-items-by-vehicle-load' , { vehicle_id : vehicheId , load_numbers : JSON.parse(load_numbers)}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -112,7 +109,6 @@ export const getItemsByVehicleAndLoads = ( vehicheId , load_numbers ) => {
 export const getVehicleLoadCount = ( vehicheId , load_numbers ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-count-by-vehicle-load' , { vehicle_id : vehicheId , load_numbers : JSON.parse(load_numbers)}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -129,7 +125,6 @@ export const getSavedNotes = (  ) => {
 		AsyncStorage.getItem('vehicle_no').then((value) => {
 			vehicheNumber = value;
 			apiClient.get( 'get-vehile-notes/'+vehicheNumber ).then((response) => {
-				console.log(response)
 				if(response.data.status == true){
 					resolve(response);
 				}else{
@@ -146,7 +141,6 @@ export const SaveVehicleNotes = ( newComment ) => {
 		AsyncStorage.getItem('vehicle_no').then((value) => {
 			vehicheNumber = value;
 			apiClient.post('save-vehile-notes' , { vehicle_number : vehicheNumber , comments : newComment}).then((response) => {
-				console.log(response)
 				if(response.data.status == true){
 					resolve(response);
 				}else{
@@ -161,7 +155,6 @@ export const SaveVehicleNotes = ( newComment ) => {
 export const updatePaymentStatus = ( invoice , status ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('update-invoice-payment-type' , {invoice_number : invoice , payment_type: status}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -175,8 +168,6 @@ export const updatePaymentStatus = ( invoice , status ) => {
 export const getTodaySale = ( vehicheNumber , driverId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-today-sales/'+vehicheNumber+'/'+driverId ).then((response) => {
-			console.log(response)
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -192,7 +183,6 @@ export const getTodaySale = ( vehicheNumber , driverId ) => {
 export const getPriorityDrivers = ( driverId , routeId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-buyer-priortity-by-driver/'+driverId+'/'+routeId ).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -206,7 +196,6 @@ export const getPriorityDrivers = ( driverId , routeId ) => {
 export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-buyer-priority-by-driver-sorted/'+driverId+'/'+routeId ).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -220,7 +209,6 @@ export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 export const getListInvoices = ( vehicheNumber , driverId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-sales-details/'+vehicheNumber+'/'+driverId ).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -234,7 +222,6 @@ export const getListInvoices = ( vehicheNumber , driverId ) => {
 export const checkIfBuyerHasVAT = ( buyerId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'check-buyer-has-vat/'+buyerId ).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -247,11 +234,7 @@ export const checkIfBuyerHasVAT = ( buyerId ) => {
 //add tp cart
 export const getCartItemDetails = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
-		console.log(postedData)
 		apiClient.post('get-cart-item-details' , { data : postedData}).then((response) => {
-			console.log('---------')
-			console.log(response)
-			console.log('---------')
 
 			if(response.data.status == true){
 				resolve(response);
@@ -267,7 +250,6 @@ export const getCartItemDetails = ( postedData ) => {
 export const updateDriverForsale = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('update-driver-for-sale' , postedData).then((response) => {
-			console.log(response)
 
 			if(response.data.status == true){
 				resolve(response);
@@ -282,7 +264,6 @@ export const updateDriverForsale = ( postedData ) => {
 export const getPendingSales = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-pending-sales' ,JSON.stringify(postedData)).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response.data);
 			}else{
@@ -297,7 +278,6 @@ export const getPendingSales = ( postedData ) => {
 export const SaveOrder = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('save-order' , { data : postedData}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -312,7 +292,6 @@ export const SaveOrder = ( postedData ) => {
 export const BeforeOrderDetails = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('order-preview' , { data : postedData}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -327,7 +306,6 @@ export const BeforeOrderDetails = ( postedData ) => {
 export const getSaleItemByInvoice = ( invoiceNo ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-sale-item-by-invoice' , { invoiceNumber : invoiceNo}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -341,7 +319,6 @@ export const getSaleItemByInvoice = ( invoiceNo ) => {
 export const searchBuyerByInvoiceNumber = ( invoiceNo ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('find-sale-item-like-invoice' , { invoiceNumber : invoiceNo}).then((response) => {
-			console.log(response)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
