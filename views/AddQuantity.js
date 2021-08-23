@@ -59,15 +59,14 @@
 	  	const [modalVisible, setModalVisible] = useState(false);
 	  	const [MyTotalPrice, setMyTotalPrice] = useState(0);
 		const [hasUndeliveredItems , setHasUndeliveredItems] = useState(true);
+		let scrollRef = useRef(); 
 
-		let undeliveredItems = {"LOAD-20-03-2021-246__134":{"value":5,"cardId":134,"VATstatus":false},"LOAD-20-03-2021-246__311":{"value":6,"cardId":311,"VATstatus":false}};
 		const ref_input2 = useRef();
 		useEffect(() => {
 			selectedLoadedItemsByQty();
 			totalAmountVatWithout = 0;
 			totalAmountVat = 0;
 			setUpdatedDataArray = [];
-
 			// return () => { 
 				// 	// AsyncStorage.removeItem('finalItems');
 				// 	setUpdatedDataArray = [];
@@ -84,7 +83,7 @@
 		} , [])
 		
 		function selectedLoadedItemsByQty() {
-			AsyncStorage.setItem('undeliveredItems' , JSON.stringify(undeliveredItems));
+			console.log("i am hit")
 			setLoadedActivityIndicator(true)
 			
 			AsyncStorage.getItem('VATStatus').then((data) => {
@@ -216,60 +215,61 @@
 
 			})
 		}
+		async function updateSelectedLoadedItemsByQty(objectData , dnum , itemId){
+			if( dnum+'__'+itemId in objectData){
+				if(objectData[dnum+'__'+itemId]['VATstatus'] == false){
+					objectData[dnum+'__'+itemId]['VATstatus'] = true;
+				}else{
+					objectData[dnum+'__'+itemId]['VATstatus'] = false;
+				}
 
-		function updateVATStatusOfProduct(dnum , itemId){
+				// if(VATUpdatedStatus.includes(dnum+'__'+itemId)){
+				// 	VATUpdatedStatus.pop(dnum+'__'+itemId);
+				// }else{
+				// 	VATUpdatedStatus.push(dnum+'__'+itemId);
+				// }
+
+				await AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
+				// AsyncStorage.setItem('itemsForVAT' , JSON.stringify(VATUpdatedStatus))
+				// setVATstatusForProducts( VATUpdatedStatus);
 			
+			}
+		}
+		function updateVATStatusOfProduct(dnum , itemId){
 			totalAmountVatWithout = 0;
 			totalAmountVat = 0;
 
-			let myData = Object.values(data);		
-			AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
-				let objectData = JSON.parse(res);
-				if( dnum+'__'+itemId in objectData){
-					if(objectData[dnum+'__'+itemId]['VATstatus'] == false){
-						objectData[dnum+'__'+itemId]['VATstatus'] = true;
-					}else{
-						objectData[dnum+'__'+itemId]['VATstatus'] = false;
-					}
+			let myData = Object.values(data);
 
-					if(VATUpdatedStatus.includes(dnum+'__'+itemId)){
-						VATUpdatedStatus.pop(dnum+'__'+itemId);
-					}else{
-						VATUpdatedStatus.push(dnum+'__'+itemId);
-					}
+			// AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
+				let objectData = loadedData;
 
-					AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
-					AsyncStorage.setItem('itemsForVAT' , JSON.stringify(VATUpdatedStatus))
-					setVATstatusForProducts( VATUpdatedStatus);
-				
-				}
-			});
+				updateSelectedLoadedItemsByQty(objectData , dnum , itemId).then(() => {
+					selectedLoadedItemsByQty()
+					let price = 0;
+					// for( let i= 0 ; i < myData.length; i++ ){
+					// 	if( myData[i][dnum] != undefined){
+					// 		if( myData[i][dnum]['VATstatus'] == true ){
+					// 			price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
+					// 		}else{
+					// 			price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
+					// 		}
+					// 		if( myData[i][dnum].id == itemId){
+					// 			if(myData[i][dnum].VATstatus == false){
+					// 				myData[i][dnum].VATstatus = true;
+					// 			}else{
+					// 				myData[i][dnum].VATstatus = false;
+					// 			}
+					// 			// setData(myData);
+					// 		}
+							
+					// 	}
+					// }
+					setMyTotalPrice(price);
+				});
+			// });
 
-			
-			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum] != undefined){
-					if( myData[i][dnum].id == itemId){
-						if(myData[i][dnum].VATstatus == false){
-							myData[i][dnum].VATstatus = true;
-						}else{
-							myData[i][dnum].VATstatus = false;
-						}
-						setData(myData);
-					}
-				}
-			}
-
-			let price = 0;
-			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum] != undefined){
-					if( myData[i][dnum]['VATstatus'] == true ){
-						price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-					}else{
-						price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
-					}
-				}
-			}
-			setMyTotalPrice(price);
+		
 		}
 
 		function updateQty(dnum , itemId , qty ){
@@ -479,7 +479,7 @@
 					</View>
 
 					<View style={{flex: 1}}>
-						<ScrollView>
+						<ScrollView >
 
 							{( loadedActivityIndicator == true ) ? 
 							<View>
@@ -509,7 +509,12 @@
 															:
 																<View style={{width: 60}} ></View>
 															}
-															<Image source={{uri:imagePrefix+''+val.img}} style={( win.width > 500 ) ? {width: 50, height: 55, marginRight: 8} : {width: 40, height: 45, marginRight: 8} } />
+															
+															{(val.img != '' && val.img != undefined && val.img != null)?
+																<Image source={{uri:imagePrefix+''+val.img}} style={( win.width > 500 ) ? {width: 50, height: 55, marginRight: 8} : {width: 40, height: 45, marginRight: 8} } />
+															:														
+																<Image source={{uri:imagePrefix+'img-dummy-product.jpg'}} style={( win.width > 500 ) ? {width: 50, height: 55, marginRight: 8} : {width: 40, height: 45, marginRight: 8} } />
+															}
 															<View key={generateRandString()}>
 																<Text key={generateRandString()} style={{ fontSize: 15, fontWeight: 'bold', }} allowFontScaling={false}>
 																	{((val.name.length > 20) ? (val.name).substring(0 , 20)+'..'  : val.name )}

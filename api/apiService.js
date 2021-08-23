@@ -208,6 +208,7 @@ export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 //get Today sale
 export const getListInvoices = ( vehicheNumber , driverId ) => {
 	return new Promise( (resolve , reject) => {
+		console.log('get-sales-details/'+vehicheNumber+'/'+driverId)
 		apiClient.get( 'get-sales-details/'+vehicheNumber+'/'+driverId ).then((response) => {
 			if(response.data.status == true){
 				resolve(response);

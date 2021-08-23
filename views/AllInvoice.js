@@ -817,6 +817,10 @@ function searchBuyer(text){
 function printData(data){
 
 }
+function ViewPrintableReciept(data){
+
+    navigation.navigate('ViewPDF' , { invoiceNo : data[0].invoice_no})
+}
 return (
     <MainScreen>
         <View style={{flex:1}}>
@@ -849,6 +853,11 @@ return (
                                                     <Text style={{fontSize: 10}}>{l[0].invoice_no}</Text>
                                                 </ListItem.Subtitle>
                                             </ListItem.Content>
+                                            <View>
+                                                <Pressable style={{backgroundColor: 'lightgreen',paddingHorizontal: 20,paddingVertical: 10}} onPress={() => { ViewPrintableReciept(l) }} >
+                                                    <Text style={{color: 'white'}}>View</Text>
+                                                </Pressable>
+                                            </View>
                                             <View>
                                                 <Pressable style={{backgroundColor: Colors.primary,paddingHorizontal: 20,paddingVertical: 10}} onPress={() => { setPrintingIndicator(true); printReceipt(l) }} >
                                                     <Text style={{color: 'white'}}>Print</Text>

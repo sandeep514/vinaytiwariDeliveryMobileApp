@@ -24,6 +24,7 @@ import { Alert } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ViewPDF from '../views/ViewPDF';
 
 const Stack = createStackNavigator();
 export default function Nav() {
@@ -208,6 +209,14 @@ export default function Nav() {
 								<Icon name="home" color={Colors.primary} style={{marginLeft: 10,padding: 10}} />
 							</Pressable>
 						),
+					})}
+				/>
+				<Stack.Screen
+					title="View Order Details"
+					name="ViewPDF"
+					component={ViewPDF}
+					options={( {navigation} ) => ({
+						headerShown: true , title : 'View Order Details',
 					})}
 				/>
 			</Stack.Navigator>
