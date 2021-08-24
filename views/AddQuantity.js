@@ -22,7 +22,8 @@
 	import { ActivityIndicator ,Modal,Keyboard} from 'react-native';
 	import { useRef } from 'react';
 	import { CheckBox } from 'react-native-elements'
-	
+	import AddQty from '../components/AddQty';
+
 	const win = Dimensions.get('window');
 
 	let setTotalAmount = 0;
@@ -41,7 +42,8 @@
 
 	let updatedValue= '';
 	let initalPaymentStatus = 'cash';
-	export default function AddQuantity({navigation}) {
+	export default function AddQuantity({navigation , route}) {
+
 		const [data, setData] = useState({});
 		// const [totalAmount, setTotalAmount] = useState(0);
 		const [loadedData , setLoadedData] = useState();
@@ -59,11 +61,34 @@
 	  	const [modalVisible, setModalVisible] = useState(false);
 	  	const [MyTotalPrice, setMyTotalPrice] = useState(0);
 		const [hasUndeliveredItems , setHasUndeliveredItems] = useState(true);
+		const [selectedItemFromItemsScreen , setSelectedItemFromItemsScreen] = useState();
+		const [updatedFinalData , setUpdatedFinalData] = useState();
 		let scrollRef = useRef(); 
-
 		const ref_input2 = useRef();
+		let mySelectedProducts = {}
+		let finalProducts = {};
+		// useEffect(() => {
+		// 	finalProducts = 
+		// 	if( latestPrice != null && latestPrice != undefined ){
+		// 		for(let i = 0 ; i < Object.values(latestPrice).length ; i++ ){
+		// 			if( Object.values(latestPrice[i])[0]['VATstatus'] == true ){
+		// 				price = price + ((Object.values(latestPrice[i])[0]['sale_price'] * Object.values(latestPrice[i])[0]['order_qty'])*1.20) ;
+		// 			}else{
+		// 				price = price + (Object.values(latestPrice[i])[0]['sale_price'] * Object.values(latestPrice[i])[0]['order_qty'])  ;
+		// 			}
+		// 		}
+		// 	}
+		// 	setMyTotalPrice(price)
+		// } , [latestPrice]);
 		useEffect(() => {
-			selectedLoadedItemsByQty();
+			if( selectedItemFromItemsScreen != undefined ){
+				selectedLoadedItemsByQty();
+			}
+		} , [selectedItemFromItemsScreen])
+		useEffect(() => {
+			mySelectedProducts = route.params.mySelectedItems;
+			setSelectedItemFromItemsScreen(route.params.mySelectedItems);
+
 			totalAmountVatWithout = 0;
 			totalAmountVat = 0;
 			setUpdatedDataArray = [];
@@ -83,7 +108,6 @@
 		} , [])
 		
 		function selectedLoadedItemsByQty() {
-			console.log("i am hit")
 			setLoadedActivityIndicator(true)
 			
 			AsyncStorage.getItem('VATStatus').then((data) => {
@@ -96,12 +120,13 @@
 				setVATstatus(data);
 			});
 			
-			AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
+			// AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
 
-				setLoadedData(JSON.parse(data));	
+				setLoadedData(selectedItemFromItemsScreen);	
 
-				getCartItemDetails(data).then((res) => {
+				getCartItemDetails(JSON.stringify(selectedItemFromItemsScreen)).then((res) => {
 					let productData = res.data.data;
+
 					for(let i = 0; i < productData.length ; i++){
 						let myData = Object.values(productData)[i]; 
 						if( Object.values(myData)[0]['itemcategory'] == 'EGGS' || Object.values(myData)[0]['itemcategory'] == 'eggs' ){
@@ -111,20 +136,20 @@
 						}
 					}
 					setData(productData);
-					let price = 0;
-					for(let i = 0; i < productData.length ; i++){
-						let myData = Object.values(productData)[i];
-						let myNewData = Object.values(myData)[0]
-						if( myNewData['VATstatus'] == true ){
-							price = price + ((myNewData['sale_price'] * myNewData['order_qty'])*1.20) ;
-						}else{
-							price = price + (myNewData['sale_price'] * myNewData['order_qty'])  ;
-						}
-					}
-					setMyTotalPrice(price);
+					// let price = 0;
+					// for(let i = 0; i < productData.length ; i++){
+					// 	let myData = Object.values(productData)[i];
+					// 	let myNewData = Object.values(myData)[0]
+					// 	if( myNewData['VATstatus'] == true ){
+					// 		price = price + ((myNewData['sale_price'] * myNewData['order_qty'])*1.20) ;
+					// 	}else{
+					// 		price = price + (myNewData['sale_price'] * myNewData['order_qty'])  ;
+					// 	}
+					// }
+					// setMyTotalPrice(price);
 					setLoadedActivityIndicator(false)
 				});
-			});
+			// });
 			
 			AsyncStorage.getItem('selectedVehicleNo').then((vehNo) => {
 				selectedVehicle = vehNo;
@@ -182,7 +207,22 @@
 				Keyboard.dismiss();
 			}else{
 				// setSaveOrderActivIndictor(true)
-				AsyncStorage.setItem('finalItems' , JSON.stringify(setUpdatedDataArray));
+
+				if( updatedFinalData == null ){
+					AsyncStorage.setItem('finalItems' , JSON.stringify(setUpdatedDataArray));
+				}else{
+					let setUpdatedDataArrayProcess = [];
+
+					for( let i = 0 ; i < updatedFinalData.length ; i++){						
+						let processedData = Object.values(updatedFinalData[i])[0];
+
+						setUpdatedDataArrayProcess.push({'VATStatus' : processedData?.VATstatus ,"dnum":processedData?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":processedData?.id,"qty":processedData?.order_qty,"credit":"NO","sale_price":processedData?.sale_price})
+					}
+					setUpdatedDataArray = setUpdatedDataArrayProcess;
+					AsyncStorage.setItem('finalItems' , JSON.stringify(setUpdatedDataArray));
+
+				}
+
 				updateRecords(setUpdatedDataArray).then((res) => {
 					let data = [];
 					data.push(res)
@@ -198,221 +238,12 @@
 
 		}
 
-		function updateWithNewQty(dnum , itemId , qty ){
-			return new Promise((resolve , reject) => {
-				AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
-					let objectData = JSON.parse(res)
-
-					for(let i = 0 ; i < Object.keys(objectData).length > 0 ;i++){
-						let updatedId = dnum+'__'+itemId;
-						objectData[updatedId].value = qty
-					}
-					AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(objectData))
-					setActInd(true)
-
-					resolve(true)
-				});
-
-			})
-		}
-		async function updateSelectedLoadedItemsByQty(objectData , dnum , itemId){
-			if( dnum+'__'+itemId in objectData){
-				if(objectData[dnum+'__'+itemId]['VATstatus'] == false){
-					objectData[dnum+'__'+itemId]['VATstatus'] = true;
-				}else{
-					objectData[dnum+'__'+itemId]['VATstatus'] = false;
-				}
-
-				// if(VATUpdatedStatus.includes(dnum+'__'+itemId)){
-				// 	VATUpdatedStatus.pop(dnum+'__'+itemId);
-				// }else{
-				// 	VATUpdatedStatus.push(dnum+'__'+itemId);
-				// }
-
-				await AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
-				// AsyncStorage.setItem('itemsForVAT' , JSON.stringify(VATUpdatedStatus))
-				// setVATstatusForProducts( VATUpdatedStatus);
-			
-			}
-		}
-		function updateVATStatusOfProduct(dnum , itemId){
-			totalAmountVatWithout = 0;
-			totalAmountVat = 0;
-
-			let myData = Object.values(data);
-
-			// AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
-				let objectData = loadedData;
-
-				updateSelectedLoadedItemsByQty(objectData , dnum , itemId).then(() => {
-					selectedLoadedItemsByQty()
-					let price = 0;
-					// for( let i= 0 ; i < myData.length; i++ ){
-					// 	if( myData[i][dnum] != undefined){
-					// 		if( myData[i][dnum]['VATstatus'] == true ){
-					// 			price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-					// 		}else{
-					// 			price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
-					// 		}
-					// 		if( myData[i][dnum].id == itemId){
-					// 			if(myData[i][dnum].VATstatus == false){
-					// 				myData[i][dnum].VATstatus = true;
-					// 			}else{
-					// 				myData[i][dnum].VATstatus = false;
-					// 			}
-					// 			// setData(myData);
-					// 		}
-							
-					// 	}
-					// }
-					setMyTotalPrice(price);
-				});
-			// });
-
-		
-		}
-
-		function updateQty(dnum , itemId , qty ){
-			let myData = Object.values(data);
-			let newQty = 0;
-			
-			AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
-				let objectData = JSON.parse(res);
-				if( dnum+'__'+itemId in objectData){
-					objectData[dnum+'__'+itemId]['value'] = qty;
-					AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
-				}
-			});
-			if( qty != '' ){
-				newQty = qty
-			}
-
-			for( let i= 0 ; i < myData.length; i++ ){
-				if(myData[i][dnum] != undefined){
-					if( myData[i][dnum].id == itemId){
-						myData[i][dnum].order_qty = newQty;
-						setData(myData)
-						// selectedLoadedItemsByQty();
-					}
-				}
-			}
-		
-			let price = 0;
-			for( let i= 0 ; i < myData.length; i++ ){
-				if(Object.values(myData[i]).length > 0){
-					if(Object.values(myData[i])[0] != undefined){
-						if( Object.values(myData[i])[0]['VATstatus'] == true ){
-							price = price + ((Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])*1.20) ;
-						}else{
-							price = price + (Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])  ;
-						}
-					}
 	
-				}
-				
-			}
-			setMyTotalPrice(price);
-			setIsKeyboardOpen(false)
-		}
 
-		function updatePrice(dnum , itemId , value ){
-			let myData = Object.values(data);
-			let newQty = 0;
-			
-			AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
-				let objectData = JSON.parse(res);
-				if( dnum+'__'+itemId in objectData){
-					objectData[dnum+'__'+itemId]['price'] = value;
-					AsyncStorage.setItem('selectedLoadedItemsByQty' ,JSON.stringify(objectData));
-				}
-			});
-			if( value != '' ){
-				newQty = value
-			}
-			for( let i= 0 ; i < myData.length; i++ ){
-				if( myData[i][dnum] != undefined ){
-					if( myData[i][dnum].id == itemId){
-						myData[i][dnum].sale_price = newQty;
-						setData(myData)
-					}
-				}
-			}
-			let price = 0;
-			// for( let i= 0 ; i < myData.length; i++ ){
-			// 	if(Object.values(myData[i]).length > 0){
-			// 		if( myData[i][dnum] != undefined ){
-			// 			if( myData[i][dnum]['VATstatus'] == true ){
-			// 				price = price + ((myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])*1.20) ;
-			// 			}else{
-			// 				price = price + (myData[i][dnum]['sale_price'] * myData[i][dnum]['order_qty'])  ;
-			// 			}
-			// 		}
-			// 	}
-			// }
-
-			for( let i= 0 ; i < myData.length; i++ ){
-				if(Object.values(myData[i]).length > 0){
-					if(Object.values(myData[i])[0] != undefined){
-						if( Object.values(myData[i])[0]['VATstatus'] == true ){
-							price = price + ((Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])*1.20) ;
-						}else{
-							price = price + (Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])  ;
-						}
-					}
-				}				
-			}
-
-			setMyTotalPrice(price);
-			setIsKeyboardOpen(false)
-			
-		}
-
-		function changeCreditStatus(status) {
-			setCreditStatus(status)
-		}
-
-		function updateVATstatus( status ) {
-			AsyncStorage.setItem('currentVATstatus' , status);
-			if( status == '1' ){
-				setVATstatus('true');
-			}else{
-				setVATstatus('false');
-			}
-		}
 
 		return (
 			<MainScreen>
 				<View style={{flex:1}}>
-					<Modal
-						animationType="slide"
-						transparent={true}
-						visible={modalVisible}
-						onRequestClose={() => {
-							setModalVisible(!modalVisible);
-						}}
-					>
-						<View style={styles.centeredView}>
-							<View style={styles.modalView}>
-								<Text style={{fontSize: 17,paddingHorizontal: 10}}>You are about to place the order, you will not able to edit this order.</Text>
-								<View style={{flexDirection: 'row',width : '90%',marginTop: 10 ,justifyContent: 'space-between'}}>
-									<Pressable
-										style={[styles.button, styles.buttonClose]}
-										onPress={() => setModalVisible(!modalVisible)}
-									>
-										<Text style={{backgroundColor: 'red' , borderRadius: 2,color: 'white',paddingVertical: 10 ,paddingHorizontal: 13,elevation: 5}}>Cancel</Text>
-									</Pressable>
-									<Pressable
-										style={[styles.button, styles.buttonClose]}
-										onPress={() => SaveOrders() }
-									>
-										<Text style={{backgroundColor:Colors.primary , borderRadius: 2,color: 'white',paddingVertical: 10 ,paddingHorizontal: 13,elevation: 5}}>Continue</Text>
-									</Pressable>
-								</View>
-							</View>
-						</View>
-					</Modal>
-
-
 					{/* {( vatStatu != 'true'  && hasVatProducts) ?
 						<View style={{ justifyContent: 'center' }} >
 							<Modal
@@ -492,82 +323,34 @@
 									{currentSelectedLoadName = Object.keys(value)[0]}
 									return (
 										<View key={generateRandString()}>
+
 											{Object.values(value).map((val , k) => {
-												{currentSelectedId = val.id}
-												{valuetem = (val.order_qty).toString()}
-												{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val.sale_price) )}
-												
-												{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val.VATstatus ,"dnum":val.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val.order_qty,"credit":"NO","sale_price":val.sale_price}) : ''}
-												return(
-													<View style={(win.width > 500) ? styles.mainBoxTab : styles.mainBox } key={generateRandString()}>
-														<View style={styles.itemBox} key={generateRandString()}>
-															{(val.itemcategory != "EGGS") ? 	
-																	<CheckBox
-																		checked={val.VATstatus}
-																		onPress={() => {  updateVATStatusOfProduct(val.loadId ,val.id ) }}
-																	/>
-															:
-																<View style={{width: 60}} ></View>
-															}
-															
-															{(val.img != '' && val.img != undefined && val.img != null)?
-																<Image source={{uri:imagePrefix+''+val.img}} style={( win.width > 500 ) ? {width: 50, height: 55, marginRight: 8} : {width: 40, height: 45, marginRight: 8} } />
-															:														
-																<Image source={{uri:imagePrefix+'img-dummy-product.jpg'}} style={( win.width > 500 ) ? {width: 50, height: 55, marginRight: 8} : {width: 40, height: 45, marginRight: 8} } />
-															}
-															<View key={generateRandString()}>
-																<Text key={generateRandString()} style={{ fontSize: 15, fontWeight: 'bold', }} allowFontScaling={false}>
-																	{((val.name.length > 20) ? (val.name).substring(0 , 20)+'..'  : val.name )}
-																</Text>
-																<Text style={{fontSize: 10}} allowFontScaling={false}> Available Stock {val.loadId} </Text>
-															</View>
-														</View>
-					
-														{/* <View key={generateRandString()} style={{flex: 0.8,justifyContent: 'space-around',flexDirection: 'row',alignItems: 'center',borderColor: 'black',height: 90 }}>
-															<View key={generateRandString()} style={styles.buttonBox}>
-																<Button icon={<Icon name="plus" size={20} color="white" />} buttonStyle={styles.plusButton} />
-																<Button icon={<Icon name="minus" size={20} color="white" />} buttonStyle={styles.minisButton} />
-															</View>
-														</View> */}
-					
-														<View key={generateRandString()} style={styles.inputBox}>
+												if(typeof val == 'object' && val != undefined){
+													
+													{currentSelectedId = val?.id}
+													{valuetem = (val?.order_qty).toString()}
+													{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val?.sale_price) )}
+													
+													{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val?.VATstatus ,"dnum":val?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val?.order_qty,"credit":"NO","sale_price":val?.sale_price}) : ''}
+													return(
 
-															<TextInput keyboardType="numeric" placeholder="Qty" defaultValue={valuetem} ref={(value) => {}} style={styles.textInput}
-															// onPressIn={() => { setIsKeyboardOpen(true) }}
-															onEndEditing={(value) => { updateQty(val.loadId ,val.id , value.nativeEvent.text) } }/>
-
-															<TextInput keyboardType="numeric" placeholder="Price" defaultValue={val.sale_price} ref={(value) => {}} style={styles.textInput} 
-															// onPressIn={() => { setIsKeyboardOpen(true) }}
-															onEndEditing={(value) => { updatePrice(val.loadId ,val.id , value.nativeEvent.text) } } />
-
-															<Text style={{ minWidth:70,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>{ (valuetem * val.sale_price).toFixed(2) }</Text>
-
-															<Text style={{ minWidth:40,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>
-																{( val.VATstatus == true )?
-																	<View>
-																		<Text>
-																			{( ((valuetem * val.sale_price) *1.20) - (valuetem * val.sale_price) ).toFixed(2)}
-																		</Text>
-																	</View>
-																:
-																	<Text>0</Text>
-																}
-															</Text>
-															<Text style={{ minWidth:40,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>
-																{( val.VATstatus == true )?
-																	<View>
-																		<Text>
-																			{(  (((valuetem * val.sale_price) *1.20) - (valuetem * val.sale_price)) + (valuetem * val.sale_price) ).toFixed(2)}
-																		</Text>
-																	</View>
-																:
-																	<Text>{ (valuetem * val.sale_price).toFixed(2)}</Text>
-																}
-															</Text>
-
-														</View>
-													</View>
-												)
+														<AddQty 
+															valuetem={valuetem} 
+															data={data} 
+															selectedItemFromItemsScreen={selectedItemFromItemsScreen} 
+															key={generateRandString()} 
+															val={val} 
+															updatedDataRes={(myUpdatedData) => { 
+																setUpdatedFinalData(myUpdatedData) 
+															}} 
+															updatedObjectRed={(myUupdatedObjectRed) => { setSelectedItemFromItemsScreen(myUpdatedData) }} 
+															updatedPrice={ (price) => { setMyTotalPrice(price)} }
+															updateMyObjectData={ (myRecord) => { 
+																// console.log(myRecord) 
+															}}
+														></AddQty>
+													)
+												}
 											})}
 										</View>
 									)
@@ -587,7 +370,7 @@
 								<Text style={{textAlign: 'center'}}><ActivityIndicator size="large" color="white"></ActivityIndicator></Text>
 							</View>
 						:
-							<Pressable style={{padding: 16,backgroundColor:Colors.primary,flexDirection: 'row',justifyContent: 'center'}} onPress={() => { SaveOrders() }}><Text style={{textAlign: 'center',color: 'white',fontSize: 20}} > Place order and print invoice £{(parseFloat(MyTotalPrice) ).toFixed(2)} </Text>
+							<Pressable style={{padding: 16,backgroundColor:Colors.primary,flexDirection: 'row',justifyContent: 'center'}} onPress={() => { SaveOrders() }}><Text style={{textAlign: 'center',color: 'white',fontSize: 20}} > Place order and print invoice. </Text>
 
 							</Pressable>
 						}
@@ -598,7 +381,7 @@
 		);
 	}
 
-	const styles = StyleSheet.create({
+const styles = StyleSheet.create({
 	vehicleImage: {width: 50, height: 50, resizeMode: 'contain'},
 	plusButton: {
 		position: 'relative',

@@ -19,8 +19,12 @@ export default function ItemsScreenWithQty({navigation}) {
 	const [ListItems , setListItems] = useState();
 	const [requestSent , setRequestSent] = useState(false);
 	const [hasUndeliveredItems , setHasUndeliveredItems] = useState(false);
+	const [selectedItemsFromLoads , setSelectedItemsFromLoads] = useState();
 	// const [listUndelivered , setListUndelivered] = useState();
 
+	useEffect(() => {
+
+	} , [ selectedItemsFromLoads ])
 	
 	useEffect(() => {
 		AsyncStorage.getItem('cartItems').then((data) => {
@@ -48,7 +52,6 @@ export default function ItemsScreenWithQty({navigation}) {
 				// AsyncStorage.setItem('undeliveredItems' , JSON.stringify(undeliveredItems));
 			}
 		});
-		
 		// setListUndelivered(undeliveredItems)
 		
 		AsyncStorage.setItem('selectedLoadedItemsByQty',JSON.stringify({}));
@@ -131,7 +134,7 @@ export default function ItemsScreenWithQty({navigation}) {
 											<View key={v} style={{flex: 1, flexDirection: 'row',flexWrap: 'wrap',justifyContent : 'space-evenly'}}>
 												{Object.keys(ListItems[key][k]).map((ke ,val) => {
 													return(
-														<ItemCard  key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
+														<ItemCard selectedData={(items) => setSelectedItemsFromLoads(items)} key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
 													)
 												})}
 											</View>
@@ -147,6 +150,9 @@ export default function ItemsScreenWithQty({navigation}) {
 			</ScrollView>
 			<Pressable 	
 				onPress={() => { 
+					navigation.push('AddQuantity' , {mySelectedItems : selectedItemsFromLoads});
+
+					return false;
 					AsyncStorage.getItem('selectedLoadedItemsByQty').then( (value) => {
 						if( Object.keys(JSON.parse(value)).length > 0 ){
 							// AsyncStorage.getItem('UndeliveredItemsInCart').then((res) => {

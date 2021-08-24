@@ -128,8 +128,13 @@ export default function LoadsScreen({navigation , route}) {
 							// AsyncStorage.removeItem('refreshLoad');
 							// ( currentLoadRoute == 'Dashboard' ) ? navigation.navigate('Dashboard') : navigation.navigate('Items') 
 						// });		
-
-						navigation.navigate('Dashboard',{params : "here"})
+						AsyncStorage.getItem('selectedLoadsNumbers').then((res) => {
+							if(JSON.parse(res).length){
+								navigation.navigate('Dashboard',{params : "here"})
+							}else{
+								alert("Please select any load.");
+							}
+						})
 					}}
 				>
 					<Icon name="arrow-right" style={{color: 'white'}} size={24} />

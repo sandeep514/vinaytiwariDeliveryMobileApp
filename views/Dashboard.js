@@ -51,6 +51,10 @@ export default function Dashboard({navigation , route}) {
 	}
 
 	useEffect(() => {
+		// AsyncStorage.getAllKeys()
+    	// .then((keys)=> AsyncStorage.multiGet(keys)
+        //             .then((data) => console.log(data)));
+
 		AsyncStorage.getItem('selectedVehicleNo').then((value) => {
 			let vehicheId = value;
 			AsyncStorage.getItem('selectedLoadsNumbers').then((value) => {

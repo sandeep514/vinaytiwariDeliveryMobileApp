@@ -6,8 +6,9 @@
 	import {Colors} from '../components/Colors';
 	import {widthToDp, heightToDp} from '../utils/Responsive';
 	let selectedLoadArray = {};
+	
 
-	export default DashboardCard = ({ backgroundColor, cardName, imageUrl, onPress, styleData, qty, cardId ,loadName }) => {
+	export default DashboardCard = ({ backgroundColor, cardName, imageUrl, onPress, styleData, qty, cardId ,loadName , selectedData}) => {
 
 		const [ UpdateQtyofItem , setUpdateQtyofItem] = useState({});
 		const [ UpdateQtyofItems , setUpdateQtyofItems] = useState(0);
@@ -71,9 +72,10 @@
 			AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
 				selectedLoadArray[loadName+'__'+cardId] = {'value' : qty,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
 				setUpdateQtyofItem(selectedLoadArray)
+				selectedData(selectedLoadArray)
 				
 				setUpdateQtyofItems((qty));
-				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+				// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 			});
 		}
 
@@ -91,14 +93,16 @@
 			if( selectedLoadArray[loadedName] != undefined ){
 				selectedLoadArray[loadedName].value = (parseFloat(selectedLoadArray[loadedName].value)+1);
 				setUpdateQtyofItem(selectedLoadArray)
+				selectedData(selectedLoadArray)
 
-				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+				// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 			}else{
 				AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
 					selectedLoadArray[loadName+'__'+cardId] = {value: 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
 
 					setUpdateQtyofItem(selectedLoadArray)
-					AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+					selectedData(selectedLoadArray)
+					// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 				});
 			}
 			
@@ -127,6 +131,7 @@
 						delete selectedLoadArray[loadedName];
 					}
 					setUpdateQtyofItem(selectedLoadArray)
+					selectedData(selectedLoadArray)
 				}
 			}else{
 				// if( (selectedLoadArray[loadedName].value-1) <= 0 ){
@@ -134,6 +139,7 @@
 				// }
 				// selectedLoadArray[loadName+'__'+cardId] = {'value' : 0 ,'cardId' : cardId};
 				setUpdateQtyofItem(selectedLoadArray)
+				selectedData(selectedLoadArray)
 			}
 
 			if( UpdateQtyofItems == undefined ){
@@ -144,7 +150,7 @@
 				}
 			}
 		
-			AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
+			// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 		}
 
 		return (

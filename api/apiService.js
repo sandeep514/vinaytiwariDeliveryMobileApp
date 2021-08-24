@@ -208,7 +208,6 @@ export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 //get Today sale
 export const getListInvoices = ( vehicheNumber , driverId ) => {
 	return new Promise( (resolve , reject) => {
-		console.log('get-sales-details/'+vehicheNumber+'/'+driverId)
 		apiClient.get( 'get-sales-details/'+vehicheNumber+'/'+driverId ).then((response) => {
 			if(response.data.status == true){
 				resolve(response);
@@ -236,7 +235,6 @@ export const checkIfBuyerHasVAT = ( buyerId ) => {
 export const getCartItemDetails = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-cart-item-details' , { data : postedData}).then((response) => {
-
 			if(response.data.status == true){
 				resolve(response);
 			}else{

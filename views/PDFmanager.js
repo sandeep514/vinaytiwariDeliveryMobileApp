@@ -47,8 +47,6 @@ export default function PDFmanager({navigation , text, onOK}) {
     const [selectedDriverId , setselectedDriverId] = useState();
     const [ bluetoothName ,setBluetoothName ] = useState();
     const [modalVisible, setModalVisible] = useState(false);
-
-	let setBase64Image = '';
     
     useEffect(() => {
         getPrinterNameByDriver();
@@ -1125,7 +1123,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         <View style={styles.bodyContainer}>
             {( win.width > 550)?
                 <View >
-                    
+
                     <View style={{flexDirection: 'row',height: '100%'}}>
                         <View style={{width: '50%'}} >
                             <ScrollView>
