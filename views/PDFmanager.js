@@ -54,6 +54,7 @@ export default function PDFmanager({navigation , text, onOK}) {
             setselectedDriverId(driverId)
         });
         AsyncStorage.getItem('readyForOrder').then((data) => {
+            setIsLoaderActive(true)
             BeforeOrderDetails(data).then( (result) => {
                 AsyncStorage.getItem('selectedInvoiceId').then((selectedInvoice) => {
                     if( selectedInvoice != null ){
@@ -117,7 +118,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                     totalAmount = (parseFloat(totalAmount)+parseFloat(amount));
                 }
                 setSavedOrderResponce(parsedData);
-
+                setIsLoaderActive(false)
             })
         })
 
@@ -1122,235 +1123,237 @@ export default function PDFmanager({navigation , text, onOK}) {
 	return (
         <View style={styles.bodyContainer}>
             {( win.width > 550)?
-                <View >
-
-                    <View style={{flexDirection: 'row',height: '100%'}}>
-                        <View style={{width: '50%'}} >
-                            <ScrollView>
-                                <View >
-                                    <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
-                                        Invoice
-                                    </Text>
-                                    <Text style={{ fontSize: 30,textAlign: 'center'}}>UK Inch</Text>
-                                    <Text style={{ fontSize: 15,textAlign: 'center'}}>Unit 12C, Bridge Industrial Estate,RH6 9HU</Text>
-                                    <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
-                                    <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ukinch2@gmail.com</Text>
-                                    <Text style={{ fontSize: 15,textAlign: 'left',marginLeft: 20}}>INVOICE: {(invoiceNumber != undefined)? invoiceNumber : ''}</Text>
-                                    <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20,borderBottomColor:'black',borderTopColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1,padding: 10 }}>
-                                        <Text style={{fontWeight: 'bold',width: 100}}>Customer</Text>
-                                        <Text style={{fontWeight: 'bold'}}></Text>
-                                        <Text style={{fontWeight: 'bold'}}></Text>
-                                        <Text style={{fontWeight: 'bold'}}>Date: { (savedOrderResonce != undefined) ? savedOrderResonce[0]['ddate'] : ''   }</Text>
-                                    </View>
-                                    <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
-                                        <Text style={{width: 100}}>Name: </Text>
-                                        <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['name'] : ''} </Text>
-                                    </View>
-                                    <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
-                                        <Text style={{width: 100}}>Address: </Text>
-                                        <Text style={{textAlign: 'left'}}>{(savedBuyerData != undefined) ? savedBuyerData['address'] : ''} </Text>
-                                    </View>
-                                    <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
-                                        <Text style={{width: 100}}>Phone: </Text>
-                                        <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['contact_no'] : ''} </Text>
-                                    </View>
-                                    {( hasNonVatProducts ) ?
-                                        <View>
-                                            {/* <View style={{marginTop: 20,paddingTop: 10,borderTopColor: 'black', borderTopWidth: 1}}><Text style={{justifyContent: 'center',textAlign: 'center',fontWeight:'bold'}}>Items without VAT</Text></View> */}
-                                            <View style={{ flex: 0.2,borderTopColor: 'black', borderTopWidth: 1, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,borderBottomColor:'black',marginTop: 20,borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
-                                                <Text style={{fontWeight: 'bold'}}>Qty</Text>
-                                                <Text style={{fontWeight: 'bold'}}>Price</Text>
-                                                <Text style={{fontWeight: 'bold'}}>Amount</Text>
-                                                <Text style={{fontWeight: 'bold'}}>VAT</Text>
-                                                <Text style={{fontWeight: 'bold'}}>Total(inc)</Text>
-                                            </View>
-                                            <View style={{marginTop: 10}}>
-                                            </View>
-                                        </View>                                
-                                    :
-                                        <View></View>
-                                    }
-                                            
-                                        {(savedOrderResonce != undefined) ?
-                                            savedOrderResonce.map((value , key) => {
-                                                return (
-                                                    <View key={key} >
-                                                        {( value['sale_item_rel'].itemcategory == 'EGGS' ) ?
-                                                            <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
-                                                                <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
-                                                                <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                    <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
-                                                                    <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                    <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
-                                                                    <Text style={{ }}>£ 0</Text>
-                                                                    <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
-                                                                </View>
-                                                            </View>
-                                                        :
-                                                            <View></View>
-                                                        } 
-                                                        {( value['sale_item_rel'].itemcategory != 'EGGS' && value.has_vat ) ?
-                                                            <View>
-                                                                <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
-                                                                    <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
-                                                                    <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                        {/* <Text style={{ width: 90}}>{value['sale_item_rel'].name}</Text> */}
-                                                                        <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
-                                                                        <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                        <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
-                                                                        <Text style={{ }}>£{((((parseFloatt(value['qty']) * value['sale_price'])*1.20)) -  (parseFloatt(value['qty']) * value['sale_price'])).toFixed(2)}</Text>
-                                                                        <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
-                                                                    </View>
-                                                                </View>
-                                                                {/* <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
-                                                                    <Text></Text>
-                                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text></Text>
-                                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}></Text> </Text>
-                                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VATTotal).toFixed(2)}</Text></Text>
-                                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal-VATTotal).toFixed(2)}</Text></Text>
-                                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal).toFixed(2)}</Text></Text>
-                                                                </View> */}
-                                                            </View>
-                                                        :
-                                                            <View></View>
-                                                        } 
-                                                    </View>
-                                                )
-                                            })
-                                            
-                                        : 
-                                            <View></View>
-                                        }
-                                        {(hasNonVatProducts) ? 
+                ( isLoaderActive )?
+                    <ActivityIndicator size={30} color={Colors.primary}></ActivityIndicator>
+                :
+                    <View >
+                        <View style={{flexDirection: 'row',height: '100%'}}>
+                            <View style={{width: '50%'}} >
+                                <ScrollView>
+                                    <View >
+                                        <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
+                                            Invoice
+                                        </Text>
+                                        <Text style={{ fontSize: 30,textAlign: 'center'}}>UK Inch</Text>
+                                        <Text style={{ fontSize: 15,textAlign: 'center'}}>Unit 12C, Bridge Industrial Estate,RH6 9HU</Text>
+                                        <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
+                                        <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ukinch2@gmail.com</Text>
+                                        <Text style={{ fontSize: 15,textAlign: 'left',marginLeft: 20}}>INVOICE: {(invoiceNumber != undefined)? invoiceNumber : ''}</Text>
+                                        <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20,borderBottomColor:'black',borderTopColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1,padding: 10 }}>
+                                            <Text style={{fontWeight: 'bold',width: 100}}>Customer</Text>
+                                            <Text style={{fontWeight: 'bold'}}></Text>
+                                            <Text style={{fontWeight: 'bold'}}></Text>
+                                            <Text style={{fontWeight: 'bold'}}>Date: { (savedOrderResonce != undefined) ? savedOrderResonce[0]['ddate'] : ''   }</Text>
+                                        </View>
+                                        <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
+                                            <Text style={{width: 100}}>Name: </Text>
+                                            <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['name'] : ''} </Text>
+                                        </View>
+                                        <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
+                                            <Text style={{width: 100}}>Address: </Text>
+                                            <Text style={{textAlign: 'left'}}>{(savedBuyerData != undefined) ? savedBuyerData['address'] : ''} </Text>
+                                        </View>
+                                        <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
+                                            <Text style={{width: 100}}>Phone: </Text>
+                                            <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['contact_no'] : ''} </Text>
+                                        </View>
+                                        {( hasNonVatProducts ) ?
                                             <View>
-                                                <View style={{flexDirection:'row' ,justifyContent: 'flex-end',marginTop: 20}}>
-                                                    <Text></Text>
-                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Amount Before VAT:</Text></Text>
-                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VATTotal).toFixed(2)}</Text></Text>
-                                                </View>
-                                                <View style={{flexDirection:'row' ,justifyContent: 'flex-end'}}>
-                                                    <Text></Text>
-                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>VAT:</Text></Text>
-                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal-VATTotal).toFixed(2)}</Text></Text>
-                                                </View>
-                                                <View style={{flexDirection:'row' ,justifyContent: 'flex-end'}}>
-                                                    <Text></Text>
-                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text></Text>
-                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal).toFixed(2)}</Text></Text>
-                                                </View>
-                                            </View>
-                                        : 
-                                            <View></View>    
-                                        }
-                                        
-                                        {( WithoutVatProductTotal > 0 ) ?
-                                            <View>
-                                                <Text style={{textAlign: 'center',marginTop: 30,marginBottom: 10}}>*******************************</Text>
-                                                <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',borderTopColor: 'black', borderTopWidth: 1,paddingHorizontal: 20,borderBottomColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
+                                                {/* <View style={{marginTop: 20,paddingTop: 10,borderTopColor: 'black', borderTopWidth: 1}}><Text style={{justifyContent: 'center',textAlign: 'center',fontWeight:'bold'}}>Items without VAT</Text></View> */}
+                                                <View style={{ flex: 0.2,borderTopColor: 'black', borderTopWidth: 1, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,borderBottomColor:'black',marginTop: 20,borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
                                                     <Text style={{fontWeight: 'bold'}}>Qty</Text>
                                                     <Text style={{fontWeight: 'bold'}}>Price</Text>
-                                                    {/* <Text style={{fontWeight: 'bold'}}>VAT</Text> */}
-                                                    <Text style={{fontWeight: 'bold'}}>Amt(inc)</Text>
+                                                    <Text style={{fontWeight: 'bold'}}>Amount</Text>
+                                                    <Text style={{fontWeight: 'bold'}}>VAT</Text>
+                                                    <Text style={{fontWeight: 'bold'}}>Total(inc)</Text>
                                                 </View>
                                                 <View style={{marginTop: 10}}>
                                                 </View>
-                                            </View>
+                                            </View>                                
                                         :
                                             <View></View>
                                         }
-                                        
-                                        {(savedOrderResonce != undefined) ?
-                                            savedOrderResonce.map((value , key) => {
-
-                                                return (
-                                                    <View key={key} >
-                                                        {( value['sale_item_rel'].itemcategory != 'EGGS' && !value.has_vat  ) ?
-                                                            <View key={key} style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
-                                                                <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}></Text>{value['sale_item_rel'].name}</Text>
-                                                                <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                    <Text style={{ }}>{(parseFloatt(value['qty'])).toFixed(2)}</Text>
-                                                                    <Text style={{ }}>£{(value['sale_price'])}</Text>
-                                                                    {/* <Text style={{ }}>£ 0</Text> */}
-                                                                    <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                
+                                            {(savedOrderResonce != undefined) ?
+                                                savedOrderResonce.map((value , key) => {
+                                                    return (
+                                                        <View key={key} >
+                                                            {( value['sale_item_rel'].itemcategory == 'EGGS' ) ?
+                                                                <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
+                                                                    <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
+                                                                    <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
+                                                                        <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
+                                                                        <Text style={{ }}>£{(value['sale_price'])}</Text>
+                                                                        <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                        <Text style={{ }}>£ 0</Text>
+                                                                        <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                                    </View>
                                                                 </View>
-                                                                {/* <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                    <Text style={{ width: 90}}>{}</Text>
-                                                                    <Text style={{ }}>{}</Text>
-                                                                    <Text style={{ fontWeight: 'bold'}}>VAT</Text>
-                                                                    <Text style={{ }}>£{((value['sale_price']*100) / 120).toFixed(2)}</Text>
-                                                                </View> */}
-
-                                                            </View>
-                                                        :
-                                                            <View></View>
-                                                        }
+                                                            :
+                                                                <View></View>
+                                                            } 
+                                                            {( value['sale_item_rel'].itemcategory != 'EGGS' && value.has_vat ) ?
+                                                                <View>
+                                                                    <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
+                                                                        <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
+                                                                        <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
+                                                                            {/* <Text style={{ width: 90}}>{value['sale_item_rel'].name}</Text> */}
+                                                                            <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
+                                                                            <Text style={{ }}>£{(value['sale_price'])}</Text>
+                                                                            <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                            <Text style={{ }}>£{((((parseFloatt(value['qty']) * value['sale_price'])*1.20)) -  (parseFloatt(value['qty']) * value['sale_price'])).toFixed(2)}</Text>
+                                                                            <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
+                                                                        </View>
+                                                                    </View>
+                                                                    {/* <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
+                                                                        <Text></Text>
+                                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text></Text>
+                                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}></Text> </Text>
+                                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VATTotal).toFixed(2)}</Text></Text>
+                                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal-VATTotal).toFixed(2)}</Text></Text>
+                                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal).toFixed(2)}</Text></Text>
+                                                                    </View> */}
+                                                                </View>
+                                                            :
+                                                                <View></View>
+                                                            } 
+                                                        </View>
+                                                    )
+                                                })
+                                                
+                                            : 
+                                                <View></View>
+                                            }
+                                            {(hasNonVatProducts) ? 
+                                                <View>
+                                                    <View style={{flexDirection:'row' ,justifyContent: 'flex-end',marginTop: 20}}>
+                                                        <Text></Text>
+                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Amount Before VAT:</Text></Text>
+                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VATTotal).toFixed(2)}</Text></Text>
                                                     </View>
-                                                )
-                                            })
-                                        : 
-                                            <View></View>
-                                        }
-                                        {(WithoutVatProductTotal > 0)?    
-                                            <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
-                                                <Text></Text>
-                                                {/* <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text> £{(totalAmountWithoutVat).toFixed(2)}</Text> */}
-                                                <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total: £{(WithoutVatProductTotal).toFixed(2)}</Text></Text>
-                                            </View>
-                                        :
-                                            <View></View>
-                                        }
-                                    <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20}}>
-                                        <Text style={{fontWeight: 'bold',width: 100}}></Text>
-                                        <Text style={{fontWeight: 'bold'}}></Text>
-                                        <Text style={{fontWeight: 'bold'}}>Grand Total:</Text>
-                                        <Text style={{fontWeight: 'bold'}}>£{(VatProductTotal + WithoutVatProductTotal).toFixed(2)}</Text>
+                                                    <View style={{flexDirection:'row' ,justifyContent: 'flex-end'}}>
+                                                        <Text></Text>
+                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>VAT:</Text></Text>
+                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal-VATTotal).toFixed(2)}</Text></Text>
+                                                    </View>
+                                                    <View style={{flexDirection:'row' ,justifyContent: 'flex-end'}}>
+                                                        <Text></Text>
+                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text></Text>
+                                                        <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal).toFixed(2)}</Text></Text>
+                                                    </View>
+                                                </View>
+                                            : 
+                                                <View></View>    
+                                            }
+                                            
+                                            {( WithoutVatProductTotal > 0 ) ?
+                                                <View>
+                                                    <Text style={{textAlign: 'center',marginTop: 30,marginBottom: 10}}>*******************************</Text>
+                                                    <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',borderTopColor: 'black', borderTopWidth: 1,paddingHorizontal: 20,borderBottomColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
+                                                        <Text style={{fontWeight: 'bold'}}>Qty</Text>
+                                                        <Text style={{fontWeight: 'bold'}}>Price</Text>
+                                                        {/* <Text style={{fontWeight: 'bold'}}>VAT</Text> */}
+                                                        <Text style={{fontWeight: 'bold'}}>Amt(inc)</Text>
+                                                    </View>
+                                                    <View style={{marginTop: 10}}>
+                                                    </View>
+                                                </View>
+                                            :
+                                                <View></View>
+                                            }
+                                            
+                                            {(savedOrderResonce != undefined) ?
+                                                savedOrderResonce.map((value , key) => {
+
+                                                    return (
+                                                        <View key={key} >
+                                                            {( value['sale_item_rel'].itemcategory != 'EGGS' && !value.has_vat  ) ?
+                                                                <View key={key} style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
+                                                                    <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}></Text>{value['sale_item_rel'].name}</Text>
+                                                                    <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
+                                                                        <Text style={{ }}>{(parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                        <Text style={{ }}>£{(value['sale_price'])}</Text>
+                                                                        {/* <Text style={{ }}>£ 0</Text> */}
+                                                                        <Text style={{ }}>£{((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)).toString()}</Text>
+                                                                    </View>
+                                                                    {/* <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
+                                                                        <Text style={{ width: 90}}>{}</Text>
+                                                                        <Text style={{ }}>{}</Text>
+                                                                        <Text style={{ fontWeight: 'bold'}}>VAT</Text>
+                                                                        <Text style={{ }}>£{((value['sale_price']*100) / 120).toFixed(2)}</Text>
+                                                                    </View> */}
+
+                                                                </View>
+                                                            :
+                                                                <View></View>
+                                                            }
+                                                        </View>
+                                                    )
+                                                })
+                                            : 
+                                                <View></View>
+                                            }
+                                            {(WithoutVatProductTotal > 0)?    
+                                                <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
+                                                    <Text></Text>
+                                                    {/* <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text> £{(totalAmountWithoutVat).toFixed(2)}</Text> */}
+                                                    <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total: £{(WithoutVatProductTotal).toFixed(2)}</Text></Text>
+                                                </View>
+                                            :
+                                                <View></View>
+                                            }
+                                        <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20}}>
+                                            <Text style={{fontWeight: 'bold',width: 100}}></Text>
+                                            <Text style={{fontWeight: 'bold'}}></Text>
+                                            <Text style={{fontWeight: 'bold'}}>Grand Total:</Text>
+                                            <Text style={{fontWeight: 'bold'}}>£{(VatProductTotal + WithoutVatProductTotal).toFixed(2)}</Text>
+                                        </View>
+                                    </View>
+                                </ScrollView>
+
+                            </View>
+                            <View style={{ width: '50%'}}>
+                                <View style={{ flex: 2.5 ,width: '100%' }}>
+                                    <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
+                                        Signature
+                                    </Text>
+                                    <View style={styles.container}>
+                                        <SignatureScreen
+                                            ref={ref}
+                                            onOK={handleSignature} 
+                                        />
+                                    
                                     </View>
                                 </View>
-                            </ScrollView>
-
-                        </View>
-                        <View style={{ width: '50%'}}>
-                            <View style={{ flex: 2.5 ,width: '100%' }}>
-                                <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
-                                    Signature
-                                </Text>
-                                <View style={styles.container}>
-                                    <SignatureScreen
-                                        ref={ref}
-                                        onOK={handleSignature} 
-                                    />
-                                
+            
+                                <View  style={{ flex: 1 ,width: '100%' }}>
+                                    <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
+                                        Remarks
+                                    </Text>
+                                    <Input row="4" placeholder="Add Remarks" value={remarks} allowFontScaling={false} onChange={(value) => {setRemarks(value.nativeEvent.text)}}/>
                                 </View>
-                            </View>
-        
-                            <View  style={{ flex: 1 ,width: '100%' }}>
-                                <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
-                                    Remarks
-                                </Text>
-                                <Input row="4" placeholder="Add Remarks" value={remarks} allowFontScaling={false} onChange={(value) => {setRemarks(value.nativeEvent.text)}}/>
-                            </View>
-                            <View  style={{ flex: 1 ,width: '100%' }}>
-                                {/* <Button title="Print" onPress={() => { printReceipt() }} />
-                                {(saveOrderActivIndictor)? <ActivityIndicator color="white" size="large" /> : <View></View>} */}
-                                {/* <ActivityIndicator  color={Colors.primary} size="large" /> */}
-                                {(saveOrderActivIndictor)? <ActivityIndicator  color={Colors.primary} size="large" /> : 
-                                
-                                <View style={{flexDirection: 'column'}}>
-                                    {/* <Pressable  onPress={() => {portDiscovery()}} style={{backgroundColor: 'black',padding: 10,marginBottom: 20}} ><Text style={{color: 'white',textAlign: 'center'}}>Get Ports</Text></Pressable>
-                                    <Pressable  onPress={() => {connect()}}  style={{backgroundColor: 'black',padding: 10,marginBottom: 20}}><Text style={{color: 'white',textAlign: 'center'}}>Connect</Text></Pressable> */}
-                                    <Button title="Print" onPress={() => { setSaveOrderActivIndictor(true);  printReceipt() }} />
-                                    {/* <Button title="Print2" onPress={() => { setSaveOrderActivIndictor(true);  printReceipt2() }} /> */}
+                                <View  style={{ flex: 1 ,width: '100%' }}>
+                                    {/* <Button title="Print" onPress={() => { printReceipt() }} />
+                                    {(saveOrderActivIndictor)? <ActivityIndicator color="white" size="large" /> : <View></View>} */}
+                                    {/* <ActivityIndicator  color={Colors.primary} size="large" /> */}
+                                    {(saveOrderActivIndictor)? <ActivityIndicator  color={Colors.primary} size="large" /> : 
+                                    
+                                    <View style={{flexDirection: 'column'}}>
+                                        {/* <Pressable  onPress={() => {portDiscovery()}} style={{backgroundColor: 'black',padding: 10,marginBottom: 20}} ><Text style={{color: 'white',textAlign: 'center'}}>Get Ports</Text></Pressable>
+                                        <Pressable  onPress={() => {connect()}}  style={{backgroundColor: 'black',padding: 10,marginBottom: 20}}><Text style={{color: 'white',textAlign: 'center'}}>Connect</Text></Pressable> */}
+                                        <Button title="Print" onPress={() => { setSaveOrderActivIndictor(true);  printReceipt() }} />
+                                        {/* <Button title="Print2" onPress={() => { setSaveOrderActivIndictor(true);  printReceipt2() }} /> */}
+                                    </View>
+                                    
+                                    }
                                 </View>
-                                
-                                }
-                            </View>
 
-                            <View style={{flex: 2}}></View>
-        
+                                <View style={{flex: 2}}></View>
+            
+                            </View>
                         </View>
                     </View>
-                </View>
-        
+
             :
                 <View style={{flex:1}}>
                     <View style={{ height: '30%' ,width: '100%' }}>

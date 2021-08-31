@@ -20,13 +20,13 @@ export default function ItemsScreenWithQty({navigation}) {
 	const [requestSent , setRequestSent] = useState(false);
 	const [hasUndeliveredItems , setHasUndeliveredItems] = useState(false);
 	const [selectedItemsFromLoads , setSelectedItemsFromLoads] = useState();
-	// const [listUndelivered , setListUndelivered] = useState();
-
+	const [customerName , setCustomerName] = useState();
+	// const [listUndelivered , setListUndelivered] = useState();	
 	useEffect(() => {
-
-	} , [ selectedItemsFromLoads ])
-	
-	useEffect(() => {
+		AsyncStorage.getItem('selectedBuyerRouteName').then((buyerName) => {
+			console.log(buyerName)
+			setCustomerName(buyerName)
+		});
 		AsyncStorage.getItem('cartItems').then((data) => {
 		// 	let myRecords = {};
 		// 	let myRecordsFinal = {};
@@ -88,6 +88,7 @@ export default function ItemsScreenWithQty({navigation}) {
 
 	return (
 		<MainScreen>
+			<Text style={{color: Colors.primary,textAlign:'center',fontSize: 18}}>Customer: {customerName}</Text>
 			<ScrollView vertical="true" >
 				{/* <Modal
 						animationType="slide"

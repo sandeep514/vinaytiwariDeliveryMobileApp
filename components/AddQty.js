@@ -96,6 +96,7 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 						myData[i][dnum].order_qty = newQty;
 
 						setNewData(myData)
+						updatedDataRes(myData)
 						if( changestate == false){
 							setChangeState(true)
 						}else{
@@ -147,6 +148,7 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 				if( myData[i][dnum].id == itemId){
 					myData[i][dnum].sale_price = newQty;
 					setNewData(myData)
+					updatedDataRes(myData)
 				}
 			}
 		}
@@ -192,8 +194,10 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 				<View style={styles.itemBox} key={generateRandString()}>
 					{(val?.itemcategory != "EGGS") ? 	
 						<CheckBox
+							size={40}
 							key={val?.id}
 							checked={val?.VATstatus}
+							center={true}
 							onPress={() =>  {updateVATStatusOfProduct(val?.loadId ,val?.id ) }}
 						/>
 					:
@@ -208,8 +212,9 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 						<Button icon={<Icon name="minus" size={20} color="white" />} buttonStyle={styles.minisButton} />
 					</View>
 				</View> */}
-				<View key={generateRandString()}>
-					<Text key={generateRandString()} style={{ fontSize: 15, fontWeight: 'bold', }} allowFontScaling={false}>
+
+				<View key={generateRandString()} style={{marginTop: 20}} >
+					<Text key={generateRandString()} style={{ fontSize: 15, fontWeight: 'bold', }} allowFontScaling={false}  >
 						{((val?.name.length > 20) ? (val?.name).substring(0 , 20)+'..'  : val?.name )}
 					</Text>
 					<Text style={{fontSize: 10}} allowFontScaling={false}> Available Stock {val?.loadId} </Text>
@@ -270,7 +275,7 @@ const styles = StyleSheet.create({
 	mainBoxTab: {
 		flex: 1,
 		flexDirection: 'row',
-		justifyContent: 'center',
+		// justifyContent: 'center',
 		borderColor: 'red',
 		height: 90,
 		paddingHorizontal: 5,
@@ -283,14 +288,17 @@ const styles = StyleSheet.create({
 		height: 130,
 		paddingHorizontal: 5,
 	},
+
 	itemBox: {
 		alignItems: 'center',
-		borderColor: 'blue',
-		height: 60,
-		// borderWidth: 2,
-		width: 40,
-		paddingRight: 20
+		textAlign: 'center',
+		height: 80,
+		width: 60,
+		paddingRight: 20,
+		// borderColor: 'blue',
+		// borderWidth: 2
 	},
+	
 	checkbox: {
 		alignSelf: "center",
 	},

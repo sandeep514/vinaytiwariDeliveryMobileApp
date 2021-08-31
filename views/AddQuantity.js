@@ -63,6 +63,8 @@
 		const [hasUndeliveredItems , setHasUndeliveredItems] = useState(true);
 		const [selectedItemFromItemsScreen , setSelectedItemFromItemsScreen] = useState();
 		const [updatedFinalData , setUpdatedFinalData] = useState();
+		const [customerName , setCustomerName] = useState();
+
 		let scrollRef = useRef(); 
 		const ref_input2 = useRef();
 		let mySelectedProducts = {}
@@ -86,6 +88,10 @@
 			}
 		} , [selectedItemFromItemsScreen])
 		useEffect(() => {
+			AsyncStorage.getItem('selectedBuyerRouteName').then((buyerName) => {
+				console.log(buyerName)
+				setCustomerName(buyerName)
+			});
 			mySelectedProducts = route.params.mySelectedItems;
 			setSelectedItemFromItemsScreen(route.params.mySelectedItems);
 
@@ -243,6 +249,7 @@
 
 		return (
 			<MainScreen>
+				<Text style={{color: Colors.primary,textAlign:'center',fontSize: 18,marginBottom: 20}}>Customer: {customerName}</Text>
 				<View style={{flex:1}}>
 					{/* {( vatStatu != 'true'  && hasVatProducts) ?
 						<View style={{ justifyContent: 'center' }} >

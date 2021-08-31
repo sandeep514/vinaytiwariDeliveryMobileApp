@@ -177,7 +177,6 @@ export const getTodaySale = ( vehicheNumber , driverId ) => {
 	});
 };
 
-
 // https://staging.tauruspress.co.uk/backend/public/api/get-buyer-priortity-by-driver/12/4
 //get Today sale
 export const getPriorityDrivers = ( driverId , routeId ) => {
@@ -191,7 +190,6 @@ export const getPriorityDrivers = ( driverId , routeId ) => {
 		});
 	});
 };
-
 
 export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 	return new Promise( (resolve , reject) => {
@@ -259,6 +257,7 @@ export const updateDriverForsale = ( postedData ) => {
 		
 	});
 };
+
 //add tp cart
 export const getPendingSales = ( postedData ) => {
 	return new Promise( (resolve , reject) => {

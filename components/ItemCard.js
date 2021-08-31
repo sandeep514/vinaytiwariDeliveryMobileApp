@@ -13,6 +13,7 @@
 		const [ UpdateQtyofItem , setUpdateQtyofItem] = useState({});
 		const [ UpdateQtyofItems , setUpdateQtyofItems] = useState(0);
 		const [ cartData , setCartData ] = useState();
+		const [ myLatestData , setMyLatestData ] = useState(0);
 		const win = Dimensions.get('window');
 		
 		useEffect(() => {
@@ -87,14 +88,17 @@
 					cartData[loadName+'_'+cardId] = (parseInt(cartData[loadName+'_'+cardId])+1).toString()
 					// selectedLoadArray[loadedName].value = (parseInt(cartData[loadName+'_'+cardId])+1);
 					setCartData(cartData)
+
 				}
 			}
 
+			setMyLatestData(myLatestData+1);
 			if( selectedLoadArray[loadedName] != undefined ){
 				selectedLoadArray[loadedName].value = (parseFloat(selectedLoadArray[loadedName].value)+1);
 				setUpdateQtyofItem(selectedLoadArray)
 				selectedData(selectedLoadArray)
 
+				console.log(selectedLoadArray)
 				// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 			}else{
 				AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
@@ -102,6 +106,8 @@
 
 					setUpdateQtyofItem(selectedLoadArray)
 					selectedData(selectedLoadArray)
+
+					console.log(selectedLoadArray)
 					// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 				});
 			}
@@ -123,6 +129,9 @@
 
 					setCartData(cartData)
 				}
+			}
+			if(myLatestData != 0){
+				setMyLatestData(myLatestData-1);
 			}
 			if( selectedLoadArray[loadedName] != undefined ){
 				if( selectedLoadArray[loadedName].value != 0 ){
@@ -174,8 +183,9 @@
 								{/* <Button title="clickme" onPress={() => {clickme()}}></Button> */}
 							</View>
 							<View style={ (win.width > 550) ? {width: '60%'} : {width: '60%'} }>
+
 								<TextInput keyboardType="numeric"  
-									defaultValue={ (cartData != undefined && cartData[loadName+'_'+cardId] != undefined) ? cartData[loadName+'_'+cardId] : (UpdateQtyofItems != undefined) ? UpdateQtyofItems.toString() :'0'} 
+									defaultValue={ (selectedLoadArray != undefined && selectedLoadArray[loadName+'__'+cardId] != undefined)? (selectedLoadArray[loadName+'__'+cardId].value).toString() : '0' } 
 									key={cardId} placeholder="Qty" style={{textAlign: 'center',color: '#000'}} onChange={(value) => { (value.nativeEvent.text != '') ? DirectUpdateQTY(loadName , cardId , value.nativeEvent.text) : '' }} />
 							</View>
 							<View  style={ (win.width > 550) ? {width: '20%'} : {width: '20%'} }>
@@ -242,7 +252,7 @@
 			alignItems: 'center',
 			elevation: 2,
 			overflow: 'hidden',
-			height: 230
+			height: 190
 		},
 		cardBackground: {
 			width: widthToDp('30%'),
@@ -263,8 +273,8 @@
 		},
 		itemImageTab: {
 			// flex: 1,
-			height: heightToDp('12.7%'),
-			width: widthToDp('25%'),
+			height: heightToDp('9%'),
+			width: widthToDp('14%'),
 			// resizeMode: 'contain',
 		},
 		itemImageContainer: {

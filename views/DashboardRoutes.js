@@ -86,6 +86,7 @@ const data = [
         const listClicked = (listData) => {
             setActive(listData.id);
             AsyncStorage.setItem( 'selectedBuyerRouteId', (listData.id).toString());
+            AsyncStorage.setItem( 'selectedBuyerRouteName', listData.name);
             // setcoordinates([{} ,{    latitude: parseFloat(listData.latitude),
             //                         longitude: parseFloat(listData.longitude),
             //                         latitudeDelta: 1,
@@ -102,7 +103,7 @@ const data = [
                             boardRepository={boardRepository}
                             open={() => {}}
                             onDragEnd={() => {}}
-        cl                    isWithCountBadge={ true }
+        					isWithCountBadge={ true }
                             boardBackground="no"
                         /> */}
               <View style={styles.nextButton}>
@@ -149,28 +150,36 @@ const data = [
                             source={require('../assets/images/map.png')}
                             style={styles.Avatar}
                           />
-                          <ListItem.Content>
-                            <ListItem.Title
-                              style={
-                                l.delivery_status == 0
-                                  ? {color: 'white'}
-                                  : l.delivery_status == 1
-                                  ? null
-                                  : {color: 'white'}
-                              }>
-                              {l.name}
-                            </ListItem.Title>
-                            <ListItem.Title
-                              style={
-                                l.delivery_status == 0
-                                  ? {color: 'white', fontSize: 12}
-                                  : l.delivery_status == 1
-                                  ? null
-                                  : {color: 'white', fontSize: 12}
-                              }>
-                              {l.address}
-                            </ListItem.Title>
-                          </ListItem.Content>
+							<ListItem.Content>
+								<ListItem.Title
+									style={
+										l.delivery_status == 0
+										? {color: 'white'}
+										: l.delivery_status == 1
+										? null
+										: {color: 'white'}
+									}>
+									{l.name}
+								</ListItem.Title>
+								<ListItem.Title
+									style={
+										l.delivery_status == 0
+										? {color: 'white', fontSize: 12}
+										: l.delivery_status == 1
+										? null
+										: {color: 'white', fontSize: 12}
+									}>
+									{l.address}
+								</ListItem.Title>
+							</ListItem.Content>
+						  	<Pressable onPress={() => { navigation.push('listInvoices') }}>
+								<Icon
+									name="cog"
+									type="font-awesome"
+									color="white"
+									style={{padding: 10}}
+								/>
+							  </Pressable>
                         </ListItem>
                       </TouchableHighlight>
                     ))
