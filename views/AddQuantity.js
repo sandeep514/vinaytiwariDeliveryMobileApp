@@ -23,6 +23,7 @@
 	import { useRef } from 'react';
 	import { CheckBox } from 'react-native-elements'
 	import AddQty from '../components/AddQty';
+import { KeyboardAvoidingView } from 'react-native';
 
 	const win = Dimensions.get('window');
 
@@ -64,6 +65,9 @@
 		const [selectedItemFromItemsScreen , setSelectedItemFromItemsScreen] = useState();
 		const [updatedFinalData , setUpdatedFinalData] = useState();
 		const [customerName , setCustomerName] = useState();
+		const [mytest , setMytest] = useState();
+		const [changestate , setChangeState] = useState();
+		const [beforeUpdPrice , setbeforeUpdatePrice] = useState({});
 
 		let scrollRef = useRef(); 
 		const ref_input2 = useRef();
@@ -88,8 +92,24 @@
 			}
 		} , [selectedItemFromItemsScreen])
 		useEffect(() => {
+			AsyncStorage.getItem('selectedInvoiceId').then((id) => {
+
+			})
+
+			AsyncStorage.getItem('beforeUpdatePrice').then((res) => {
+				if(res != null){
+					if( Object.keys(JSON.parse(res)).length > 0 ){
+						setbeforeUpdatePrice(JSON.parse(res))
+						// for(let i = 0 ; i < Object.keys(JSON.parse(res)).length ; i++){
+						// 	if( val?.loadId in JSON.parse(res) ){
+						// 		setbeforeUpdatePrice(JSON.parse(res))
+						// 		return false;
+						// 	}
+						// }	
+					}
+				}
+			})
 			AsyncStorage.getItem('selectedBuyerRouteName').then((buyerName) => {
-				console.log(buyerName)
 				setCustomerName(buyerName)
 			});
 			mySelectedProducts = route.params.mySelectedItems;
@@ -129,6 +149,7 @@
 			// AsyncStorage.getItem('selectedLoadedItemsByQty').then((data) => {
 
 				setLoadedData(selectedItemFromItemsScreen);	
+
 
 				getCartItemDetails(JSON.stringify(selectedItemFromItemsScreen)).then((res) => {
 					let productData = res.data.data;
@@ -208,15 +229,16 @@
 		}
 
 		function SaveOrders(){	
-			// setModalVisible(!modalVisible)		
-			if( IsKeyboardOpen){
-				Keyboard.dismiss();
-			}else{
-				// setSaveOrderActivIndictor(true)
+			// setSaveOrderActivIndictor(true)
 
+			Keyboard.dismiss();
+
+			// return false;
+				// setSaveOrderActivIndictor(true)
 				if( updatedFinalData == null ){
 					AsyncStorage.setItem('finalItems' , JSON.stringify(setUpdatedDataArray));
 				}else{
+					
 					let setUpdatedDataArrayProcess = [];
 
 					for( let i = 0 ; i < updatedFinalData.length ; i++){						
@@ -225,22 +247,25 @@
 						setUpdatedDataArrayProcess.push({'VATStatus' : processedData?.VATstatus ,"dnum":processedData?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":processedData?.id,"qty":processedData?.order_qty,"credit":"NO","sale_price":processedData?.sale_price})
 					}
 					setUpdatedDataArray = setUpdatedDataArrayProcess;
+					
 					AsyncStorage.setItem('finalItems' , JSON.stringify(setUpdatedDataArray));
 
 				}
 
 				updateRecords(setUpdatedDataArray).then((res) => {
-					let data = [];
-					data.push(res)
-					data.push({'type' : creaditStatus});
-					AsyncStorage.getItem('currentVATstatus').then((VATstatus) => {
-						// data.push({'has_vat' : parseInt(VATstatus)});
-						AsyncStorage.setItem('readyForOrder' , JSON.stringify(data));
-						navigation.push('PDFmanager');
-					})
-	
+					AsyncStorage.getItem('beforeUpdatePrice').then((salePriceRes) => {
+						let data = [];
+						data.push(res)
+						data.push({'type' : creaditStatus});
+						data.push({'extraSalePrices' : salePriceRes	});
+						
+						// AsyncStorage.getItem('currentVATstatus').then((VATstatus) => {
+							// data.push({'has_vat' : parseInt(VATstatus)});
+							AsyncStorage.setItem('readyForOrder' , JSON.stringify(data));
+							navigation.push('PDFmanager');
+						// })
+					});
 				})
-			}
 
 		}
 
@@ -248,143 +273,187 @@
 
 
 		return (
-			<MainScreen>
-				<Text style={{color: Colors.primary,textAlign:'center',fontSize: 18,marginBottom: 20}}>Customer: {customerName}</Text>
-				<View style={{flex:1}}>
-					{/* {( vatStatu != 'true'  && hasVatProducts) ?
-						<View style={{ justifyContent: 'center' }} >
-							<Modal
-								animationType="slide"
-								transparent={true}
-								visible={true}
-								onRequestClose={(  ) => {
-										Alert.alert("Modal has been closed.");
-								}} >
+			
+				<MainScreen>
+					 <Modal
+						animationType="slide"
+						transparent={true}
+						visible={modalVisible}
+						onRequestClose={() => {
+						Alert.alert("Modal has been closed.");
+						setModalVisible(!modalVisible);
+						}}
+					>
+						<View style={styles.centeredView}>
+						<View style={styles.modalView}>
+							<Text style={styles.modalText}>Hello World!</Text>
+							<Pressable
+							style={[styles.button, styles.buttonClose]}
+							onPress={() => setModalVisible(!modalVisible)}
+							>
+							<Text style={styles.textStyle}>Hide Modal</Text>
+							</Pressable>
+						</View>
+						</View>
+					</Modal>
+					<Text style={{color: Colors.primary,textAlign:'center',fontSize: 18,marginBottom: 20}}>Customer: {customerName}</Text>
+					<View style={{flex:1}}>
+						{/* {( vatStatu != 'true'  && hasVatProducts) ?
+							<View style={{ justifyContent: 'center' }} >
+								<Modal
+									animationType="slide"
+									transparent={true}
+									visible={true}
+									onRequestClose={(  ) => {
+											Alert.alert("Modal has been closed.");
+									}} >
 
-								<View style={styles.centeredView}>
-									<View style={styles.modalView}>
-										<Text style={ styles.modalText }>Some of the selected items are VAT related, would you like to show VAT in invoice?</Text>
-										<View style={{ flexDirection: 'row', marginTop: 20 }}>
+									<View style={styles.centeredView}>
+										<View style={styles.modalView}>
+											<Text style={ styles.modalText }>Some of the selected items are VAT related, would you like to show VAT in invoice?</Text>
+											<View style={{ flexDirection: 'row', marginTop: 20 }}>
 
-											<Pressable style={{ backgroundColor: 'red',color: 'white',paddingHorizontal: 30,paddingVertical: 15 }} onPress={() => {updateVATstatus("0")}} >
-												<Text style={{color: 'white'}}>No</Text>
-											</Pressable>
+												<Pressable style={{ backgroundColor: 'red',color: 'white',paddingHorizontal: 30,paddingVertical: 15 }} onPress={() => {updateVATstatus("0")}} >
+													<Text style={{color: 'white'}}>No</Text>
+												</Pressable>
 
-											<Pressable style={{ backgroundColor: Colors.primary,color: 'white',paddingHorizontal: 30,paddingVertical: 15,marginLeft: 40}} onPress={() => updateVATstatus("1") } >
-												<Text style={{color: 'white'}}>Yes</Text>
-											</Pressable>
+												<Pressable style={{ backgroundColor: Colors.primary,color: 'white',paddingHorizontal: 30,paddingVertical: 15,marginLeft: 40}} onPress={() => updateVATstatus("1") } >
+													<Text style={{color: 'white'}}>Yes</Text>
+												</Pressable>
 
+											</View>
 										</View>
 									</View>
-								</View>
 
-							</Modal>
-						</View>
-					:
-						<View></View>
-					} */}
-
-					{(ActInd == true) ?
-						<View style={{ flex:1,position:'absolute',justifyContent:'center',height:'100%',width: '100%',backgroundColor: '#ededed',zIndex:9999,opacity: 0.5}} >
-							<ActivityIndicator size="large" color={Colors.primary} />
-						</View>
-					:
-						<View></View>
-					}
-
-					<View style={{flex: 0.06, justifyContent: 'center',flexDirection: 'row'}}>
-						<View>
-							<Pressable onPress={() => { setCreditStatus('cash') }} style={ (creaditStatus == 'cash') ? styles.activeStatus : styles.deActiveStatus }>
-								<Text style={ (creaditStatus == 'cash') ? styles.activeStatusText : styles.deActiveStatusText }>
-									CASH
-								</Text>
-							</Pressable>
-						</View>
-						<View>
-							<Pressable onPress={() => { setCreditStatus('credit') }} style={ (creaditStatus == 'credit') ? styles.activeStatus : styles.deActiveStatus }>
-								<Text style={ (creaditStatus == 'credit') ? styles.activeStatusText : styles.deActiveStatusText }>
-									CREDIT
-								</Text>
-							</Pressable>
-						</View>
-						<View>
-							<Pressable onPress={() => { setCreditStatus('bank') }} style={ (creaditStatus == 'bank') ? styles.activeStatus : styles.deActiveStatus }>
-								<Text style={ (creaditStatus == 'bank') ? styles.activeStatusText : styles.deActiveStatusText }>
-									BANK TRANSFER
-								</Text>
-							</Pressable>
-						</View>
-					</View>
-
-					<View style={{flex: 1}}>
-						<ScrollView >
-
-							{( loadedActivityIndicator == true ) ? 
-							<View>
-								<ActivityIndicator color={Colors.primary} size="large" />
-							</View>
-								
-							:
-								(data != undefined)?
-								Object.values(data).map((value , key) => {
-									{currentSelectedLoadName = Object.keys(value)[0]}
-									return (
-										<View key={generateRandString()}>
-
-											{Object.values(value).map((val , k) => {
-												if(typeof val == 'object' && val != undefined){
-													
-													{currentSelectedId = val?.id}
-													{valuetem = (val?.order_qty).toString()}
-													{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val?.sale_price) )}
-													
-													{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val?.VATstatus ,"dnum":val?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val?.order_qty,"credit":"NO","sale_price":val?.sale_price}) : ''}
-													return(
-
-														<AddQty 
-															valuetem={valuetem} 
-															data={data} 
-															selectedItemFromItemsScreen={selectedItemFromItemsScreen} 
-															key={generateRandString()} 
-															val={val} 
-															updatedDataRes={(myUpdatedData) => { 
-																setUpdatedFinalData(myUpdatedData) 
-															}} 
-															updatedObjectRed={(myUupdatedObjectRed) => { setSelectedItemFromItemsScreen(myUpdatedData) }} 
-															updatedPrice={ (price) => { setMyTotalPrice(price)} }
-															updateMyObjectData={ (myRecord) => { 
-																// console.log(myRecord) 
-															}}
-														></AddQty>
-													)
-												}
-											})}
-										</View>
-									)
-								})
-							:
-								<View></View>
-							
-							}
-							
-							
-						</ScrollView>
-					</View>
-					<View style={{borderTopColor: 'lightgrey' , borderTopWidth: 1}}>
-						
-						{(saveOrderActivIndictor == true) ?
-							<View style={{backgroundColor: Colors.primary,textAlign: 'center',width: '100%'}}>
-								<Text style={{textAlign: 'center'}}><ActivityIndicator size="large" color="white"></ActivityIndicator></Text>
+								</Modal>
 							</View>
 						:
-							<Pressable style={{padding: 16,backgroundColor:Colors.primary,flexDirection: 'row',justifyContent: 'center'}} onPress={() => { SaveOrders() }}><Text style={{textAlign: 'center',color: 'white',fontSize: 20}} > Place order and print invoice. </Text>
+							<View></View>
+						} */}
+
+						{(ActInd == true) ?
+							<View style={{ flex:1,position:'absolute',justifyContent:'center',height:'100%',width: '100%',backgroundColor: '#ededed',zIndex:9999,opacity: 0.5}} >
+								<ActivityIndicator size="large" color={Colors.primary} />
+							</View>
+						:
+							<View></View>
+						}
+
+						<View style={{flex: 0.06, justifyContent: 'center',flexDirection: 'row'}}>
+							<View>
+								<Pressable onPress={() => { setCreditStatus('cash') }} style={ (creaditStatus == 'cash') ? styles.activeStatus : styles.deActiveStatus }>
+									<Text style={ (creaditStatus == 'cash') ? styles.activeStatusText : styles.deActiveStatusText }>
+										CASH
+									</Text>
+								</Pressable>
+							</View>
+							<View>
+								<Pressable onPress={() => { setCreditStatus('credit') }} style={ (creaditStatus == 'credit') ? styles.activeStatus : styles.deActiveStatus }>
+									<Text style={ (creaditStatus == 'credit') ? styles.activeStatusText : styles.deActiveStatusText }>
+										CREDIT
+									</Text>
+								</Pressable>
+							</View>
+							<View>
+								<Pressable onPress={() => { setCreditStatus('bank') }} style={ (creaditStatus == 'bank') ? styles.activeStatus : styles.deActiveStatus }>
+									<Text style={ (creaditStatus == 'bank') ? styles.activeStatusText : styles.deActiveStatusText }>
+										BANK TRANSFER
+									</Text>
+								</Pressable>
+							</View>
+						</View>
+						<View>
+							<Pressable onPress={() => {
+								if( changestate == false){
+									setChangeState(true)
+								}else{
+									setChangeState(false)
+								}
+							}} style={{backgrountColor: 'red',borderWidth: 1, borderColor: '#ededed' ,width: 150}}>
+								<Text style={{padding: 10,justifyContent: 'center',textAlign: 'center',backgroundColor: 'grey',color: 'white',borderRadius: 10}}>Calculate</Text>
+							</Pressable>
+						</View>
+
+						<View style={{flex: 1}}>
+							<ScrollView >
+
+								{( loadedActivityIndicator == true ) ? 
+								<View>
+									<ActivityIndicator color={Colors.primary} size="large" />
+								</View>
+									
+								:	
+									(data != undefined)?
+									Object.values(data).map((value , key) => {
+										{currentSelectedLoadName = Object.keys(value)[0]}
+										return (
+											<View key={generateRandString()}>
+
+												{Object.values(value).map((val , k) => {
+													if(typeof val == 'object' && val != undefined){
+														
+														{currentSelectedId = val?.id}
+														{valuetem = (val?.order_qty).toString()}
+														{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val?.sale_price) )}
+														
+														{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val?.VATstatus ,"dnum":val?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val?.order_qty,"credit":"NO","sale_price":val?.sale_price}) : ''}
+														return(
+
+															<AddQty 
+																savedSalePrice={beforeUpdPrice}
+																updatePriceDataTest={(value) => {setMytest(value)}}
+																valuetem={valuetem} 
+																data={data} 
+																selectedItemFromItemsScreen={selectedItemFromItemsScreen} 
+																key={generateRandString()} 
+																val={val} 
+																keyboard={(value) => { setIsKeyboardOpen(value)}}
+																updatedDataRes={(myUpdatedData) => { 
+																	setUpdatedFinalData(myUpdatedData);
+																}} 
+																updatedObjectRed={(myUupdatedObjectRed) => { 
+																	setSelectedItemFromItemsScreen(myUpdatedData) 
+																}} 
+																updatedPrice={ (price) => { 
+																	setMyTotalPrice(price)
+																} }
+																updateMyObjectData={ (myRecord) => { 
+																	// console.log(myRecord) 
+																}}
+															></AddQty>
+														)
+													}
+												})}
+											</View>
+										)
+									})
+								:
+									<View></View>
+								
+								}
+								
+								
+							</ScrollView>
+						</View>
+					</View>
+					<View style={{}}>
+				
+						{/* {(IsKeyboardOpen == true) ? */}
+						{(saveOrderActivIndictor == true) ?
+							<View style={{backgroundColor: Colors.primary,textAlign: 'center',width: '100%'}}>
+								{/* <Text style={{textAlign: 'center'}}><ActivityIndicator size="large" color="white"></ActivityIndicator></Text> */}
+							</View>
+						:
+							<Pressable style={{position: 'relative',bottom: 0,padding: 16,backgroundColor:Colors.primary,flexDirection: 'row',justifyContent: 'center'}} onPress={() => { SaveOrders() }}><Text style={{textAlign: 'center',color: 'white',fontSize: 20}} > Place order and print invoice.. </Text>
 
 							</Pressable>
 						}
 						{/* {setTotalAmount} */}
 					</View>
-				</View>
-			</MainScreen>
+
+				</MainScreen>
+				
+
 		);
 	}
 

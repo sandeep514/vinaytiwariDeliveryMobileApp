@@ -818,9 +818,9 @@ function printData(data){
 
 }
 function ViewPrintableReciept(data){
-
     navigation.navigate('ViewPDF' , { invoiceNo : data[0].invoice_no})
 }
+
 return (
     <MainScreen>
         <View style={{flex:1}}>
@@ -850,7 +850,7 @@ return (
                                                     {l[0]["buyer_rel"].name}
                                                 </ListItem.Title>
                                                 <ListItem.Subtitle allowFontScaling={false} >
-                                                    <Text style={{fontSize: 10}}>{l[0].invoice_no}</Text>
+                                                    <Text style={{fontSize: 10}}>{l[0].invoice_no}      {l[0].idate}</Text>
                                                 </ListItem.Subtitle>
                                             </ListItem.Content>
                                             <View>

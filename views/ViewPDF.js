@@ -51,13 +51,13 @@ export default function ViewPDF({navigation , route , text, onOK}) {
         });
         
         getSaleItemByInv(route.params.invoiceNo).then( (result) => {
-            console.log(result)
+
             setSavedBuyerData(result[0].buyer_rel);
             let parsedData = result;
 
             setSavedOrderResponce(parsedData);
             for(let i = 0 ; i < parsedData.length ; i++){
-                console.log("here")
+
                 if( parsedData[i]['has_vat'] == 1 || parsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS'){
                     if(parsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS'){
                         let qty = parsedData[i]['qty'];

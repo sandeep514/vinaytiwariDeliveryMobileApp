@@ -42,6 +42,9 @@ const data = [
             AsyncStorage.removeItem('cartItems')
             AsyncStorage.removeItem('itemsAddedInCart')
             AsyncStorage.setItem('selectedLoadedItemsByQty',JSON.stringify({}));
+            AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify({}));
+            AsyncStorage.removeItem('beforeUpdatePrice');
+
             getRoutes()
             // AsyncStorage.getItem('location').then( (data) => {
             //     let currentLoc = JSON.parse(data)
@@ -172,11 +175,11 @@ const data = [
 									{l.address}
 								</ListItem.Title>
 							</ListItem.Content>
-						  	<Pressable onPress={() => { navigation.push('listInvoices') }}>
+						  	<Pressable onPress={() => { navigation.push('listInvoices' , {buyerId : l.id}) }}>
 								<Icon
 									name="cog"
 									type="font-awesome"
-									color="white"
+									color={Colors.primary}
 									style={{padding: 10}}
 								/>
 							  </Pressable>

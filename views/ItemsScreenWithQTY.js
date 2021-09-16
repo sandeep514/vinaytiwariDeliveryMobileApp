@@ -21,30 +21,36 @@ export default function ItemsScreenWithQty({navigation}) {
 	const [hasUndeliveredItems , setHasUndeliveredItems] = useState(false);
 	const [selectedItemsFromLoads , setSelectedItemsFromLoads] = useState();
 	const [customerName , setCustomerName] = useState();
+	const [myBuyerId , setMyBuyerId] = useState();
 	// const [listUndelivered , setListUndelivered] = useState();	
 	useEffect(() => {
 		AsyncStorage.getItem('selectedBuyerRouteName').then((buyerName) => {
-			console.log(buyerName)
 			setCustomerName(buyerName)
 		});
-		AsyncStorage.getItem('cartItems').then((data) => {
-		// 	let myRecords = {};
-		// 	let myRecordsFinal = {};
-		// 	let relData = JSON.parse(data);
-		// 	if( data != undefined ){
-		// 		for(let i = 0 ; i < relData.length; i++){
-
-		// 			let dnum = relData[i].dnum;
-		// 			let sitem = relData[i].sitem;
-		// 			let qty = relData[i].qty;
-
-		// 			myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
-		// 			myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
-		// 			AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal))
-		// 			AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+		
+		// AsyncStorage.getItem('selectedBuyer').then((buyerId) => {
+		// 	AsyncStorage.getItem('cartItems').then((data) => {
+		// 		let myRecords = {};
+		// 		let myRecordsFinal = {};
+		// 		let relData = JSON.parse(data);
+		// 		if( data != undefined ){
+		// 			for(let i = 0 ; i < relData.length; i++){
+	
+		// 				let dnum = relData[i].dnum;
+		// 				let sitem = relData[i].sitem;
+		// 				let qty = relData[i].qty;
+	
+		// 				myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
+		// 				myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'buyerId' : buyerId, 'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
+		// 				setSelectedItemsFromLoads(myRecordsFinal)
+		// 				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal))
+		// 				AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+		// 			}
 		// 		}
-		// 	}
-		})
+		// 	})
+		// });
+
+		
 		AsyncStorage.getItem('user_id').then((userId) => {
 			if( userId != 13 && userId != '13'){
 				// setHasUndeliveredItems(true);
@@ -135,7 +141,7 @@ export default function ItemsScreenWithQty({navigation}) {
 											<View key={v} style={{flex: 1, flexDirection: 'row',flexWrap: 'wrap',justifyContent : 'space-evenly'}}>
 												{Object.keys(ListItems[key][k]).map((ke ,val) => {
 													return(
-														<ItemCard selectedData={(items) => setSelectedItemsFromLoads(items)} key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
+														<ItemCard selectedData={(items) => setSelectedItemsFromLoads(items)} key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} salePrice={ListItems[key][k][ke].sale_price} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
 													)
 												})}
 											</View>
@@ -151,6 +157,8 @@ export default function ItemsScreenWithQty({navigation}) {
 			</ScrollView>
 			<Pressable 	
 				onPress={() => { 
+					// console.log(selectedItemsFromLoads)
+					// return false;
 					navigation.push('AddQuantity' , {mySelectedItems : selectedItemsFromLoads});
 
 					return false;

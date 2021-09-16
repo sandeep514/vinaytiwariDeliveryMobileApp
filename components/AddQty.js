@@ -6,25 +6,28 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {Colors} from '../components/Colors';
 import {widthToDp, heightToDp} from '../utils/Responsive';
 import { CheckBox } from 'react-native-elements'
-
 const win = Dimensions.get('window');
 
 let totalAmountVatWithout = 0;
 let totalAmountVat = 0;
 let setUpdatedDataArray = [];
+let salePrices = 0;
+let mynewdata = {};
+let updatedMynewdata = {};
+let updateRecord = {};
 
-export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPrice , updatedDataRes , updateMyObjectData }) => {
+export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPrice , updatedDataRes , updateMyObjectData , keyboard, savedSalePrice }) => {
 
 	const [newData , setNewData] = useState();
 	const [selectedItem , setSelectedItem] = useState();
 	const [changestate , setChangeState] = useState(false);
 	const [myUpdatePrice , setMyUpdatePrice] = useState(0);
+	const [beforeUpdPrice , setbeforeUpdatePrice] = useState({});
 
 	useEffect(() => {
 		setNewData(data)
 		setSelectedItem(selectedItemFromItemsScreen)
-		// setUpdatedData(setUpdatedDataArray)
-
+		setbeforeUpdatePrice(savedSalePrice)
 	})
 
     function generateRandString(){
@@ -56,11 +59,15 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 						myData[i][dnum].VATstatus = true;
 						setNewData(myData)
 						updatedDataRes(myData)
+						// AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(myData)).then(()=> {
+							
+						// })
 						
 					}else{
 						myData[i][dnum].VATstatus = false;
 						setNewData(myData)
 						updatedDataRes(myData)
+						// AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(myData))
 					}
 					// selectedLoadedItemsByQty();
 				}
@@ -86,9 +93,11 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 			setSelectedItem(objectData)
 			updateMyObjectData(objectData)
 		}
+
 		if( qty != '' ){
 			newQty = qty
 		}
+
 		if( myData != undefined){
 			for( let i= 0 ; i < myData.length; i++ ){
 				if(myData[i][dnum] != undefined){
@@ -97,81 +106,129 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 
 						setNewData(myData)
 						updatedDataRes(myData)
-						if( changestate == false){
-							setChangeState(true)
-						}else{
-							setChangeState(false)
-						}
-						return false
+						// AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(myData))
+
+						// if( changestate == false){
+						// 	setChangeState(true)
+						// }else{
+						// 	setChangeState(false)
+						// }
+						// return false
 					}
 				}
 			}
-		}
-
-		
-	
-		// let price = 0;
-		// for( let i= 0 ; i < myData.length; i++ ){
-		// 	if(Object.values(myData[i]).length > 0){
-		// 		if(Object.values(myData[i])[0] != undefined){
-		// 			if( Object.values(myData[i])[0]['VATstatus'] == true ){
-		// 				price = price + ((Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])*1.20) ;
-		// 			}else{
-		// 				price = price + (Object.values(myData[i])[0]['sale_price'] * Object.values(myData[i])[0]['order_qty'])  ;
-		// 			}
-		// 		}
-
-		// 	}			
-		// }
-
-		
-	}
-
-	function updatePrice(dnum , itemId , value ){
-		let myData = newData;
-		let newQty = 0;
-		
-			let objectData = selectedItem;
-			if( dnum in objectData){
-				objectData[dnum]['price'] = value;
-				// setSelectedItemFromItemsScreen(objectData)
-				setSelectedItem(objectData)
-				updateMyObjectData(objectData)
-
-			}
-		if( value != '' ){
-			newQty = value
-		}
-
-		for( let i= 0 ; i < myData.length; i++ ){
-			if( myData[i][dnum] != undefined ){
-				if( myData[i][dnum].id == itemId){
-					myData[i][dnum].sale_price = newQty;
-					setNewData(myData)
-					updatedDataRes(myData)
-				}
-			}
-		}
-		// let price = 0;
-
-		// for( let i= 0 ; i < myData.length; i++ ){
-		// 	if(Object.values(myData[i]).length > 0){
-		// 		if(Object.values(myData[i]) != undefined){
-		// 			if( Object.values(myData[i])['VATstatus'] == true ){
-		// 				price = price + ((Object.values(myData[i])['sale_price'] * Object.values(myData[i])['order_qty'])*1.20) ;
-		// 			}else{
-		// 				price = price + (Object.values(myData[i])['sale_price'] * Object.values(myData[i])['order_qty'])  ;
-		// 			}
-		// 		}
-		// 	}				
-		// }
-
-		if( changestate == false){
-			setChangeState(true)
-		}else{
-			setChangeState(false)
 		}	
 	}
+
+	function updatePrice(dnum , itemId , qty ){
+		let myData = newData;
+		let newQty = 0;
+		let objectData = selectedItem;
+
+		if( dnum in objectData){
+			objectData[dnum]['sale_price'] = qty;
+			setSelectedItem(objectData)
+			updateMyObjectData(objectData)
+		}
+
+		if( qty != '' ){
+			newQty = qty
+		}
+
+		if( myData != undefined){
+			let parseMyres = {};
+			for( let i= 0 ; i < myData.length; i++ ){
+				if(myData[i][dnum] != undefined){
+					if( myData[i][dnum].id == itemId){
+						myData[i][dnum].sale_price = newQty;
+
+						setNewData(myData)
+						updatedDataRes(myData)
+						AsyncStorage.getItem('beforeUpdatePrice').then((myres) => {
+
+							if( myres != null ){
+								if( JSON.parse(myres).length != 0 ){
+									let parseMyres = [];
+									parseMyres = JSON.parse(myres);
+									parseMyres[dnum] = newQty;
+									AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(parseMyres))
+								}else{
+									parseMyres[dnum] = newQty;
+
+									AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(parseMyres))
+								}
+							}else{
+									let parseMyres = [];
+									parseMyres[dnum] = newQty;
+									AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(parseMyres))
+								}
+
+							return false							
+						})
+
+						// if( changestate == false){
+						// 	setChangeState(true)
+						// }else{
+						// 	setChangeState(false)
+						// }
+						// return false
+					}
+				}
+			}
+		}	
+	}
+	// function updatePrice(dnum , itemId , value ){
+	// 	let myData = newData;
+	// 	let newQty = 0;		
+	// 	let objectData = selectedItem;
+
+	// 	if( value != '' ){
+	// 		newQty = value
+	// 	}
+	// 	AsyncStorage.getItem('beforeUpdatePrice').then(() => {
+	// 		for( let i= 0 ; i < myData.length; i++ ){
+	// 			if( myData[i][dnum] != undefined ){
+	// 				if( myData[i][dnum].id == itemId){
+	// 					myData[i][dnum].sale_price = newQty;
+	// 					AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(myData)).then(() => {
+	
+	// 						if( dnum in objectData){
+	// 							objectData[dnum]['price'] = value;
+	// 							// setSelectedItemFromItemsScreen(objectData)
+	// 							setSelectedItem(objectData)
+	// 							updateMyObjectData(objectData)
+	// 						}
+							
+	// 						setNewData(myData)
+	// 						updatedDataRes(myData)
+	// 					})
+	
+	// 				}
+	// 			}
+	// 		}
+	// 	})
+		
+		
+	// 	// let price = 0;
+
+	// 	// for( let i= 0 ; i < myData.length; i++ ){
+	// 	// 	if(Object.values(myData[i]).length > 0){
+	// 	// 		if(Object.values(myData[i]) != undefined){
+	// 	// 			if( Object.values(myData[i])['VATstatus'] == true ){
+	// 	// 				price = price + ((Object.values(myData[i])['sale_price'] * Object.values(myData[i])['order_qty'])*1.20) ;
+	// 	// 			}else{
+	// 	// 				price = price + (Object.values(myData[i])['sale_price'] * Object.values(myData[i])['order_qty'])  ;
+	// 	// 			}
+	// 	// 		}
+	// 	// 	}				
+	// 	// }
+
+	// 	if( changestate == false){
+	// 		setChangeState(true)
+	// 	}else{
+	// 		setChangeState(false)
+	// 	}	
+	// }
 
 	function updateTotalPrice(){
 		let price = 0
@@ -190,6 +247,7 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
     return (
 		
         <View style={(win.width > 500) ? styles.mainBoxTab : styles.mainBox } key={generateRandString()}>
+			
             <View style={{flexDirection: 'row',justifyContent: 'flex-start',marginTop: 20}}>
 				<View style={styles.itemBox} key={generateRandString()}>
 					{(val?.itemcategory != "EGGS") ? 	
@@ -223,33 +281,34 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 
             <View key={generateRandString()} style={styles.inputBox}>
 
-                <TextInput keyboardType="numeric" placeholder="Qty" defaultValue={((val?.order_qty).toString())} ref={(value) => {}} style={styles.textInput} onEndEditing={(value) => { updateQty(val?.loadId ,val?.id , value.nativeEvent.text) } }/>
+                <TextInput keyboardType="numeric" placeholder="Qty"  defaultValue={ ((val?.order_qty).toString()) } ref={(value) => {}} style={styles.textInput} onChange={(value) => { updateQty(val?.loadId ,val?.id , value.nativeEvent.text) } }/>
+				{/* val?.sale_price */}
+                
+				<TextInput keyboardType="numeric" placeholder="Price" defaultValue={(( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price).toString()} ref={(value) => {}} style={styles.textInput} onChange={(value) => { updatePrice(val?.loadId ,val?.id , value.nativeEvent.text) } } />
 
-                <TextInput keyboardType="numeric" placeholder="Price" defaultValue={val?.sale_price} ref={(value) => {}} style={styles.textInput} 
-                onEndEditing={(value) => { updatePrice(val?.loadId ,val?.id , value.nativeEvent.text) } } />
-
-                <Text style={{ minWidth:70,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>{ (((val?.order_qty).toString()) * val?.sale_price).toFixed(2) }</Text>
+                <Text style={{ minWidth:70,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>{ (((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price)).toFixed(2) }</Text>
 
                 <Text style={{ minWidth:40,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>
                     {( val?.VATstatus == true )?
                         <View>
                             <Text>
-                                {( ((((val?.order_qty).toString()) * val?.sale_price) *1.20) - (((val?.order_qty).toString()) * val?.sale_price) ).toFixed(2)}
+                               	{( ((((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price)) *1.20) - (((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price)) ).toFixed(2)}
                             </Text>
                         </View>
                     :
                         <Text>0</Text>
                     }
                 </Text>
+
                 <Text style={{ minWidth:40,paddingHorizontal: 10,paddingVertical: 15,backgroundColor: '#ededed',borderWidth: 1 , borderColor: Colors.primary }}>
                     {( val?.VATstatus == true )?
                         <View>
                             <Text>
-                                {(  (((((val?.order_qty).toString()) * val?.sale_price) *1.20) - (((val?.order_qty).toString()) * val?.sale_price)) + (((val?.order_qty).toString()) * val?.sale_price) ).toFixed(2)}
+                                {(  (((((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price)) *1.20) - (((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price))) + (((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price)) ).toFixed(2)}
                             </Text>
                         </View>
                     :
-                        <Text>{ (((val?.order_qty).toString()) * val?.sale_price).toFixed(2)}</Text>
+                        <Text>{ (((val?.order_qty).toString()) * (( Object.keys(beforeUpdPrice).length > 0 && val?.loadId in beforeUpdPrice)? beforeUpdPrice[val?.loadId] :val?.sale_price)).toFixed(2)}</Text>
                     }
                 </Text>
 

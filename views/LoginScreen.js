@@ -32,7 +32,7 @@ export default function LoginScreen({navigation}) {
 
 			setIsLoaderActive(false);
 			let response = res.data.data;
-
+			
 			AsyncStorage.setItem('user_address', response.address);
 			AsyncStorage.setItem('user_contact_no', response.contact_no);
 			AsyncStorage.setItem('user_dob', response.dob);
@@ -42,7 +42,7 @@ export default function LoginScreen({navigation}) {
 			AsyncStorage.setItem('user_licenseno', response.licenseno);
 			AsyncStorage.setItem('user_name', response.name);
 			AsyncStorage.setItem('user_username', response.username);
-			AsyncStorage.setItem('printerName', response.printerName);
+			AsyncStorage.setItem('printerName', (response.printerName != null && response.printerName != undefined) ? response.printerName : '' );
 			
 			navigation.navigate('Vehicle');			
 		} , (err) => {

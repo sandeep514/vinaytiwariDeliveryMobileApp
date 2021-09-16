@@ -8,7 +8,7 @@
 	let selectedLoadArray = {};
 	
 
-	export default DashboardCard = ({ backgroundColor, cardName, imageUrl, onPress, styleData, qty, cardId ,loadName , selectedData}) => {
+	export default DashboardCard = ({ backgroundColor, cardName, imageUrl, onPress, styleData, qty, cardId ,loadName , selectedData ,salePrice}) => {
 
 		const [ UpdateQtyofItem , setUpdateQtyofItem] = useState({});
 		const [ UpdateQtyofItems , setUpdateQtyofItems] = useState(0);
@@ -17,6 +17,7 @@
 		const win = Dimensions.get('window');
 		
 		useEffect(() => {
+	
 			selectedLoadArray = {};
 			getPendingOrderResponce();
 			// AsyncStorage.getItem('itemsAddedInCart').then((data) => {
@@ -98,7 +99,6 @@
 				setUpdateQtyofItem(selectedLoadArray)
 				selectedData(selectedLoadArray)
 
-				console.log(selectedLoadArray)
 				// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 			}else{
 				AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
@@ -107,7 +107,6 @@
 					setUpdateQtyofItem(selectedLoadArray)
 					selectedData(selectedLoadArray)
 
-					console.log(selectedLoadArray)
 					// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 				});
 			}
@@ -184,8 +183,7 @@
 							</View>
 							<View style={ (win.width > 550) ? {width: '60%'} : {width: '60%'} }>
 
-								<TextInput keyboardType="numeric"  
-									defaultValue={ (selectedLoadArray != undefined && selectedLoadArray[loadName+'__'+cardId] != undefined)? (selectedLoadArray[loadName+'__'+cardId].value).toString() : '0' } 
+								<TextInput keyboardType="numeric" defaultValue={ (selectedLoadArray != undefined && selectedLoadArray[loadName+'__'+cardId] != undefined)? (selectedLoadArray[loadName+'__'+cardId].value).toString() : '0' } 
 									key={cardId} placeholder="Qty" style={{textAlign: 'center',color: '#000'}} onChange={(value) => { (value.nativeEvent.text != '') ? DirectUpdateQTY(loadName , cardId , value.nativeEvent.text) : '' }} />
 							</View>
 							<View  style={ (win.width > 550) ? {width: '20%'} : {width: '20%'} }>

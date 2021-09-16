@@ -406,9 +406,30 @@ export default function Todayinvoices({navigation}) {
         getSaleItemByInvoice(invoiceNo).then((data) => {
             setActInd(false)
             AsyncStorage.setItem('cartItems' , JSON.stringify(data.data.data));
+
             AsyncStorage.setItem('selectedInvoiceId' , invoiceNo);
             AsyncStorage.setItem('selectedBuyer' , (selectedBuyer).toString());
-            navigation.push('ItemsScreenWithQty');
+            AsyncStorage.getItem('selectedBuyer').then((buyerId) => {
+                let myRecords = {};
+                let myRecordsFinal = {};
+                let relData = data.data.data;
+                if( data != undefined ){
+                    for(let i = 0 ; i < relData.length; i++){
+    
+                        let dnum = relData[i].dnum;
+                        let sitem = relData[i].sitem;
+                        let qty = relData[i].qty;
+    
+                        myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
+                        myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'buyerId' : buyerId, 'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
+                        AsyncStorage.setItem('undeliveredItems' , JSON.stringify(myRecordsFinal))
+                        AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal))
+                        AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+                    }
+                }
+                navigation.push('AddQuantity' , { mySelectedItems: myRecordsFinal});
+
+            });
         })
     }
     function searchBuyer(text){
@@ -430,6 +451,10 @@ export default function Todayinvoices({navigation}) {
 
     function printData(data){
 
+    }
+
+    function ViewPrintableReciept(invoiceNo){
+        navigation.navigate('ViewPDF' , { invoiceNo : invoiceNo})
     }
 
     function changeStatus(){
@@ -517,18 +542,26 @@ export default function Todayinvoices({navigation}) {
                                                     <Text style={{fontSize: 10}}>{l[0].invoice_no}</Text>
                                                 </ListItem.Subtitle>
                                             </ListItem.Content>
+                                            <View>
+                                                <Pressable style={{width: 60,backgroundColor: 'lightgreen',paddingHorizontal: 12,paddingVertical: 2,borderRadius: 5,alignItems: 'center'}} onPress={() => { ViewPrintableReciept(l[0].invoice_no) }} >
+                                                    <Text style={{color: 'white'}}>View</Text>
+                                                </Pressable>
+                                            </View>
                                             <View style={{ flexDirection: 'column' }}>
-                                                
                                                 <View style={{  }}>
                                                     <Pressable style={{width: 80,backgroundColor: 'red',paddingHorizontal: 12,paddingVertical: 2,borderRadius: 5}} onPress={() => { showDropdown(l[0].invoice_no) }} >
                                                         <Text style={{color: 'white'}}>un-settled</Text>
                                                     </Pressable>
                                                 </View>
                                                 {( selectedPerson == l[0].invoice_no )?
-                                                    <View style={{backgroundColor: 'white',zIndex: 99999,elevation: 5,padding: 10,borderRadius: 5,flexDirection: 'row',justifyContent: 'space-between',width: 150}}>
-                                                        <Pressable onPress={ () => { showModels( l[0].invoice_no , 'cash' ) }}><Text >Cash</Text></Pressable>
+                                                    <View style={{backgroundColor: 'white',elevation: 5,padding: 10,borderRadius: 5,flexDirection: 'row',justifyContent: 'space-between',width: 250 ,top: 10,right: 0,zIndex: 99999}}>
+                                                        <Pressable onPress={ () => { showModels( l[0].invoice_no , 'cash' ) }}>
+                                                            <Text >Cash Recieved</Text>
+                                                        </Pressable>
                                                         <Text style={{borderRightColor: '#ededed',borderRightWidth: 1}}></Text>
-                                                        <Pressable onPress={ () => { showModels( l[0].invoice_no , 'bank_transfer' ) }}><Text>Bank Transfer</Text></Pressable>
+                                                        <Pressable onPress={ () => { showModels( l[0].invoice_no , 'bank_transfer' ) }}>
+                                                            <Text>Bank Transfer Recieved</Text>
+                                                        </Pressable>
                                                     </View>
                                                 :
                                                     <View></View>
@@ -566,8 +599,13 @@ export default function Todayinvoices({navigation}) {
                                                         <Text style={{fontSize: 10}}>{l[0].dnum}</Text>
                                                     </ListItem.Subtitle>
                                                 </ListItem.Content>
-                                                <View style={{ flexDirection: 'column' }}>
-                                                    <View style={{  }}>
+                                                <View style={{ flexDirection: 'row' }}>
+                                                    <View>
+                                                        <Pressable style={{width: 60,backgroundColor: 'lightgreen',paddingHorizontal: 12,paddingVertical: 2,borderRadius: 5,alignItems: 'center'}} onPress={() => { ViewPrintableReciept(l[0].invoice_no) }} >
+                                                            <Text style={{color: 'white'}}>View</Text>
+                                                        </Pressable>
+                                                    </View>
+                                                    <View style={{ flexDirection: 'column',marginLeft: 15 }}>
                                                         <Pressable style={{textAlign: 'center',justifyContent: 'center',width: 80,backgroundColor: Colors.primary,paddingHorizontal: 12,paddingVertical: 2,borderRadius: 5}} onPress={() => { gotoCart( l[0].invoice_no ,l[0]["buyer_rel"].id ) }} >
                                                             <Text style={{color: 'white',textAlign: 'center'}}>Cart</Text>
                                                         </Pressable>

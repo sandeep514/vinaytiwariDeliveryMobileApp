@@ -191,6 +191,31 @@ export const getPriorityDrivers = ( driverId , routeId ) => {
 	});
 };
 
+// get buyer invoices
+export const getBuyerInvoices = ( buyerId ) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.get( 'get-buyer-invoices/'+buyerId).then((response) => {
+			if(response.data.status == true){
+				resolve(response);
+			}else{
+				reject(response.data.error);
+			}
+		});
+	});
+};
+
+// update-sale-invoice-payment-type
+export const updateTypeOfinvoice = ( invoice , status ) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.post('update-sale-invoice-payment-type' , {invoice : invoice , payment_type: status}).then((response) => {
+			if(response.data.status == true){
+				resolve(response);
+			}else{
+				reject(response.data.error);
+			}
+		});
+	});
+};
 export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-buyer-priority-by-driver-sorted/'+driverId+'/'+routeId ).then((response) => {
@@ -282,21 +307,19 @@ export const SaveOrder = ( postedData ) => {
 				reject(response.data.error);
 			}
 		});
-		
 	});
 };
 
 //get Before order details
 export const BeforeOrderDetails = ( postedData ) => {
-	return new Promise( (resolve , reject) => {
-		apiClient.post('order-preview' , { data : postedData}).then((response) => {
+	return new Promise( (resolve , reject) => {		
+		apiClient.post('order-preview' , { data : postedData }).then((response) => {
 			if(response.data.status == true){
 				resolve(response);
 			}else{
 				reject(response.data.error);
 			}
 		});
-		
 	});
 };
 

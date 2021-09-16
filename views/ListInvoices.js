@@ -11,117 +11,123 @@ TextInput,
 Pressable
 } from 'react-native';
 import {Colors} from './../components/Colors';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import {ListItem, Avatar, Header, Button, Input} from 'react-native-elements';
 import MainScreen from '../layout/MainScreen';
 import {useState, useEffect} from 'react';
-import {generateRandString, getCartItemDetails, getDiverId, getListInvoices, getVehicle, imagePrefix} from '../api/apiService';
+import {getBuyerInvoices, updateTypeOfinvoice} from '../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {searchBuyerByInvoiceNumber, getSaleItemByInvoice} from '../api/apiService';
 import { ActivityIndicator } from 'react-native';
-import { useRef } from 'react';
-import { BluetoothManager,BluetoothEscposPrinter,BluetoothTscPrinter } from 'react-native-bluetooth-escpos-printer';
-import { StarPRNT } from 'react-native-star-prnt';
 
 const win = Dimensions.get('window');
 
-let setTotalAmount = 0;
-let setUpdatedDataArray = [];
-let currentSelectedId = '';
-let currentSelectedLoadName = '';
-let selectedVehicle = '';
-let selectedRoute = '';
-let selectedDriver = '';
-let selectedBuyerId = '';
-let valuetem = '';
-let updatedValue= '';
-let initalPaymentStatus = 'cash';
-let unableToConnect = 0;
-let commandsArray = [];
-
-export default function ListInvoices({navigation}) {
+export default function ListInvoices({navigation, route}) {
     const [printingIndicator , setPrintingIndicator] = useState(false);
     const [selectedLoadCount , setSelectedLoadCount] = useState();
+    const [TotalInvoiceNumber , setTotalInvoiceNumber] = useState(0);
     const [ActInd , setActInd] = useState();
 
     useEffect(() => {
-        getListInvoice();
+        getListInvoice(route.params.buyerId);
+        AsyncStorage.setItem('setBuyerIdData' ,(route.params.buyerId).toString() );
+
     } , []);
 
-    function getListInvoice(){
-        AsyncStorage.getItem('selectedVehicleNo').then((value) => {
-            let selectedVehNo  = value;
-            AsyncStorage.getItem('user_id').then((value) => {
-                let driverId =  value;
-                getListInvoices(driverId , selectedVehNo).then((data) => {
-                    setSelectedLoadCount(data.data.data)
-                });
-            });
+    function getListInvoice(buyerId){
+        getBuyerInvoices(buyerId).then((data) => {
+            setSelectedLoadCount(data.data.invoices)
+            setTotalInvoiceNumber(data.data.totalOfAllInvoices)
         });
     }
-return (
-    <MainScreen>
-        <View style={{flex:1}}>
-            {(ActInd == true) ?
-                <View style={{ flex:1,position:'absolute',justifyContent:'center',height:'100%',width: '100%',backgroundColor: '#ededed',zIndex:9999,opacity: 0.5}} >
-                    <ActivityIndicator size="large" color={Colors.primary} />
-                </View>
-            :
-                <View style={styles.itemListSection}>
-                    {(printingIndicator)?
-                        <View style={{ position: 'absolute',height: win.height,width: win.width,backgroundColor: '#e8e8e8',zIndex: 9999,opacity: 0.5,justifyContent: 'center',alignItems: 'center'}}>
-                            <ActivityIndicator size="large" color={Colors.primary} />
-                            <Text>Printing your invoice ,Please wait...</Text>
-                        </View>
-                    :
-                        <View></View>
-                    }
-                    {/* <TextInput placeholder="Search Buyer By Invoice no" placeholderTextColor="lightgrey" style={styles.textInput} onChange={(value) => { searchBuyer(value.nativeEvent.text) } } /> */}
-                    <ScrollView vertical='true'>
-                        {(selectedLoadCount != undefined && selectedLoadCount != null) ?
-                            Object.values(selectedLoadCount).map((l, i) => (
-                                (l != null)?
-                                <TouchableHighlight key={i}>
-                                        <ListItem bottomDivider key={i}>
-                                            <ListItem.Content key={i}>
-                                                <ListItem.Title key={i} style={{fontSize: 14}} allowFontScaling={false}>
-                                                    {l[0]["buyer_rel"].name}
-                                                </ListItem.Title>
-                                                <ListItem.Subtitle allowFontScaling={false} >
-                                                    <Text style={{fontSize: 10}}>{l[0].invoice_no}</Text>
-                                                </ListItem.Subtitle>
-                                            </ListItem.Content>
-                                            <View>
-                                                <Pressable style={{backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5}} onPress={() => { ViewPrintableReciept(l) }} >
-                                                    <Text style={{color: 'white'}}>Cash</Text>
-                                                </Pressable>
-                                            </View>
-                                            <View>
-                                                <Pressable style={{backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5}} onPress={() => { ViewPrintableReciept(l) }} >
-                                                    <Text style={{color: 'white'}}>Credit</Text>
-                                                </Pressable>
-                                            </View>
-                                            <View>
-                                                <Pressable style={{backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5}} onPress={() => { setPrintingIndicator(true); printReceipt(l) }} >
-                                                    <Text style={{color: 'white'}}>Bank Transfer</Text>
-                                                </Pressable>
-                                            </View>
-                                        </ListItem>
-                                    </TouchableHighlight>
-                                :
-                                    <View></View>
-                            ))
-                        : 
-                            <View>
+    function changeStatusOfInvoice(invoiceNumber , type){
+        setPrintingIndicator(true);
+        updateTypeOfinvoice(invoiceNumber , type).then((res) => {
+            AsyncStorage.getItem('setBuyerIdData').then((myBuyerId) => {
+                getListInvoice(myBuyerId)
+                setPrintingIndicator(false)
+            })
+        } , (err) => {
+            setPrintingIndicator(false)
+        })
+    }
+    function ViewPrintableReciept(data){
+        navigation.navigate('ViewPDF' , { invoiceNo : data[0].invoice})
+    }
+    return (
+        <MainScreen>
+            <View style={{flex:1}}>
+                {(ActInd == true) ?
+                    <View style={{ flex:1,position:'absolute',justifyContent:'center',height:'100%',width: '100%',backgroundColor: '#ededed',zIndex:9999,opacity: 0.5}} >
+                        <ActivityIndicator size="large" color={Colors.primary} />
+                    </View>
+                :
+                    <View style={styles.itemListSection}>
+                        {(printingIndicator)?
+                            <View style={{ position: 'absolute',height: win.height,width: win.width,backgroundColor: '#e8e8e8',zIndex: 9999,opacity: 0.5,justifyContent: 'center',alignItems: 'center'}}>
                                 <ActivityIndicator size="large" color={Colors.primary} />
+                                <Text>Updating Record, Please wait...</Text>
                             </View>
+                        :
+                            <View></View>
                         }
-                    </ScrollView>
-                </View>
-            }
-        </View>
-    </MainScreen>
-);
+                        {/* <TextInput placeholder="Search Buyer By Invoice no" placeholderTextColor="lightgrey" style={styles.textInput} onChange={(value) => { searchBuyer(value.nativeEvent.text) } } /> */}
+                        <View style={{justifyContent: 'center' }}>
+                            <Text style={{textAlign: 'right' ,color: Colors.primary , fontSize: 22,marginRight: 20}}>Total: £<Text style={{  }}>{(TotalInvoiceNumber.toFixed(2))}</Text></Text>
+                        </View>
+                        <ScrollView vertical='true'>
+                            {(selectedLoadCount != undefined && selectedLoadCount != null) ?
+                                Object.values(selectedLoadCount).map((l, i) => (
+                                    (l != null)?
+                                        <TouchableHighlight key={i}>
+                                            <ListItem bottomDivider key={i}>
+
+                                                <ListItem.Content key={i}>
+                                                    <ListItem.Title key={i} style={{fontSize: 14}} allowFontScaling={false}>
+                                                        <Pressable onPress={ () => { ViewPrintableReciept(l) }}>
+                                                            <Text>{l[0].invoice}</Text>
+                                                        </Pressable> 
+                                                    </ListItem.Title>
+                                                    <ListItem.Subtitle allowFontScaling={false} >
+                                                        <Text style={{fontSize: 13}}>£{ l.invoiceTotal } </Text>
+                                                        <Text style={{fontSize: 10}}> {l[0].ddate} </Text>
+                                                    </ListItem.Subtitle>
+                                                </ListItem.Content>
+
+                                                <View>
+                                                    <Pressable style={(l[0].payment_type == 'cash') ? {backgroundColor: 'green',paddingHorizontal: 10,paddingVertical: 5 }: {backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5 }} onPress={() => { changeStatusOfInvoice(l[0].invoice , 'cash') }} >
+                                                        <Text style={{color: 'white'}}>Cash</Text>
+                                                    </Pressable>
+                                                </View>
+
+                                                <View>
+                                                    <Pressable style={(l[0].payment_type == 'credit') ? {backgroundColor: 'green',paddingHorizontal: 10,paddingVertical: 5 }: {backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5 }} onPress={() => { changeStatusOfInvoice(l[0].invoice , 'credit') }} >
+                                                        <Text style={{color: 'white'}}>Credit</Text>
+                                                    </Pressable>
+                                                </View>
+
+                                                <View>
+                                                    <Pressable style={(l[0].payment_type == 'bank') ? {backgroundColor: 'green',paddingHorizontal: 10,paddingVertical: 5 }: {backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5 }} onPress={() => { changeStatusOfInvoice(l[0].invoice , 'bank') }} >
+                                                        <Text style={{color: 'white'}}>Bank Transfer</Text>
+                                                    </Pressable>
+                                                </View>
+
+                                            </ListItem>
+                                        </TouchableHighlight>
+                                        
+                                    :
+                                        <View></View>
+                                ))
+                            : 
+                                <View>
+                                    <ActivityIndicator size="large" color={Colors.primary} />
+                                </View>
+                            }
+                        </ScrollView>
+                       
+                    </View>
+                }
+            </View>
+        </MainScreen>
+    );
 }
 
 const styles = StyleSheet.create({
