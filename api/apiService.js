@@ -336,10 +336,39 @@ export const getSaleItemByInvoice = ( invoiceNo ) => {
 		
 	});
 };
+
 //Save Order
 export const searchBuyerByInvoiceNumber = ( invoiceNo ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('find-sale-item-like-invoice' , { invoiceNumber : invoiceNo}).then((response) => {
+			if(response.data.status == true){
+				resolve(response);
+			}else{
+				reject(response.data.error);
+			}
+		});
+		
+	});
+};
+
+//  https://delivery-app.ripungupta.com/backend/public/api/save-load
+export const saveNewLoad = ( data ) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.post('save-load' , { data : data}).then((response) => {
+			console.log(response.data)
+			if(response.data.status == true){
+				resolve(response);
+			}else{
+				reject(response.data.error);
+			}
+		});
+		
+	});
+};
+
+export const getSalesItemsForLoad = ( ) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.get('get-sale-items-for-load').then((response) => {
 			if(response.data.status == true){
 				resolve(response);
 			}else{

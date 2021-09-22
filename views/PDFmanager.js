@@ -987,8 +987,6 @@ export default function PDFmanager({navigation , text, onOK}) {
                             myData.push({'remarks' : remarks});
                             myData.push({'invoice_no' : invoiceNumber});
                             myData.push({'signature' : base64});
-
-
                             SaveOrder(JSON.stringify(myData)).then((res) => {
                                 setSaveOrderActivIndictor(false)
                                 AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));

@@ -26,6 +26,7 @@ import { Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ViewPDF from '../views/ViewPDF';
 import ListInvoices from '../views/ListInvoices';
+import Demandstock from '../views/Demandstock';
 
 const Stack = createStackNavigator();
 export default function Nav() {
@@ -225,6 +226,14 @@ export default function Nav() {
 					component={ViewPDF}
 					options={( {navigation} ) => ({
 						headerShown: true , title : 'View Order Details',
+					})}
+				/>
+				<Stack.Screen
+					title="Demand Stock"
+					name="Demandstock"
+					component={Demandstock}
+					options={( {navigation} ) => ({
+						headerShown: true , title : 'Demand Stock',
 					})}
 				/>
 			</Stack.Navigator>

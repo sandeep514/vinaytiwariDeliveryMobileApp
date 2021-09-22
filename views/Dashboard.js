@@ -8,6 +8,7 @@ import {
   TouchableHighlight,
   ScrollView,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import {Card, ListItem, Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -130,8 +131,11 @@ export default function Dashboard({navigation , route}) {
 						navigation.push('DashboardRoutes' , {'myRoutes' : listRoute});
 					}}
 				/>
+				
 			</View>
-
+			<Pressable style={{padding: 10}} onPress={() => { navigation.navigate('Demandstock') }}>
+				<Text>Here</Text>
+			</Pressable>
 			<View style={styles.barSection}>
 				<Text style={styles.detailBar} allowFontScaling={false}>
 					Sales for Today
