@@ -8,20 +8,22 @@ ScrollView,
 TouchableHighlight,
 Text,
 TextInput,
-Pressable
+Pressable,
+FlatList
 } from 'react-native';
 import {Colors} from './../components/Colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {ListItem, Avatar, Header, Button, Input} from 'react-native-elements';
 import MainScreen from '../layout/MainScreen';
 import {useState, useEffect} from 'react';
-import {generateRandString, getCartItemDetails, getDiverId, getListInvoices, getVehicle, imagePrefix} from '../api/apiService';
+import {generateRandString, getCartItemDetails, getDiverId, getListInvoices, getVehicle, imagePrefix, printing} from '../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {searchBuyerByInvoiceNumber, getSaleItemByInvoice} from '../api/apiService';
 import { ActivityIndicator } from 'react-native';
 import { useRef } from 'react';
 import { BluetoothManager,BluetoothEscposPrinter,BluetoothTscPrinter } from 'react-native-bluetooth-escpos-printer';
 import { StarPRNT } from 'react-native-star-prnt';
+import ListComponent from './component/ListComponent';
 
 const win = Dimensions.get('window');
 
@@ -42,7 +44,7 @@ let commandsArray = [];
 export default function AddQuantity({navigation}) {
 const [data, setData] = useState();
 // const [totalAmount, setTotalAmount] = useState();
-const [loadedData , setLoadedData] = useState();
+const [loadedData , setLoadedData] = useState(false);
 const [updatedData , setUpdatedData] = useState();
 const [loadedActivityIndicator , setLoadedActivityIndicator] = useState(false);
 const [printingIndicator , setPrintingIndicator] = useState(false);
@@ -50,11 +52,13 @@ const [ActInd , setActInd] = useState(false);
 const [creaditStatus , setCreditStatus] = useState(initalPaymentStatus);
 const [saveOrderActivIndictor , setSaveOrderActivIndictor] = useState(false);
 const [selectedLoadCount , setSelectedLoadCount] = useState();
+const [undeliveredItems , setUndeliveredItems] = useState();
 const [ device ,setDevice ] = useState();
 const [ isBluetoothEnabled ,setisBluetoothEnabled ] = useState(false);
 const [ bluetoothName ,setBluetoothName ] = useState();
 const [ hasVatProduct ,setHasVatProducts ] = useState(false);
 const [ hasNonVatProducts ,setHasNonVatProducts ] = useState(false);
+const [refreshPage, setRefreshPage] = useState("");
 
 const ref_input2 = useRef();
 var paired = [];
@@ -65,12 +69,15 @@ useEffect(() => {
 } , []);
 
 function getListInvoice(){
+    setLoadedData(true);
     AsyncStorage.getItem('selectedVehicleNo').then((value) => {
         let selectedVehNo  = value;
         AsyncStorage.getItem('user_id').then((value) => {
             let driverId =  value;
             getListInvoices(driverId , selectedVehNo).then((data) => {
+                setLoadedData(false);
                 setSelectedLoadCount(data.data.data)
+                setUndeliveredItems(data.data.undeliverdItems);
             });
         });
     });
@@ -79,7 +86,7 @@ function getListInvoice(){
 function getSaleItemByInv (invoiceNo) {
     return new Promise( (resolve , reject) => {
         getSaleItemByInvoice(invoiceNo).then((res) => {
-            resolve(res.data.data);
+            resolve(res.data);
         });
     } ,(err) =>{
         reject(err)
@@ -92,24 +99,31 @@ printReceipt = (data) => {
     let buyerAddress = data[0]['buyer_rel'].address;
     let buyerPhone = data[0]['buyer_rel'].contact_no;
     let invoiceNo = data[0].invoice_no;
+
     AsyncStorage.getItem('user_id').then((res) => {
         getDiverId(res).then((printerName) => {
             setBluetoothName(printerName)
+
             if( printerName.printerType == 'star'){
                 if(res != null && res != undefined){
+
                     getSaleItemByInv(invoiceNo).then((res) => {
-                        for(let i = 0 ; i < res.length ; i++){
-                            if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
+                        for(let i = 0 ; i < res.data.length ; i++){
+                            if( res.data[i]['sale_item_rel'].itemcategory == 'EGGS' || res.data[i]['sale_item_rel'].itemcategory == 3  || res.data[i]['sale_item_rel'].itemcategory == '3' || res.data[i].has_vat ){
                                 setHasVatProducts(true)
                             }
-                            if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
+                            if( res.data[i]['sale_item_rel'].itemcategory != 'EGGS' && !res.data[i].has_vat || res.data[i]['sale_item_rel'].itemcategory == 3  || res.data[i]['sale_item_rel'].itemcategory == '3' && !res.data[i].has_vat ){
                                 setHasNonVatProducts(true)
                             }                                                    
                         }
-                        printDesignStarPrinter( Object.values(res) , invoiceNo , buyerName ,buyerAddress , buyerPhone );
+                        printDesignStarPrinter( Object.values(res.data) , invoiceNo , buyerName ,buyerAddress , buyerPhone , res.undeliverdItems);
                         setPrintingIndicator(false);
                     },(error) => {
                         alert(error);
+                    }).catch(function(error) {
+                        console.log('There has been a problem with your fetch operation: ' + error.message);
+                         // ADD THIS THROW error
+                          throw error;
                     });
                 }
             }else{
@@ -128,10 +142,10 @@ printReceipt = (data) => {
 
                                             getSaleItemByInv(invoiceNo).then((res) => {
                                                 for(let i = 0 ; i < res.length ; i++){
-                                                    if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i].has_vat ){
+                                                    if( res[i]['sale_item_rel'].itemcategory == 'EGGS' || res[i]['sale_item_rel'].itemcategory == 3 || res[i]['sale_item_rel'].itemcategory == '3' || res[i].has_vat ){
                                                         setHasVatProducts(true)
                                                     }
-                                                    if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat ){
+                                                    if( res[i]['sale_item_rel'].itemcategory != 'EGGS' && !res[i].has_vat || res[i]['sale_item_rel'].itemcategory == 3 || res[i]['sale_item_rel'].itemcategory == '3' && !res[i].has_vat ){
                                                         setHasNonVatProducts(true)
                                                     }                                                    
                                                 }
@@ -165,8 +179,16 @@ printReceipt = (data) => {
                     },
                 );
             }
-        })
-    })
+        }).catch(function(error) {
+            console.log('There has been a problem with your fetch operation: ' + error.message);
+             // ADD THIS THROW error
+              throw error;
+        });
+    }).catch(function(error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+         // ADD THIS THROW error
+          throw error;
+    });
 };
 
 getPrinterNameByDriver = () => {
@@ -212,11 +234,12 @@ getPrinterNameByDriver = () => {
     })
 }
 
-printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) => {
-    alert("here");
+printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone , undeliveredItem) => {
+    printing(data , invoiceNo , buyerName, buyerAddress , buyerPhone , undeliveredItem ,hasVatProduct,hasNonVatProducts);
+    return false
     let totalAmount = 0;
     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-    commandsArray.push({appendBitmapText: "UK Inch",fontSize:40});
+    commandsArray.push({appendBitmapText: "SUN FARMS",fontSize:40});
     commandsArray.push({append: '\n'});
     commandsArray.push({append: "Unit 12C, Bridge Industrial Estate,RH6 9HU\n"});
     commandsArray.push({append: "Phone: 07917105510\n"});
@@ -259,7 +282,7 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
     commandsArray.push({append: '--------------------------------\n'});
     let nonVatTotal = 0;
     
-    if( hasNonVatProducts ){
+    if( hasVatProduct ){
         commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
         commandsArray.push({append: 'Qty  '});
         commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
@@ -275,19 +298,20 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
 
         let beforeVatPrice = 0;
         let vatAmount = 0;
+
         for(let i = 0 ; i < data.length ; i++){
-            if( data[i]['sale_item_rel'].itemcategory == 'EGGS' || data[i].has_vat == 1){
+            if( data[i]['sale_item_rel'].itemcategory == 'EGGS' || data[i]['sale_item_rel'].itemcategory == 3 || data[i]['sale_item_rel'].itemcategory == '3' || data[i].has_vat == 1){
                 let sitem       = data[i]['sale_item_rel']['name'];
                 let salePrice   = data[i]['sale_price'];
                 let qty         = data[i]['qty'];
                 let vat = 0;
                 let amount = 0;
-                if( data[i]['sale_item_rel'].itemcategory != 'EGGS' ){
+                if( data[i]['sale_item_rel'].itemcategory != 'EGGS' && data[i]['sale_item_rel'].itemcategory != 3 && data[i]['sale_item_rel'].itemcategory != '3' ){
                     vat = (( (( ( (data[i]['sale_price'] * data[i]['qty']) * 1.20 ) - (data[i]['sale_price'] * data[i]['qty']))) ).toFixed(2)).toString();
     
                     vatAmount = vatAmount + parseFloat(vat);
                 }
-                if( data[i]['sale_item_rel'].itemcategory == 'EGGS' ){
+                if( data[i]['sale_item_rel'].itemcategory == 'EGGS' && data[i]['sale_item_rel'].itemcategory == 3 && data[i]['sale_item_rel'].itemcategory == '3' ){
                     amount = ((data[i]['sale_price'] * data[i]['qty']).toFixed(2)).toString();
                 }else{
                     amount = (( (data[i]['sale_price'] * data[i]['qty']) * 1.20 ).toFixed(2)).toString();
@@ -358,6 +382,9 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
         commandsArray.push({append: (beforeVatPrice + vatAmount).toFixed(2)+'\n'});
 
     }
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+
     
     if(hasNonVatProducts > 0){
         commandsArray.push({append: '\n'});
@@ -374,7 +401,7 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
         commandsArray.push({append: '--------------------------------\n'});
         
         for(let i = 0 ; i < data.length ; i++){
-            if( data[i]['sale_item_rel'].itemcategory != 'EGGS' && !data[i]['has_vat'] ){
+            if( data[i]['sale_item_rel'].itemcategory != 'EGGS' && data[i]['sale_item_rel'].itemcategory != 3  && data[i]['sale_item_rel'].itemcategory != '3'  && !data[i]['has_vat'] ){
                 let sitem = data[i]['sale_item_rel']['name'];
                 let salePrice = data[i]['sale_price'];
                 let qty = data[i]['qty'];
@@ -416,6 +443,8 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
 
         commandsArray.push({ append: (nonVatTotal).toFixed(2) });
         commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
         commandsArray.push({append: '--------------------------------\n'});
     }
 
@@ -430,6 +459,54 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
     commandsArray.push({appendBytes:[0x9c]});
 
     commandsArray.push({ append: (totalAmount+nonVatTotal).toFixed(2) });        
+
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '--------------------------------\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+
+
+    if( undeliveredItem != undefined ){
+        if(Object.values(undeliveredItem).length > 0){
+            commandsArray.push({append: '\n'});
+            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+            commandsArray.push({append: '******* Un Delivered *******'});
+            
+            commandsArray.push({append: '\n'});
+            
+            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+            commandsArray.push({append: 'Item'+'                    '});
+            commandsArray.push({append: 'Qty'});
+            commandsArray.push({append: '\n'});
+
+            commandsArray.push({append: '--------------------------------\n'});
+
+            for(let i = 0 ; i < Object.values(undeliveredItem).length ; i++){            
+
+                let undeliveredItemPrice = Object.values(undeliveredItem)[i]['sale_item_rel'].name;
+                let myQty = (Object.values(undeliveredItem)[i]['qty']);
+                    
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: undeliveredItemPrice+'            '});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
+                commandsArray.push({ append: myQty });
+                
+                commandsArray.push({append: '\n'});
+            }
+
+            // commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+            // commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+            // commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+            // commandsArray.push({appendBytes:[0x9c]});
+            // commandsArray.push({append: '\n'});
+            // commandsArray.push({append: '--------------------------------\n'});
+        }    
+    }
+
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
     commandsArray.push({append: '\n'});
     commandsArray.push({append: '\n'});
     commandsArray.push({append: '\n'});
@@ -440,12 +517,38 @@ printDesignStarPrinter = async (data , invoiceNo , buyerName, buyerAddress , buy
 async function print() {
     try {
         var printResult = await StarPRNT.print('StarPRNT', commandsArray, 'BT:');
-        alert(printResult); // Success!
+        // alert(printResult); // Success!
+        setRefreshPage("refresh");
+
+        // navigation.navigate('Dashboard');
+        // getListInvoice();
+
     } catch (e) {
         alert(e);
     }
 }
 
+const filterData = (SearchedData) => {
+
+    var matched_terms = [];
+    var search_term = SearchedData;
+    search_term  = search_term.toLowerCase();
+    for(var i = 0 ; i < selectedLoadCount.length ; i++){
+        if( selectedLoadCount[i].length > 0 ){
+            if( 'buyer_rel' in selectedLoadCount[i][0] ){
+                if( 'name' in selectedLoadCount[i][0].buyer_rel ){
+                    
+                    if(selectedLoadCount[i][0].buyer_rel.name.toLowerCase().indexOf(search_term) !== -1 ){
+                        matched_terms.push( selectedLoadCount[i] ); 
+                    }
+                    // SetData([matched_terms])
+                    setSelectedLoadCount(matched_terms);
+                }    
+            }
+        }
+
+    }
+}
 
 printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) => {
     let totalAmount = 0;
@@ -454,7 +557,7 @@ printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) =>
             BluetoothEscposPrinter.ALIGN.CENTER,
         );
         await BluetoothEscposPrinter.setBlob(0);
-        await BluetoothEscposPrinter.printText('UK Inch\n\r', {
+        await BluetoothEscposPrinter.printText('SUN FARMS\n\r', {
             encoding: 'GBK',
             codepage: 0,
             widthtimes: 3,
@@ -807,23 +910,18 @@ printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) =>
 }
 
 function searchBuyer(text){
-    // setActInd(true)
     searchBuyerByInvoiceNumber(text).then((res) => {
         setSelectedLoadCount(res.data.data)
-        // setActInd(false)
     })
 }
 
-function printData(data){
-
-}
 function ViewPrintableReciept(data){
     navigation.navigate('ViewPDF' , { invoiceNo : data[0].invoice_no})
 }
 
 return (
     <MainScreen>
-        <View style={{flex:1}}>
+        <View style={{height: '90%'}}>
             {(ActInd == true) ?
                 <View style={{ flex:1,position:'absolute',justifyContent:'center',height:'100%',width: '100%',backgroundColor: '#ededed',zIndex:9999,opacity: 0.5}} >
                     <ActivityIndicator size="large" color={Colors.primary} />
@@ -839,41 +937,21 @@ return (
                         <View></View>
                     }
                     <TextInput placeholder="Search Buyer By Invoice no" placeholderTextColor="lightgrey" style={styles.textInput} onChange={(value) => { searchBuyer(value.nativeEvent.text) } } />
-                    <ScrollView vertical='true'>
-                        {(selectedLoadCount != undefined && selectedLoadCount != null) ?
-                            Object.values(selectedLoadCount).map((l, i) => (
-                                (l != null)?
-                                <TouchableHighlight key={i}>
-                                        <ListItem bottomDivider key={i}>
-                                            <ListItem.Content key={i}>
-                                                <ListItem.Title key={i} style={{fontSize: 14}} allowFontScaling={false}>
-                                                    {l[0]["buyer_rel"].name}
-                                                </ListItem.Title>
-                                                <ListItem.Subtitle allowFontScaling={false} >
-                                                    <Text style={{fontSize: 10}}>{l[0].invoice_no}      {l[0].idate}</Text>
-                                                </ListItem.Subtitle>
-                                            </ListItem.Content>
-                                            <View>
-                                                <Pressable style={{backgroundColor: 'lightgreen',paddingHorizontal: 20,paddingVertical: 10}} onPress={() => { ViewPrintableReciept(l) }} >
-                                                    <Text style={{color: 'white'}}>View</Text>
-                                                </Pressable>
-                                            </View>
-                                            <View>
-                                                <Pressable style={{backgroundColor: Colors.primary,paddingHorizontal: 20,paddingVertical: 10}} onPress={() => { setPrintingIndicator(true); printReceipt(l) }} >
-                                                    <Text style={{color: 'white'}}>Print</Text>
-                                                </Pressable>
-                                            </View>
-                                        </ListItem>
-                                    </TouchableHighlight>
-                                :
-                                    <View></View>
-                            ))
-                        : 
-                            <View>
-                                <ActivityIndicator size="large" color={Colors.primary} />
-                            </View>
-                        }
-                    </ScrollView>
+                    {(!loadedData)?
+                        <FlatList
+                            contentContainerStyle={{justifyContent: 'space-between'}}
+                            data={selectedLoadCount}
+                            keyExtractor={item => item[0].id}
+                            showsVerticalScrollIndicator ={false}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({ item }) => (
+                                <ListComponent item={item} ViewRecieptState={(item) => { ViewPrintableReciept(item) }} PrintReceiptState={(item) => { console.log(item), printReceipt(item) } }/>
+                            )}
+                        />
+                    :
+                        <ActivityIndicator size="large" color={Colors.primary} />
+                    }
+                    
                 </View>
             }
         </View>

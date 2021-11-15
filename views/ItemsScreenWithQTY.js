@@ -1,5 +1,5 @@
 import React , { useEffect , useState} from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Dimensions, FlatList, SectionList } from 'react-native';
 import {View, Text, StyleSheet ,TextInput } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import { getItemsByVehicleAndLoads, imagePrefix, checkIfBuyerHasVAT } from '../api/apiService';
@@ -14,16 +14,98 @@ import { Modal } from 'react-native';
 let itemList = [
 	
 ];
-export default function ItemsScreenWithQty({navigation}) {
+
+function renderSectionList({items}){
+	return (
+		<View>
+
+		</View>
+		// <View key={k}>
+		// 	<Text key={k} style={{paddingHorizontal: 13,paddingVertical: 10,backgroundColor: '#ededed' ,fontSize: 18,marginTop: 15}}>{k}</Text>
+		// 	<View key={v} style={{flex: 1, flexDirection: 'row',flexWrap: 'wrap',justifyContent : 'space-evenly'}}>
+		// 		{Object.keys(ListItems[key][k]).map((ke ,val) => {
+		// 			return(
+					// <ItemCard selectedData={(items) => setSelectedItemsFromLoads(items)} key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} salePrice={ListItems[key][k][ke].sale_price} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
+		// 			)
+		// 		})}
+		// 	</View>
+		// </View>
+		// <Text>{item.name}</Text>
+	);
+}
+
+
+export default function ItemsScreenWithQty({navigation , route}) {
 	const [activeIndicatorLoader , setActiveIndicatorLoader] = useState(true);
+	const [activeIndicatorLoaderImages , setActiveIndicatorLoaderImages] = useState(false);
 	const [ListItems , setListItems] = useState();
 	const [requestSent , setRequestSent] = useState(false);
 	const [hasUndeliveredItems , setHasUndeliveredItems] = useState(false);
 	const [selectedItemsFromLoads , setSelectedItemsFromLoads] = useState();
 	const [customerName , setCustomerName] = useState();
 	const [myBuyerId , setMyBuyerId] = useState();
+	const windowWidth = Dimensions.get('window').width;
+
+
+	useEffect(() => {
+		// getPendingOrderResponce();
+	} , [])
+
+	// function getPendingOrderResponce () {
+	// 	AsyncStorage.getItem('cartItems').then((data) => {
+	// 		let myRecords = {};
+	// 		let myRecordsFinal = {};
+	// 		let relData = JSON.parse(data);
+	// 		if( data != undefined ){
+	// 			for(let i = 0 ; i < relData.length; i++){
+	// 				let dnum = relData[i].dnum;
+	// 				let sitem = relData[i].sitem;
+	// 				let qty = relData[i].qty;
+
+	// 				myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
+	// 				myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
+	// 				setSelectedItemsFromLoads(JSON.stringify(myRecordsFinal));
+	// 				AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal) )
+					
+					
+	// 				AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+	// 			}
+	// 			setCartData(myRecords)
+	// 			selectedLoadArray = myRecordsFinal;
+	// 		}
+	// 	})
+	// }
+
+	const renderCard = ({ item }) => {
+		return(
+			<View>
+				
+				<FlatList
+					data={item.list}
+					numColumns={4}
+					initialNumToRender={2}
+					renderItem={({ item }) => {
+						return(
+							<View style={{  }}>
+								<ItemCard selectedData={(item) => { setSelectedItemsFromLoads(item)}} qty="true" backgroundColor="#fff" loadName={item.loadname} cardId={item.id} salePrice={item.sale_price} cardName={item.name} imageUrl={imagePrefix+''+item.img} />
+							</View>
+						)}
+					}
+					keyExtractor={item.id}
+				/>
+
+			</View>
+
+		)
+	} 
+
 	// const [listUndelivered , setListUndelivered] = useState();	
 	useEffect(() => {
+		if( route.params != undefined ){
+			if(route.params.mySelectedItems != undefined){
+				setSelectedItemsFromLoads(route.params.mySelectedItems);
+			}	
+		}
 		AsyncStorage.getItem('selectedBuyerRouteName').then((buyerName) => {
 			setCustomerName(buyerName)
 		});
@@ -78,9 +160,12 @@ export default function ItemsScreenWithQty({navigation}) {
 			AsyncStorage.getItem('selectedLoadsNumbers').then((value) => { 
 				let load_numbers = value;
 				getItemsByVehicleAndLoads( vehicheId , load_numbers).then((res) => {
-
 					setListItems(res.data.data);
 					setActiveIndicatorLoader(false);
+					setActiveIndicatorLoaderImages(true)
+					setTimeout(() => {
+						setActiveIndicatorLoaderImages(false)
+					}, 8000)
 				} ,(err) => {
 					setActiveIndicatorLoader(false);
 				});
@@ -91,11 +176,20 @@ export default function ItemsScreenWithQty({navigation}) {
 		setHasUndeliveredItems(false);
 		AsyncStorage.setItem('UndeliveredItemsInCart' , status );
 	}
-
 	return (
 		<MainScreen>
-			<Text style={{color: Colors.primary,textAlign:'center',fontSize: 18}}>Customer: {customerName}</Text>
+			{(activeIndicatorLoaderImages) ? 
+				<View style={{position: 'absolute' , height: '100%' , width: '100%',backgroundColor: '#ededed',zIndex: 99999,justifyContent: 'center',textAlign: 'center',opacity: 0.8}}>
+					<Text style={{textAlign: 'center',fontSize: 20}}>Please Wait, Fetching Images</Text>
+					<ActivityIndicator size="large" color="#6c33a1" />
+				</View>
+			:
+				null
+			}
+				
 			<ScrollView vertical="true" >
+
+			<Text style={{color: Colors.primary,textAlign:'center',fontSize: 18}}>Customer: {customerName}</Text>
 				{/* <Modal
 						animationType="slide"
 						transparent={true}
@@ -129,6 +223,41 @@ export default function ItemsScreenWithQty({navigation}) {
 				:
 					<Text></Text>
 				}
+				
+				{/* {(ListItems != undefined) ?
+				
+					Object.values(ListItems).map((item , index) =>  {
+						return (
+							<View key={index} >
+								
+
+								<Text style={{width: '100%',paddingBottom:10,flexDirection: 'row',flexWrap: 'wrap', fontSize: 20,textAlign: 'center' }}>{item.loadname}</Text>
+
+									<SectionList
+										scrollEventThrottle={1000}
+										sections = {item.loadItems}
+										initialNumToRender={20}
+										// horizontal={true}
+										
+										stickySectionHeadersEnabled={false}
+										showsVerticalScrollIndicator ={false}
+										showsHorizontalScrollIndicator={false}
+										contentContainerStyle={{}}
+										keyExtractor = {(items, index) => items + index}
+										renderSectionHeader = {({ section: { title } }) => (
+											<View style={{width: windowWidth,padding: 5,backgroundColor: 'skyblue'}}>
+												<Text style={[styles.header, {backgroundColor: 'transparent' , color: 'white',marginLeft: 10}]} >{title}</Text>
+											</View>
+										)}
+										renderItem={renderCard}	
+									/>
+
+							</View>
+						)
+					})
+				:
+					<Text></Text>
+				} */}
 				{(ListItems != undefined) ?
 					Object.keys(ListItems).map((key , value) => {
 						return (
@@ -138,10 +267,10 @@ export default function ItemsScreenWithQty({navigation}) {
 									return (
 										<View key={k}>
 											<Text key={k} style={{paddingHorizontal: 13,paddingVertical: 10,backgroundColor: '#ededed' ,fontSize: 18,marginTop: 15}}>{k}</Text>
-											<View key={v} style={{flex: 1, flexDirection: 'row',flexWrap: 'wrap',justifyContent : 'space-evenly'}}>
+											<View key={v} style={{flexDirection: 'row',flexWrap: 'wrap',justifyContent : 'space-evenly'}}>
 												{Object.keys(ListItems[key][k]).map((ke ,val) => {
 													return(
-														<ItemCard selectedData={(items) => setSelectedItemsFromLoads(items)} key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} salePrice={ListItems[key][k][ke].sale_price} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
+														<ItemCard selectedData={(data) => { setSelectedItemsFromLoads(data) }} key={ke} qty="true" backgroundColor="#fff" loadName={key} cardId={ListItems[key][k][ke].id} cardName={ListItems[key][k][ke].name} imageUrl={imagePrefix+''+ListItems[key][k][ke].img} />
 													)
 												})}
 											</View>
@@ -154,11 +283,10 @@ export default function ItemsScreenWithQty({navigation}) {
 				:
 					<Text></Text>
 				}
-			</ScrollView>
+				
+				</ScrollView>
 			<Pressable 	
 				onPress={() => { 
-					// console.log(selectedItemsFromLoads)
-					// return false;
 					navigation.push('AddQuantity' , {mySelectedItems : selectedItemsFromLoads});
 
 					return false;
@@ -216,4 +344,18 @@ const styles = StyleSheet.create({
 		elevation: 5,
 		justifyContent: 'center'
 	},
+	item: {
+		backgroundColor: "#f9c2ff",
+		padding: 20,
+		marginVertical: 8
+	},
+	header: {
+		fontSize: 26,
+		backgroundColor: "#fff",
+		fontWeight: 'bold'
+	},
+	title: {
+		fontSize: 24
+	}
 });
+

@@ -81,7 +81,7 @@ export default function Dashboard({navigation , route}) {
 	} , [])
 
 	function getSalesOfDay(){
-		AsyncStorage.getItem('selectedVehicleNo').then((value) => {
+		AsyncStorage.getItem('selectedVehicleNo').then( (value) => {
 			let selectedVehNo  = value;
 			AsyncStorage.getItem('user_id').then((value) => {
 				let driverId =  value;
@@ -124,6 +124,23 @@ export default function Dashboard({navigation , route}) {
 					}}
 				/>
 				<DashboardCard
+					backgroundColor={Colors.primary}
+					cardName="Loads"
+					icon="plus"
+					onPress={() => {
+						navigation.push('Demandstock' );
+					}}
+				/>
+
+				<DashboardCard
+					backgroundColor={Colors.skyBlue}
+					cardName="Un-Delivered"
+					icon="list"
+					onPress={() => {
+						navigation.push('undeliveredItems' );
+					}}
+				/>
+				<DashboardCard
 					backgroundColor={Colors.yellow}
 					cardName="ROUTES"
 					icon="map"
@@ -132,10 +149,13 @@ export default function Dashboard({navigation , route}) {
 					}}
 				/>
 				
+				
 			</View>
-			<Pressable style={{padding: 10}} onPress={() => { navigation.navigate('Demandstock') }}>
-				<Text>Here</Text>
-			</Pressable>
+			
+			{/* <Pressable style={{padding: 10,backgroundColor: 'green'}} onPress={() => { navigation.navigate('Demandstock') }}>
+				<Text style={{textAlign: 'center',color: 'white',fontSize: 20}}>Generate New Load</Text>
+			</Pressable> */}
+
 			<View style={styles.barSection}>
 				<Text style={styles.detailBar} allowFontScaling={false}>
 					Sales for Today

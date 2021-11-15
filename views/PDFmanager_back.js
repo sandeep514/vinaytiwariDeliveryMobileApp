@@ -337,7 +337,7 @@ export default function PDFmanagerback({navigation , text, onOK}) {
                 BluetoothEscposPrinter.ALIGN.CENTER,
             );
             await BluetoothEscposPrinter.setBlob(0);
-            await BluetoothEscposPrinter.printText('UK Inch\n\r', { 
+            await BluetoothEscposPrinter.printText('SUN FARMS\n\r', { 
                 encoding: 'GBK',
                 codepage: 0,
                 widthtimes: 3,
@@ -696,7 +696,7 @@ export default function PDFmanagerback({navigation , text, onOK}) {
 
         printDesignStarPrinter = async (buyerData , ItemData, extraData) => {
             commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-            commandsArray.push({append: "UK Inch\n"});
+            commandsArray.push({append: "SUN FARMS\n"});
             commandsArray.push({append: "94 Staceway Worth, Crawley, RH107YR\n"});
             commandsArray.push({append: "Phone: 07917105510\n"});
             commandsArray.push({append: "Email: Ekinch2@gmail.com\n"});
@@ -1030,7 +1030,7 @@ export default function PDFmanagerback({navigation , text, onOK}) {
                                     <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
                                         Invoice
                                     </Text>
-                                    <Text style={{ fontSize: 30,textAlign: 'center'}}>UK Inch</Text>
+                                    <Text style={{ fontSize: 30,textAlign: 'center'}}>SUN FARMS</Text>
                                     <Text style={{ fontSize: 15,textAlign: 'center'}}>94 Staceway Worth, Crawley, RH107YR</Text>
                                     <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
                                     <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ekinch2@gmail.com</Text>
@@ -1261,7 +1261,7 @@ export default function PDFmanagerback({navigation , text, onOK}) {
                                 <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
                                     Invoice
                                 </Text>
-                                <Text style={{ fontSize: 30,textAlign: 'center'}}>UK Inch</Text>
+                                <Text style={{ fontSize: 30,textAlign: 'center'}}>SUN FARMS</Text>
                                 <Text style={{ fontSize: 15,textAlign: 'center'}}>94 Staceway Worth, Crawley, RH107YR</Text>
                                 <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
                                 <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ekinch2@gmail.com</Text>

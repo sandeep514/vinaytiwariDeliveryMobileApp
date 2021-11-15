@@ -5,6 +5,9 @@ import {
 	StyleSheet,
 	FlatList,
 	Pressable,
+	SectionList,
+	ActivityIndicator,
+	TouchableOpacity,
 } from 'react-native';
 
 import {Colors} from '../components/Colors';
@@ -22,7 +25,14 @@ export default function Demandstock({navigation , route}) {
 	const [ selectedVehicleId , setSelectedVehicleId ] = useState();
 	const [ MyLoadNewNumber , setMyLoadNewNumber ] = useState();
 	const [ mySavedLoadData , SetMySavedLoadData ] = useState();
+	const [ loaded , SetLoaded ] = useState(true);
 
+	const Item = ({ title }) => (
+		<View style={styles.item}>
+		  	<Text style={styles.title}>{title}</Text>
+		</View>
+	);
+	  
 	useEffect(() => {	
 
 		AsyncStorage.getItem('vehicle_no').then((vehicleNo) => {
@@ -35,24 +45,40 @@ export default function Demandstock({navigation , route}) {
 
 	} , []);
 
+	const renderSectionHeader = ({ section: { title } }) => (
+		<Text style={{padding: 10 , color: '#fff',fontSize: 20,backgroundColor:Colors.primary}} >{title}</Text>
+	)
 	function getSalesItemsForLoads(){
+		SetLoaded(true)
 		getSalesItemsForLoad().then((res) => {
 			setMyLoadNewNumber(res.data.load_number)
 			setData(res.data.items);
-			console.log("here")
-			console.log(res.data.items)
+			SetLoaded(false)
+
 		})
 	}
 
 	function saveLoad(loadData){
+		SetLoaded(true)
+
 		let processedData = { 'data' : loadData , 'vehicleNo' : selectedVehicleId , 'loadNumber' : MyLoadNewNumber }
 
 		saveNewLoad(processedData).then((res) => {
-			console.log(res.data.data)
+			
+			SetLoaded(false)
+			alert("Load generated sucessfully");
+			navigation.navigate('Dashboard');
 
-		})
+		});
+
 	}
 
+	function renderAlerts({ item }) {
+		return (
+			<DemandstockList data={item} savedData={ (updatedData) => { SetMySavedLoadData(updatedData) } } savedLoadData={mySavedLoadData} />
+		);
+	  }
+	
 	return (
 		<MainScreen>
 			<View style={styles.itemListSection}>
@@ -78,24 +104,28 @@ export default function Demandstock({navigation , route}) {
 						<Text style={styles.headerTitle}>Total</Text>
 					</View>
 				</View>
-				{Object.keys(data).map((myData) => {
-					return(
-						<View>
-							<Text style={{color: Colors.primary}}>{myData}</Text>
-							<FlatList
-								data={data[myData]}
-								// renderItem={renderItem}
-								initialNumToRender={20} 
-								keyExtractor={(item) => item.id}
-								// extraData={selectedId}
-								renderItem={({ item }) => (
-									<DemandstockList data={item} savedData={ (updatedData) => { SetMySavedLoadData(updatedData) } } savedLoadData={mySavedLoadData}  />
-								)}
-							/>
-						</View>
-					)
-					
-				})}
+				{( loaded == true )? 
+					<ActivityIndicator color={Colors.primary}></ActivityIndicator>
+				:
+					// <SectionList
+					// 	sections={DATA}
+					// 	keyExtractor={(item, index) => index}
+					// 	renderItem={({ item }) => <Item title={item} />}
+					// 	renderSectionHeader={({ section: { title } }) => (
+					// 		<Text style={styles.header}>here</Text>
+					// 	)}
+					// />
+
+					<SectionList
+						sections={data}
+						keyExtractor={item => `${item.id}`}
+						renderItem={(renderAlerts)}
+						renderSectionHeader={renderSectionHeader}
+					/>
+					// <View><Text>Here</Text></View>
+				}
+				
+				
 				
 			</View>
 			<Pressable style={{position: 'absolute',backgroundColor: Colors.primary , bottom: 0,margin: 20,paddingHorizontal: 21,right: 0,paddingVertical: 18,borderRadius: 100}} onPress={() => { saveLoad(mySavedLoadData) }}>

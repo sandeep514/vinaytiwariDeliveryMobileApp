@@ -140,7 +140,7 @@ export default function Todayinvoices({navigation}) {
                 BluetoothEscposPrinter.ALIGN.CENTER,
             );
             await BluetoothEscposPrinter.setBlob(0);
-            await BluetoothEscposPrinter.printText('UK Inch\n\r', {
+            await BluetoothEscposPrinter.printText('SUN FARMS\n\r', {
                 encoding: 'GBK',
                 codepage: 0,
                 widthtimes: 3,
@@ -427,7 +427,8 @@ export default function Todayinvoices({navigation}) {
                         AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
                     }
                 }
-                navigation.push('AddQuantity' , { mySelectedItems: myRecordsFinal});
+                navigation.push('ItemsScreenWithQty' , { mySelectedItems: myRecordsFinal});
+                // navigation.push('AddQuantity' , { mySelectedItems: myRecordsFinal});
 
             });
         })

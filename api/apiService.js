@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ToastAndroid } from 'react-native';
 import apiClient from './client';
+import { StarPRNT } from 'react-native-star-prnt';
 
 export const imagePrefix = 'https://delivery-app.ripungupta.com/';
 
@@ -216,6 +217,7 @@ export const updateTypeOfinvoice = ( invoice , status ) => {
 		});
 	});
 };
+
 export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.get( 'get-buyer-priority-by-driver-sorted/'+driverId+'/'+routeId ).then((response) => {
@@ -229,9 +231,9 @@ export const getPrioritySortedDrivers = ( driverId , routeId ) => {
 };
 
 //get Today sale
-export const getListInvoices = ( vehicheNumber , driverId ) => {
+export const getListInvoices = ( driverId , vehicheId ) => {
 	return new Promise( (resolve , reject) => {
-		apiClient.get( 'get-sales-details/'+vehicheNumber+'/'+driverId ).then((response) => {
+		apiClient.get( 'get-sales-details/'+driverId+'/'+vehicheId ).then((response) => {
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -258,6 +260,8 @@ export const checkIfBuyerHasVAT = ( buyerId ) => {
 export const getCartItemDetails = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-cart-item-details' , { data : postedData}).then((response) => {
+			console.log(response.data.data)
+
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -347,15 +351,24 @@ export const searchBuyerByInvoiceNumber = ( invoiceNo ) => {
 				reject(response.data.error);
 			}
 		});
-		
 	});
 };
 
+export const saveSortedPriority = (sortedArray , driverId , routeId) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.post('update-buyer-priority' , { priorities : sortedArray , driverId : driverId , routeId : routeId}).then((response) => {
+			if(response.data.status == 'success'){
+				resolve(response);
+			}else{
+				reject(response.data.error);
+			}
+		});
+	});
+}
 //  https://delivery-app.ripungupta.com/backend/public/api/save-load
 export const saveNewLoad = ( data ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('save-load' , { data : data}).then((response) => {
-			console.log(response.data)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -378,3 +391,387 @@ export const getSalesItemsForLoad = ( ) => {
 		
 	});
 };
+
+export const getItemRequirement = ( ) => {
+	return new Promise( (resolve , reject) => {
+		apiClient.get('get-items-requirement').then((response) => {
+			if(response.data.status == true){
+				resolve(response.data.data);
+			}else{
+				reject(response.data.error);
+			}
+		});
+		
+	});
+};
+
+export const printing = (data , invoiceNo , buyerName, buyerAddress , buyerPhone , undeliveredItem,hasVatProduct,hasNonVatProducts) => {
+	let commandsArray = [];
+
+	let totalAmount = 0;
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({appendBitmapText: "SUN FARMS",fontSize:45});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: "Unit 12C, Bridge Industrial Estate,RH6 9HU\n"});
+    commandsArray.push({append: "Phone: 07917105510\n"});
+    commandsArray.push({append: "Email: Ukinch2@gmail.com\n"});
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'INVOICE: '+invoiceNo});
+    commandsArray.push({append: '\n'});
+    
+    //Customer Details
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({append: '--------------------------------\n'});
+
+    
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+    commandsArray.push({append: 'Date: '+data[0].idate });
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({append: '--------------------------------\n'});
+
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Customer \n'});
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Name: '});
+    commandsArray.push({append: buyerName});
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Address: '});
+    commandsArray.push({append: buyerName });
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+    commandsArray.push({append: 'Phone: '});
+    commandsArray.push({append: buyerPhone });
+    commandsArray.push({append: '\n'});
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({append: '--------------------------------\n'});
+    let nonVatTotal = 0;
+    
+    if( hasVatProduct ){
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+        commandsArray.push({append: 'Qty  '});
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+        commandsArray.push({append: 'Price  '});
+        commandsArray.push({append: 'Amount '});
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
+        commandsArray.push({append: 'VAT  '});
+        commandsArray.push({append: 'Total'});
+
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '--------------------------------\n'});
+
+        let beforeVatPrice = 0;
+        let vatAmount = 0;
+
+        for(let i = 0 ; i < data.length ; i++){
+            if( data[i]['sale_item_rel'].itemcategory == 'EGGS' || data[i]['sale_item_rel'].itemcategory == 3 || data[i]['sale_item_rel'].itemcategory == '3' || data[i].has_vat == 1){
+                let sitem       = data[i]['sale_item_rel']['name'];
+                let salePrice   = data[i]['sale_price'];
+                let qty         = data[i]['qty'];
+                let vat = 0;
+                let amount = 0;
+                if( data[i]['sale_item_rel'].itemcategory != 'EGGS' && data[i]['sale_item_rel'].itemcategory != 3 && data[i]['sale_item_rel'].itemcategory != '3' ){
+                    vat = (( (( ( (data[i]['sale_price'] * data[i]['qty']) * 1.20 ) - (data[i]['sale_price'] * data[i]['qty']))) ).toFixed(2)).toString();
+    
+                    vatAmount = vatAmount + parseFloat(vat);
+                }
+                if( data[i]['sale_item_rel'].itemcategory == 'EGGS' || data[i]['sale_item_rel'].itemcategory == 3 || data[i]['sale_item_rel'].itemcategory == '3' ){
+                    amount = ((data[i]['sale_price'] * data[i]['qty']).toFixed(2)).toString();
+                }else{
+                    amount = (( (data[i]['sale_price'] * data[i]['qty']) * 1.20 ).toFixed(2)).toString();
+                    
+                }
+                beforeVatPrice = (beforeVatPrice + parseFloat((qty*salePrice)));
+
+                totalAmount = (parseFloat(totalAmount)+parseFloat(amount));
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: sitem+'\n'});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: (qty*1).toFixed(0)+'   '});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: salePrice+'   '});
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: (qty*salePrice).toFixed(2)+'   '});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: vat+'   '});
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({append: amount});
+                
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '--------------------------------\n'});
+            }
+        }
+
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+        commandsArray.push({append: 'Amount Before VAT: '});
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+        commandsArray.push({append: (beforeVatPrice).toFixed(2)+'\n'});
+
+        commandsArray.push({append: 'VAT: '});
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+        commandsArray.push({append: (vatAmount).toFixed(2)+'\n'});
+
+        commandsArray.push({append: 'Total: '});
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+        commandsArray.push({append: (beforeVatPrice + vatAmount).toFixed(2)+'\n'});
+
+    }
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+
+    
+    if(hasNonVatProducts > 0){
+        commandsArray.push({append: '\n'});
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+        commandsArray.push({append: '*************************'});
+        
+        commandsArray.push({append: '\n'});
+        
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+        commandsArray.push({append: 'Qty'+'     '});
+        commandsArray.push({append: 'Price'+'       '});
+        commandsArray.push({append: 'Amt'});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '--------------------------------\n'});
+        
+        for(let i = 0 ; i < data.length ; i++){
+            if( data[i]['sale_item_rel'].itemcategory != 'EGGS' && data[i]['sale_item_rel'].itemcategory != 3  && data[i]['sale_item_rel'].itemcategory != '3'  && !data[i]['has_vat'] ){
+                let sitem = data[i]['sale_item_rel']['name'];
+                let salePrice = data[i]['sale_price'];
+                let qty = data[i]['qty'];
+                let amount = ((data[i]['sale_price'] * data[i]['qty']).toFixed(2)).toString();
+                let vat = 0;
+                nonVatTotal = (nonVatTotal + parseFloat(amount));
+
+                totalAmount = (parseFloat(totalAmount));
+
+                
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: sitem});
+                commandsArray.push({append: '\n'});
+                
+                commandsArray.push({ append: (qty*1).toFixed(0)+'       ' });
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({ append: salePrice+'       ' });
+
+                commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                commandsArray.push({appendBytes:[0x9c]});
+                commandsArray.push({ append: amount });
+                commandsArray.push({append: '\n'});
+    			commandsArray.push({append: '--------------------------------\n'});
+                // commandsArray.push({append: '\n'});
+            }
+        }
+        commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+        commandsArray.push({ append: 'Total: ' });
+
+        commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+        commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+        commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+        commandsArray.push({appendBytes:[0x9c]});
+
+        commandsArray.push({ append: (nonVatTotal).toFixed(2) });
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '--------------------------------\n'});
+    }
+
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
+    commandsArray.push({ append: '  ' });
+    commandsArray.push({ append: '  ' });
+    commandsArray.push({ append: 'Grand Total: ' });
+
+    commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+    commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+    commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+    commandsArray.push({appendBytes:[0x9c]});
+
+    commandsArray.push({ append: (totalAmount+nonVatTotal).toFixed(2) });        
+
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '--------------------------------\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+
+
+    if( undeliveredItem != undefined ){
+        if(Object.values(undeliveredItem).length > 0){
+            commandsArray.push({append: '\n'});
+            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+            commandsArray.push({append: '******* Un Delivered *******'});
+            
+            commandsArray.push({append: '\n'});
+            
+            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+            commandsArray.push({append: 'Item'+'                    '});
+            commandsArray.push({append: 'Qty'});
+            commandsArray.push({append: '\n'});
+
+            commandsArray.push({append: '--------------------------------\n'});
+
+            for(let i = 0 ; i < Object.values(undeliveredItem).length ; i++){            
+
+                let undeliveredItemPrice = Object.values(undeliveredItem)[i]['sale_item_rel'].name;
+                let myQty = (Object.values(undeliveredItem)[i]['qty']);
+                    
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                commandsArray.push({append: undeliveredItemPrice+'            '});
+
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
+                commandsArray.push({ append: myQty });
+                
+                commandsArray.push({append: '\n'});
+            }
+
+            // commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+            // commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+            // commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+            // commandsArray.push({appendBytes:[0x9c]});
+            // commandsArray.push({append: '\n'});
+            // commandsArray.push({append: '--------------------------------\n'});
+        }    
+    }
+
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+
+	try {
+        var printResult =  StarPRNT.print('StarPRNT', commandsArray, 'BT:');
+        // alert(printResult); // Success!
+        // setRefreshPage("refresh");
+
+        // navigation.navigate('Dashboard');
+        // getListInvoice();
+
+    } catch (e) {
+        alert(e);
+    }
+	
+}
+export const printingUndeliveredItems = (data) => {
+	
+	let commandsArray = [];
+
+	let totalAmount = 0;
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+    commandsArray.push({appendBitmapText: "SUN FARMS",fontSize:45});
+    
+    // commandsArray.push({append: '\n'});
+
+    if( data != undefined ){
+        if(Object.values(data).length > 0){
+		
+            commandsArray.push({append: '\n'});
+            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+            commandsArray.push({append: '******* Un Delivered *******'});
+            
+            commandsArray.push({append: '\n'});
+            
+            commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+            commandsArray.push({append: 'Item'+'                    '});
+            commandsArray.push({append: 'Qty'});
+            commandsArray.push({append: '\n'});
+
+            commandsArray.push({append: '--------------------------------\n'});
+
+            for(let i = 0 ; i < Object.values(data).length ; i++){   
+				for(let i = 0 ; i < Object.values(Object.values(data)[i].data).length ; i++){            		
+					let date = Object.values(Object.values(data)[i].data)[i].date	;
+					let item_name = Object.values(Object.values(data)[i].data)[i].item_name	;
+					let qty = Object.values(Object.values(data)[i].data)[i].qty	;
+
+					commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+					commandsArray.push({append: date+'     '});
+
+					commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
+					commandsArray.push({ append: item_name+'     ' });
+					commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.right});
+					commandsArray.push({ append: qty });
+					
+					commandsArray.push({append: '\n'});
+				}
+            }
+            // commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+            // commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+            // commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+            // commandsArray.push({appendBytes:[0x9c]});
+            // commandsArray.push({append: '\n'});
+            // commandsArray.push({append: '--------------------------------\n'});
+        }    
+    }
+
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+    commandsArray.push({append: '\n'});
+	try {
+        var printResult =  StarPRNT.print('StarPRNT', commandsArray, 'BT:');
+		return false;
+        // alert(printResult); // Success!
+        // setRefreshPage("refresh");
+
+        // navigation.navigate('Dashboard');
+        // getListInvoice();
+
+    } catch (e) {
+		alert('i am here')
+        // alert(JSON.stringify(e));
+    }
+	
+}

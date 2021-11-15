@@ -50,6 +50,7 @@ export default function ListInvoices({navigation, route}) {
         })
     }
     function ViewPrintableReciept(data){
+        
         navigation.navigate('ViewPDF' , { invoiceNo : data[0].invoice})
     }
     return (
@@ -83,15 +84,25 @@ export default function ListInvoices({navigation, route}) {
                                                 <ListItem.Content key={i}>
                                                     <ListItem.Title key={i} style={{fontSize: 14}} allowFontScaling={false}>
                                                         <Pressable onPress={ () => { ViewPrintableReciept(l) }}>
-                                                            <Text>{l[0].invoice}</Text>
+                                                            <Text style={{fontSize: 15}}>{l[0].buyer_rel['name']} </Text>
                                                         </Pressable> 
                                                     </ListItem.Title>
                                                     <ListItem.Subtitle allowFontScaling={false} >
-                                                        <Text style={{fontSize: 13}}>£{ l.invoiceTotal } </Text>
+                                                        ( <Text style={{fontSize: 16}}>{l[0].invoice}</Text> )  
+                                                        <Text style={{fontSize: 13}}>  £{ l.invoiceTotal } </Text>
                                                         <Text style={{fontSize: 10}}> {l[0].ddate} </Text>
                                                     </ListItem.Subtitle>
                                                 </ListItem.Content>
+                                                <View>
+                                                    <Text style={{fontSize: 15 , fontWeight: 'bold'}}> Clossing balance: £{ (l.closingBalance).toFixed(2) }</Text>
+                                                </View>
+                                                <View>
+                                                    <Pressable style={{backgroundColor: 'skyblue',paddingHorizontal: 10,paddingVertical: 5 }} onPress={() => { ViewPrintableReciept(l) }} >
+                                                        <Text style={{color: 'white'}}>View</Text>
+                                                    </Pressable>
+                                                </View>
 
+                                                
                                                 <View>
                                                     <Pressable style={(l[0].payment_type == 'cash') ? {backgroundColor: 'green',paddingHorizontal: 10,paddingVertical: 5 }: {backgroundColor: Colors.primary,paddingHorizontal: 10,paddingVertical: 5 }} onPress={() => { changeStatusOfInvoice(l[0].invoice , 'cash') }} >
                                                         <Text style={{color: 'white'}}>Cash</Text>
@@ -133,14 +144,14 @@ export default function ListInvoices({navigation, route}) {
 const styles = StyleSheet.create({
 vehicleImage: {width: 50, height: 50, resizeMode: 'contain'},
 plusButton: {
-position: 'relative',
-backgroundColor: Colors.parrotGreen,
-alignSelf: 'center',
+    position: 'relative',
+    backgroundColor: Colors.parrotGreen,
+    alignSelf: 'center',
 },
 minisButton: {
-position: 'relative',
-backgroundColor: Colors.redMaroon,
-alignSelf: 'center',
+    position: 'relative',
+    backgroundColor: Colors.redMaroon,
+    alignSelf: 'center',
 },
 mainBox: {
 flex: 1,

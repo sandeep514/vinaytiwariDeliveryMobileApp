@@ -1,43 +1,53 @@
 import React, {useState,useEffect} from 'react';
 import {ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, TouchableHighlight, View} from 'react-native';
-import {Icon, ListItem} from 'react-native-elements';
+import {Icon, Input, ListItem} from 'react-native-elements';
 import {Colors} from '../components/Colors';
 import MainScreen from '../layout/MainScreen';
 import {heightToDp} from '../utils/Responsive';
 // import MapView, { Marker } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getPriorityDrivers  } from '../api/apiService';
+import { getPriorityDrivers, saveSortedPriority  } from '../api/apiService';
 import { Text } from 'react-native';
+import ItemComponent from './component/inputcomponent';
 // import { BoardRepository , Board } from 'react-native-draganddrop-board'
 
-const data = [
-    {
-        id: 1,
-        name: "Today's routes",
-        rows: [
-            {
-                id: '1',
-                name: 'Analyze your audience',
-                // description: 'Learn more about the audience to whom you will be speaking'
-            },
-   
-        ]
-    }
-]
-
+	const data = [
+		{
+			id: 1,
+			name: "Today's routes",
+			rows: [
+				{
+					id: '1',
+					name: 'Analyze your audience',
+					// description: 'Learn more about the audience to whom you will be speaking'
+				},
+	
+			]
+		}
+	]
     export default function DashboardRoutes({navigation , route}) {
-        const [coord , setCoord] = useState({
+        
+		const [coord , setCoord] = useState({
             latitude: 31.6206,
             longitude: 74.8801,
             latitudeDelta: 1,
             longitudeDelta: 1,
         })
+
         const [listRoutes , setListRoutes] = useState();
         const [listRoute , setListRoute] = useState();
         const [boardRepo , setBoardRepo] = useState();
         const [hasRoutes , setHasRoutes] = useState(false);
+        const [SaveLoader , setSaveLoader] = useState(false);
+        const [reloader , setReloader] = useState(false);
+        const [sortedLists , setSortedLists] = useState({});
+        const [newUpdatedList , setNewUpdatedList] = useState([]);
         // let boardRepository = new BoardRepository(route.params.myRoutes);
         useEffect(() => {
+			getRoutes();
+		} , [reloader])
+        useEffect(() => {
+
             AsyncStorage.removeItem('selectedLoadedItemsByQty');
             AsyncStorage.removeItem('cartItems')
             AsyncStorage.removeItem('itemsAddedInCart')
@@ -56,16 +66,36 @@ const data = [
             // })
             
 
-            return ( AsyncStorage.removeItem('selectedInvoiceId'))
+								
+            return ( AsyncStorage.removeItem('selectedInvoiceId') , AsyncStorage.removeItem('newSortedArray') )
         } , [])
 
-        function getRoutes(){
+		const getBuyerIds = (data) => {
+			let sortedList = [];
+			return new Promise((resolve , reject) => {
+				if( data != undefined ){
+					for( let i = 0 ; i < data.length ; i++ ){
+						sortedList.push(data[i].id);
+					}	
+					resolve(sortedList);
+				}else{
+					reject("some error")
+				}
+			})
+		}
+		
+        const getRoutes = () => {
             AsyncStorage.getItem('selectedRoute').then((routeId) => {
                 AsyncStorage.getItem('user_id').then((driverid) => {
                     getPriorityDrivers(driverid , routeId).then((res) => {
                         setHasRoutes(true)
-                        
                         setListRoute(res.data.data);
+						getBuyerIds(res.data.data).then((res) => {
+							setSortedLists(res);
+							console.log(res)
+						}).catch((err) => {
+							console.log(err);
+						})
                     } , (err) =>{
     
                     })
@@ -84,12 +114,14 @@ const data = [
                 longitudeDelta: 1,
             }
         ]);
+
         const [active, setActive] = new useState();
 
         const listClicked = (listData) => {
             setActive(listData.id);
             AsyncStorage.setItem( 'selectedBuyerRouteId', (listData.id).toString());
             AsyncStorage.setItem( 'selectedBuyerRouteName', listData.name);
+
             // setcoordinates([{} ,{    latitude: parseFloat(listData.latitude),
             //                         longitude: parseFloat(listData.longitude),
             //                         latitudeDelta: 1,
@@ -99,17 +131,70 @@ const data = [
 
         };
 
+		const saveSort = () => {
+			setSaveLoader(true)
+			AsyncStorage.getItem('selectedRoute').then((routeId) => {
+                AsyncStorage.getItem('user_id').then((driverid) => {
+					saveSortedPriority( sortedLists , driverid , routeId).then((res) => {
+						setSaveLoader(false);
+						console.log(res);
+						if(reloader) {
+							console.log("here");
+							setReloader(false)
+						}else{
+							console.log("kjnjknk");
+							setReloader(true)
+						}
+						
+					}).catch((err) => {
+						console.log(err);
+					});
+				})
+			});
+		}
+
+
         return (
           <MainScreen>
+			  <View style={{ 
+							alignItems: 'center',
+							justifyContent:'center',
+							// position: 'absolute',
+							width: '96%',
+							height: 45,
+							zIndex: 9999,
+							top: 0,
+							// right: '33%',
+							// padding: 18,
+							backgroundColor: Colors.primary,
+							borderRadius: 100,
+							margin: 10
+					}}>
+					{(!SaveLoader) ?
+						<Pressable
+							onPress={() => {
+								saveSort();
+							}}
+						>
+							<Text style={{color: '#fff' , fontSize: 20}}>Save Sort</Text>
+						</Pressable>
+						:
+						<ActivityIndicator color='#fff' size={20} />
+					}
+				</View>
             <View style={styles.container}>
               {/* <Board
                             boardRepository={boardRepository}
-                            open={() => {}}
+                            open={() => {}}	
                             onDragEnd={() => {}}
         					isWithCountBadge={ true }
                             boardBackground="no"
                         /> */}
+					
+
               <View style={styles.nextButton}>
+
+
                 <Pressable
                   onPress={() => {
                     if (active != undefined) {
@@ -135,24 +220,28 @@ const data = [
                   {hasRoutes != false && listRoute != undefined ? (
                     listRoute.map((l, i) => (
                       <TouchableHighlight
+						style={{padding:0 ,margin: 0}}
                         key={i}
                         onPress={event => listClicked(l)}>
                         <ListItem
-                          containerStyle={
-                            active == l.id
-                              ? styles.active
-                              : l.delivery_status == 0
-                              ? {backgroundColor: '#ff6363'}
-                              : l.delivery_status == 1
-                              ? {backgroundColor: 'white'}
-                              : {backgroundColor: 'blue'}
-                          }
-                          key={i}
-                          bottomDivider>
-                          <Image
-                            source={require('../assets/images/map.png')}
-                            style={styles.Avatar}
-                          />
+                          	containerStyle={
+								active == l.id
+									? styles.active
+									: l.delivery_status == 0
+									? {backgroundColor: '#ff6363'}
+									: l.delivery_status == 1
+									? {backgroundColor: 'white'}
+									: {backgroundColor: 'blue'}
+							}
+							key={i}
+							bottomDivider>
+								<View style={{padding: 0 , margin: 0,width: 60,marginTop: 15,height: 60}}>
+									<ItemComponent defaultImage={((l.priority)).toString()} listItems={sortedLists} sortedItm={(sortItems) => { console.log("here"), setSortedLists(sortItems) }} buyerId={l.id} />
+								</View>
+							<Image
+								source={require('../assets/images/map.png')}
+								style={styles.Avatar}
+							/>
 							<ListItem.Content>
 								<ListItem.Title
 									style={
@@ -175,22 +264,26 @@ const data = [
 									{l.address}
 								</ListItem.Title>
 							</ListItem.Content>
-						  	<Pressable onPress={() => { navigation.push('listInvoices' , {buyerId : l.id}) }}>
+							<Pressable onPress={() => { 
+								
+								navigation.push('listInvoices' , {buyerId : l.id}) }
+
+							}>
 								<Icon
 									name="cog"
 									type="font-awesome"
 									color={Colors.primary}
 									style={{padding: 10}}
 								/>
-							  </Pressable>
+							</Pressable>
                         </ListItem>
                       </TouchableHighlight>
                     ))
                   ) : (
                     <View>
-                      <ActivityIndicator
-                        color={Colors.primary}
-                        size="large"></ActivityIndicator>
+						<ActivityIndicator
+							color={Colors.primary}
+							size="large"></ActivityIndicator>
                     </View>
                   )}
                 </ScrollView>

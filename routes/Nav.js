@@ -20,13 +20,13 @@ import AllInvoice from '../views/AllInvoice';
 import Todayinvoices from '../views/Todayinvoices';
 
 import { View, Text, Button, Image } from 'react-native';
-import { Alert } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ViewPDF from '../views/ViewPDF';
 import ListInvoices from '../views/ListInvoices';
 import Demandstock from '../views/Demandstock';
+import UndeliveredList from '../views/UndeliveredList';
 
 const Stack = createStackNavigator();
 export default function Nav() {
@@ -234,6 +234,14 @@ export default function Nav() {
 					component={Demandstock}
 					options={( {navigation} ) => ({
 						headerShown: true , title : 'Demand Stock',
+					})}
+				/>
+				<Stack.Screen
+					title="Undelivered Items"
+					name="undeliveredItems"
+					component={UndeliveredList}
+					options={( {navigation} ) => ({
+						headerShown: true , title : 'Undelivered Items',
 					})}
 				/>
 			</Stack.Navigator>

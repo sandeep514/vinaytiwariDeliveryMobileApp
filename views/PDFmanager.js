@@ -26,11 +26,11 @@ export default function PDFmanager({navigation , text, onOK}) {
     const ref = useRef();
 	const win = Dimensions.get('window');
 
-	const [ isLoaderActive ,setIsLoaderActive ] = useState(false);
-	const [ isBluetoothEnabled ,setisBluetoothEnabled ] = useState(false);
-	const [ device ,setDevice ] = useState();
-	const [ savedOrderResonce ,setSavedOrderResponce ] = useState();
-	const [ myData ,setMyData ] = useState();
+	const [ isLoaderActive , setIsLoaderActive ] = useState(false);
+	const [ isBluetoothEnabled , setisBluetoothEnabled ] = useState(false);
+	const [ device , setDevice ] = useState();
+	const [ savedOrderResonce , setSavedOrderResponce ] = useState();
+	const [ undeliveredItems ,setundeliveredItems ] = useState();
 	const [ hasNonVatProducts ,setHasNonVatProducts ] = useState(false);
 	const [ hasVatProducts ,setHasVatProducts ] = useState(false);
 	const [ remarks ,setRemarks ] = useState('');
@@ -49,8 +49,6 @@ export default function PDFmanager({navigation , text, onOK}) {
     const [modalVisible, setModalVisible] = useState(false);
     
     useEffect(() => {
-        
-        
         getPrinterNameByDriver();
         AsyncStorage.getItem('user_id').then((driverId) => {
             setselectedDriverId(driverId)
@@ -59,6 +57,7 @@ export default function PDFmanager({navigation , text, onOK}) {
             
             setIsLoaderActive(true)
             BeforeOrderDetails(data).then( (result) => {
+
                 AsyncStorage.getItem('selectedInvoiceId').then((selectedInvoice) => {
                     if( selectedInvoice != null ){
                         setInvoiceNumber(selectedInvoice);
@@ -66,17 +65,20 @@ export default function PDFmanager({navigation , text, onOK}) {
                         setInvoiceNumber(result.data.invoiceNumber);
                     }
                 })
-    
                 setSavedBuyerData(result.data.buyer);
                 setSavedBuyerData(result.data.buyer);
+                setundeliveredItems(result.data.undeliverdItems)
+
                 let parsedData = result.data.data;
 
                 setSavedOrderResponce(parsedData);
-                for(let i = 0 ; i < parsedData.length ; i++){
-                    if( parsedData[i]['has_vat'] == 1 || parsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS'){
-                        if(parsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS'){
-                            let qty = parsedData[i]['qty'];
-                            let sale_price = parsedData[i]['sale_price'];
+                // return false
+                let jsonparsedData = Object.values(parsedData);
+                for(let i = 0 ; i < jsonparsedData.length ; i++){
+                    if( jsonparsedData[i]['has_vat'] == 1 || jsonparsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS'){
+                        if(jsonparsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS'){
+                            let qty = jsonparsedData[i]['qty'];
+                            let sale_price = jsonparsedData[i]['sale_price'];
                             
                             // setVatProductTotal( (parseFloat(VatProductTotal) + (parseFloat(qty)*parseFloat(sale_price))) );
                             totalAmountVat = (parseFloat(totalAmountVat) + (parseFloat(qty)*parseFloat(sale_price))) 
@@ -85,9 +87,9 @@ export default function PDFmanager({navigation , text, onOK}) {
                             setVatProductTotal(totalAmountVat);
                             setVATTotal(AmountVat)
                         }
-                        if( parsedData[i]['has_vat'] == 1 ){
-                            let qty = parsedData[i]['qty'];
-                            let sale_price = parsedData[i]['sale_price'];
+                        if( jsonparsedData[i]['has_vat'] == 1 ){
+                            let qty = jsonparsedData[i]['qty'];
+                            let sale_price = jsonparsedData[i]['sale_price'];
                             let totalPriceAfterVAT = (((qty*sale_price) *1.20));
                             let amount = (qty*sale_price);
 
@@ -99,12 +101,11 @@ export default function PDFmanager({navigation , text, onOK}) {
 
                         }
                     }
-
-                    if( parsedData[i]['has_vat'] == 0 && parsedData[i]['sale_item_rel']['itemcategory'] != 'EGGS' ){
+                    if( jsonparsedData[i]['has_vat'] == 0 && jsonparsedData[i]['sale_item_rel']['itemcategory'] != 'EGGS' ){
                         
-                        if( parsedData[i]['has_vat'] == 0 ){
-                            let qty = parsedData[i]['qty'];
-                            let sale_price = parsedData[i]['sale_price'];
+                        if( jsonparsedData[i]['has_vat'] == 0 ){
+                            let qty = jsonparsedData[i]['qty'];
+                            let sale_price = jsonparsedData[i]['sale_price'];
                             let totalPriceAfterVAT = ( (qty*sale_price) );
                             
                             totalAmountWithoutVat = (parseFloat(totalAmountWithoutVat) + parseFloat(totalPriceAfterVAT)) 
@@ -112,16 +113,16 @@ export default function PDFmanager({navigation , text, onOK}) {
                         }
                     }
 
-                    if( parsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS' || parsedData[i]['sale_item_rel']['itemcategory'] == 'eggs' || parsedData[i].has_vat == 1 ){
+                    if( jsonparsedData[i]['sale_item_rel']['itemcategory'] == 'EGGS' || jsonparsedData[i]['sale_item_rel']['itemcategory'] == 'eggs' || jsonparsedData[i].has_vat == 1 ){
                         setHasNonVatProducts(true);
                     }else{
                         setHasVatProducts(true);
                     }
 
-                    let amount = ((parsedData[i]['sale_price'] * parsedData[i]['qty']).toFixed(2)).toString();
+                    let amount = ((jsonparsedData[i]['sale_price'] * jsonparsedData[i]['qty']).toFixed(2)).toString();
                     totalAmount = (parseFloat(totalAmount)+parseFloat(amount));
                 }
-                setSavedOrderResponce(parsedData);
+                setSavedOrderResponce(jsonparsedData);
                 setIsLoaderActive(false)
             })
         })
@@ -348,7 +349,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                 BluetoothEscposPrinter.ALIGN.CENTER,
             );
             await BluetoothEscposPrinter.setBlob(0);
-            await BluetoothEscposPrinter.printText('UK Inch\n\r', { 
+            await BluetoothEscposPrinter.printText('SUN FARMS\n\r', { 
                 encoding: 'GBK',
                 codepage: 0,
                 widthtimes: 3,
@@ -408,7 +409,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                         BluetoothEscposPrinter.ALIGN.CENTER,
                         BluetoothEscposPrinter.ALIGN.RIGHT,
                     ],
-                    ['Customer','', '','Date:'+savedOrderResonce[0]['ddate']],
+                    ['Customer','', '','Date:'+(savedOrderResonce != undefined) ? savedOrderResonce[0]['ddate'] : '' ],
                 {},
             );
             await BluetoothEscposPrinter.printText(
@@ -708,7 +709,7 @@ export default function PDFmanager({navigation , text, onOK}) {
     async function printDesignStarPrinter (buyerData , ItemData, extraData) {
         
         commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
-        commandsArray.push({appendBitmapText: "UK Inch",fontSize:40});
+        commandsArray.push({appendBitmapText: "SUN FARMS",fontSize:40});
         commandsArray.push({append: '\n'});
         commandsArray.push({append: "Unit 12C, Bridge Industrial Estate,RH6 9HU\n"});
         commandsArray.push({append: "Phone: 07917105510\n"});
@@ -764,6 +765,7 @@ export default function PDFmanager({navigation , text, onOK}) {
             commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
             commandsArray.push({append: '\n'});
             commandsArray.push({append: '--------------------------------\n'});
+            
 
             for(let i = 0 ; i < savedOrderResonce.length ; i++){
                 if( savedOrderResonce[i]['sale_item_rel'].itemcategory == 'EGGS' || savedOrderResonce[i].has_vat == 1){
@@ -776,17 +778,19 @@ export default function PDFmanager({navigation , text, onOK}) {
                     if( savedOrderResonce[i]['sale_item_rel'].itemcategory != 'EGGS' ){
                         vat = (( (( ( (savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']) * 1.20 ) - (savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']))) ).toFixed(2)).toString();
                     }
+
                     if( savedOrderResonce[i]['sale_item_rel'].itemcategory == 'EGGS' ){
                         amount = ((savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']).toFixed(2)).toString();
                     }else{
                         amount = (( (savedOrderResonce[i]['sale_price'] * savedOrderResonce[i]['qty']) * 1.20 ).toFixed(2)).toString();
                     }
+
                     totalAmount = (parseFloat(totalAmount));
                     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
                     commandsArray.push({append: sitem+'\n'});
 
                     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
-                    commandsArray.push({append: (qty*1).toFixed(0)+'   '});
+                    commandsArray.push({append: (qty*1)+'   '});
 
                     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
                     commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
@@ -844,6 +848,8 @@ export default function PDFmanager({navigation , text, onOK}) {
             commandsArray.push({append: (VatProductTotal).toFixed(2)+'\n'});
 
         }
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
         
         if(WithoutVatProductTotal > 0){
             commandsArray.push({append: '\n'});
@@ -868,12 +874,11 @@ export default function PDFmanager({navigation , text, onOK}) {
                     let vat = 0;
                     totalAmount = (parseFloat(totalAmount));
 
-                    
                     commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
                     commandsArray.push({append: sitem});
                     commandsArray.push({append: '\n'});
                     
-                    commandsArray.push({ append: (qty*1).toFixed(0)+'       ' });
+                    commandsArray.push({ append: (qty*1)+'       ' });
 
                     commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
                     commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
@@ -888,6 +893,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                     commandsArray.push({ append: amount });
                     
                     commandsArray.push({append: '\n'});
+                    commandsArray.push({append: '--------------------------------\n'});        
                 }
             }
             commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
@@ -902,7 +908,6 @@ export default function PDFmanager({navigation , text, onOK}) {
             commandsArray.push({append: '\n'});
             commandsArray.push({append: '--------------------------------\n'});
         }
-
         commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Right});
         commandsArray.push({ append: '  ' });
         commandsArray.push({ append: '  ' });
@@ -918,10 +923,54 @@ export default function PDFmanager({navigation , text, onOK}) {
         commandsArray.push({append: '\n'});
         commandsArray.push({append: '\n'});
         commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
+        commandsArray.push({append: '\n'});
+
+
+        if( undeliveredItems != undefined ){
+            if(undeliveredItems.length > 0){
+                commandsArray.push({append: '\n'});
+                commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Center});
+                commandsArray.push({append: '******* Un Delivered *******'});
+                
+                commandsArray.push({append: '\n'});
+                
+                // commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                // commandsArray.push({append: 'Item'+'                  '});
+                // commandsArray.push({append: 'Qty'});
+
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '--------------------------------\n'});
+                
+                for(let i = 0 ; i < undeliveredItems.length ; i++){
+                    let undeliveredItemPrice = undeliveredItems[i]['sale_item_rel'].name;
+                    let myQty = (parseFloatt(undeliveredItems[i]['qty'])).toFixed(2);
+                    
+                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.Left});
+                    commandsArray.push({append: 'Item: '+undeliveredItemPrice});
+                    commandsArray.push({append: '\n'});
+
+                    commandsArray.push({appendAlignment: StarPRNT.AlignmentPosition.left});
+                    commandsArray.push({ append: 'Qty: '+myQty });
+                    commandsArray.push({append: '\n'});
+                    commandsArray.push({append: '--------------------------------\n'});
+                }
+
+                // commandsArray.push({appendCodePage:StarPRNT.CodePageType.CP858});
+                // commandsArray.push({appendEncoding: StarPRNT.Encoding.USASCII});
+                // commandsArray.push({appendInternational: StarPRNT.InternationalType.UK});
+                // commandsArray.push({appendBytes:[0x9c]});
+                // commandsArray.push({append: '\n'});
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '\n'});
+                commandsArray.push({append: '\n'});
+            }    
+        }
         print();
     };
 
-  
     async function portDiscovery() {
         try {
             let printers = await StarPRNT.portDiscovery('Bluetooth');
@@ -955,7 +1004,7 @@ export default function PDFmanager({navigation , text, onOK}) {
     }
 
     function printReceipt() {
-        setSaveOrderActivIndictor(true)
+        // setSaveOrderActivIndictor(true)
         if(selectedDriverId == 13){
             AsyncStorage.getItem('readyForOrder').then((result) => {
                 let myData = JSON.parse(result)
@@ -964,6 +1013,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                 // myData.push({'remarks' : remarks});
                 // myData.push({'invoice_no' : invoiceNumber});
                 myData.push({'signature' : base64});
+                
                 SaveOrder(JSON.stringify(myData)).then((res) => {
                     setSaveOrderActivIndictor(false)
                     // AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
@@ -976,10 +1026,13 @@ export default function PDFmanager({navigation , text, onOK}) {
                 })
             })
         }else{
+
             let hasPrinter = false;
             setSaveOrderActivIndictor(true);  
             AsyncStorage.getItem('user_id').then((res) => {
+    
                 getDiverId(res).then((result) => {
+    
                     if( result.printerType == 'star'){
                         AsyncStorage.getItem('readyForOrder').then((result) => {
                             let myData = JSON.parse(result)
@@ -987,6 +1040,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                             myData.push({'remarks' : remarks});
                             myData.push({'invoice_no' : invoiceNumber});
                             myData.push({'signature' : base64});
+
                             SaveOrder(JSON.stringify(myData)).then((res) => {
                                 setSaveOrderActivIndictor(false)
                                 AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
@@ -1136,7 +1190,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                                         <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
                                             Invoice
                                         </Text>
-                                        <Text style={{ fontSize: 30,textAlign: 'center'}}>UK Inch</Text>
+                                        <Text style={{ fontSize: 30,textAlign: 'center'}}>SUN FARMS</Text>
                                         <Text style={{ fontSize: 15,textAlign: 'center'}}>Unit 12C, Bridge Industrial Estate,RH6 9HU</Text>
                                         <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
                                         <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ukinch2@gmail.com</Text>
@@ -1177,7 +1231,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                                         }
                                                 
                                             {(savedOrderResonce != undefined) ?
-                                                savedOrderResonce.map((value , key) => {
+                                                Object.values(savedOrderResonce).map((value , key) => {
                                                     return (
                                                         <View key={key} >
                                                             {( value['sale_item_rel'].itemcategory == 'EGGS' ) ?
@@ -1265,7 +1319,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                                             }
                                             
                                             {(savedOrderResonce != undefined) ?
-                                                savedOrderResonce.map((value , key) => {
+                                                Object.values(savedOrderResonce).map((value , key) => {
 
                                                     return (
                                                         <View key={key} >
@@ -1310,6 +1364,43 @@ export default function PDFmanager({navigation , text, onOK}) {
                                             <Text style={{fontWeight: 'bold'}}>Grand Total:</Text>
                                             <Text style={{fontWeight: 'bold'}}>£{(VatProductTotal + WithoutVatProductTotal).toFixed(2)}</Text>
                                         </View>
+
+                                        {( undeliveredItems != undefined)?
+                                            (undeliveredItems.length > 0) ? 
+                                                <View>
+                                                    {/* <Text>here</Text> */}
+                                                    <Text style={{textAlign: 'center',marginTop: 30,marginBottom: 10}}>******** <Text style={{fontWeight: 'bold',fontSize: 18}}>Un Delivered</Text> ********</Text>
+                                                    <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',borderTopColor: 'black', borderTopWidth: 1,paddingHorizontal: 20,borderBottomColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
+                                                        <Text style={{fontWeight: 'bold'}}>Name</Text>
+                                                        {/* <Text style={{fontWeight: 'bold'}}>Price</Text> */}
+                                                        {/* <Text style={{fontWeight: 'bold'}}>VAT</Text> */}
+                                                        <Text style={{fontWeight: 'bold'}}>Qty</Text>
+                                                    </View>
+                                                    <View style={{marginTop: 10}}>
+                                                    </View>
+
+                                                    {undeliveredItems.map((value , key) => {
+                                                        return (
+                                                            <View key={key} >
+                                                                <View key={key} style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
+                                                                    <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
+                                                                        {/* <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}></Text>{value['sale_item_rel'].name}</Text> */}
+
+                                                                        <Text style={{ }}>{value['sale_item_rel'].name}</Text>
+                                                                        <Text style={{ }}>{(parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                    </View>
+                                                                </View>
+                                                            </View>
+                                                        )
+                                                    })}
+                                                </View>
+                                                
+                                            : null
+                                        : 
+                                            null
+                                        }
+
+                                        {/* undeliveredItems */}
                                     </View>
                                 </ScrollView>
 
@@ -1324,7 +1415,6 @@ export default function PDFmanager({navigation , text, onOK}) {
                                             ref={ref}
                                             onOK={handleSignature} 
                                         />
-                                    
                                     </View>
                                 </View>
             
@@ -1355,60 +1445,59 @@ export default function PDFmanager({navigation , text, onOK}) {
                             </View>
                         </View>
                     </View>
-
             :
                 ( isLoaderActive )?
                     <ActivityIndicator size={35} color={Colors.primary}></ActivityIndicator>
                 :
-                <View style={{flex:1}}>
-                    <View style={{ height: '30%' ,width: '100%' }}>
-                        <ScrollView>
-                            <View >
-                                <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
-                                    Invoice
-                                </Text>
-                                <Text style={{ fontSize: 30,textAlign: 'center'}}>UK Inch</Text>
-                                <Text style={{ fontSize: 15,textAlign: 'center'}}>Unit 12C, Bridge Industrial Estate,RH6 9HU</Text>
-                                <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
-                                <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ukinch2@gmail.com</Text>
-                                <Text style={{ fontSize: 15,textAlign: 'left',marginLeft: 20}}>INVOICE: {(invoiceNumber != undefined)? invoiceNumber : ''}</Text>
-                                <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20,borderBottomColor:'black',borderTopColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1,padding: 10 }}>
-                                    <Text style={{fontWeight: 'bold',width: 100}}>Customer</Text>
-                                    <Text style={{fontWeight: 'bold'}}></Text>
-                                    <Text style={{fontWeight: 'bold'}}></Text>
-                                    <Text style={{fontWeight: 'bold'}}>Date: { (savedOrderResonce != undefined) ? savedOrderResonce[0]['ddate'] : ''   }</Text>
-                                </View>
-                                <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
-                                    <Text style={{width: 100}}>Name: </Text>
-                                    <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['name'] : ''} </Text>
-                                </View>
-                                <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
-                                    <Text style={{width: 100}}>Address: </Text>
-                                    <Text style={{textAlign: 'left'}}>{(savedBuyerData != undefined) ? savedBuyerData['address'] : ''} </Text>
-                                </View>
-                                <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
-                                    <Text style={{width: 100}}>Phone: </Text>
-                                    <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['contact_no'] : ''} </Text>
-                                </View>
-                                {( hasNonVatProducts ) ?
-                                    <View>
-                                        {/* <View style={{marginTop: 20,paddingTop: 10,borderTopColor: 'black', borderTopWidth: 1}}><Text style={{justifyContent: 'center',textAlign: 'center',fontWeight:'bold'}}>Items without VAT</Text></View> */}
-                                        <View style={{ flex: 0.2,borderTopColor: 'black', borderTopWidth: 1, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,borderBottomColor:'black',marginTop: 20,borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
-                                            <Text style={{fontWeight: 'bold'}}>Qty</Text>
-                                            <Text style={{fontWeight: 'bold'}}>Price</Text>
-                                            <Text style={{fontWeight: 'bold'}}>Amount</Text>
-                                            <Text style={{fontWeight: 'bold'}}>VAT</Text>
-                                            <Text style={{fontWeight: 'bold'}}>Total(inc)</Text>
-                                        </View>
-                                        <View style={{marginTop: 10}}>
-                                        </View>
-                                    </View>                                
-                                :
-                                    <View></View>
-                                }
-                                        
-                                    {(savedOrderResonce != undefined) ?
-                                        savedOrderResonce.map((value , key) => {
+                    <View style={{flex:1}}>
+                        <View style={{ height: '30%' ,width: '100%' }}>
+                            <ScrollView>
+                                <View >
+
+                                    <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'white',textAlign: 'center'}}>
+                                        Invoice
+                                    </Text>
+                                    <Text style={{ fontSize: 30,textAlign: 'center'}}>SUN FARMS</Text>
+                                    <Text style={{ fontSize: 15,textAlign: 'center'}}>Unit 12C, Bridge Industrial Estate,RH6 9HU</Text>
+                                    <Text style={{ fontSize: 15,textAlign: 'center'}}>Phone: 07917105510</Text>
+                                    <Text style={{ fontSize: 15,textAlign: 'center'}}>Email: Ukinch2@gmail.com</Text>
+                                    <Text style={{ fontSize: 15,textAlign: 'left',marginLeft: 20}}>INVOICE: {(invoiceNumber != undefined)? invoiceNumber : ''}</Text>
+                                    <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20,borderBottomColor:'black',borderTopColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1,padding: 10 }}>
+                                        <Text style={{fontWeight: 'bold',width: 100}}>Customer</Text>
+                                        <Text style={{fontWeight: 'bold'}}></Text>
+                                        <Text style={{fontWeight: 'bold'}}></Text>
+                                        <Text style={{fontWeight: 'bold'}}>Date: { (savedOrderResonce != undefined) ? savedOrderResonce[0]['ddate'] : ''   }</Text>
+                                    </View>
+                                    <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
+                                        <Text style={{width: 100}}>Name: </Text>
+                                        <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['name'] : ''} </Text>
+                                    </View>
+                                    <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
+                                        <Text style={{width: 100}}>Address: </Text>
+                                        <Text style={{textAlign: 'left'}}>{(savedBuyerData != undefined) ? savedBuyerData['address'] : ''} </Text>
+                                    </View>
+                                    <View style={{ flex: 0.2, flexDirection:'row',paddingHorizontal: 20,marginTop: 20}}>
+                                        <Text style={{width: 100}}>Phone: </Text>
+                                        <Text style={{}}>{(savedBuyerData != undefined) ? savedBuyerData['contact_no'] : ''} </Text>
+                                    </View>
+                                    {( hasNonVatProducts ) ?
+                                        <View>
+                                            {/* <View style={{marginTop: 20,paddingTop: 10,borderTopColor: 'black', borderTopWidth: 1}}><Text style={{justifyContent: 'center',textAlign: 'center',fontWeight:'bold'}}>Items without VAT</Text></View> */}
+                                            <View style={{ flex: 0.2,borderTopColor: 'black', borderTopWidth: 1, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,borderBottomColor:'black',marginTop: 20,borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
+                                                <Text style={{fontWeight: 'bold'}}>Qty</Text>
+                                                <Text style={{fontWeight: 'bold'}}>Price</Text>
+                                                <Text style={{fontWeight: 'bold'}}>Amount</Text>
+                                                <Text style={{fontWeight: 'bold'}}>VAT</Text>
+                                                <Text style={{fontWeight: 'bold'}}> Total (inc)</Text>
+                                            </View>
+                                            <View style={{ marginTop: 10 }}>
+                                            </View>
+                                        </View>                                
+                                    :
+                                        <View></View>
+                                    } 
+                                    {(savedOrderResonce != undefined ) ?
+                                        Object.values(savedOrderResonce).map((value , key) => {
                                             return (
                                                 <View key={key} >
                                                     {( value['sale_item_rel'].itemcategory == 'EGGS' ) ?
@@ -1427,10 +1516,13 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                     } 
                                                     {( value['sale_item_rel'].itemcategory != 'EGGS' && value.has_vat ) ?
                                                         <View>
-                                                            <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
-                                                                <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}> </Text>{value['sale_item_rel'].name}</Text>
+                                                            <View style={{ borderBottomColor: '#ededed', borderBottomWidth: 1, paddingVertical: 15 }}>
+                                                                
+                                                                <Text style={{ width: '100%',marginLeft: 20}}>
+                                                                    <Text style={{ fontWeight: 'bold' }}> </Text>
+                                                                        {value['sale_item_rel'].name}
+                                                                    </Text>
                                                                 <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
-                                                                    {/* <Text style={{ width: 90}}>{value['sale_item_rel'].name}</Text> */}
                                                                     <Text style={{ }}>{parseFloatt(value['qty'])}</Text>
                                                                     <Text style={{ }}>£{(value['sale_price'])}</Text>
                                                                     <Text style={{ }}>£{(value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)}</Text>
@@ -1438,25 +1530,18 @@ export default function PDFmanager({navigation , text, onOK}) {
                                                                     <Text style={{ }}>£{( parseFloat((value['sale_price'] * parseFloatt(value['qty'])).toFixed(2)) * 1.20).toFixed(2)}</Text>
                                                                 </View>
                                                             </View>
-                                                            {/* <View style={{flexDirection:'row' ,justifyContent: 'space-between',marginTop: 20}}>
-                                                                <Text></Text>
-                                                                <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}>Total:</Text></Text>
-                                                                <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}></Text> </Text>
-                                                                <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VATTotal).toFixed(2)}</Text></Text>
-                                                                <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal-VATTotal).toFixed(2)}</Text></Text>
-                                                                <Text style={{marginRight: 20}}><Text style={{fontWeight: 'bold'}}> £{(VatProductTotal).toFixed(2)}</Text></Text>
-                                                            </View> */}
+                                                           
                                                         </View>
                                                     :
                                                         <View></View>
                                                     } 
                                                 </View>
                                             )
-                                        })
-                                        
+                                        })                                        
                                     : 
                                         <View></View>
                                     }
+
                                     {(hasNonVatProducts) ? 
                                         <View>
                                             <View style={{flexDirection:'row' ,justifyContent: 'flex-end',marginTop: 20}}>
@@ -1509,7 +1594,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                                     }
                                     
                                     {(savedOrderResonce != undefined) ?
-                                        savedOrderResonce.map((value , key) => {
+                                        Object.values(savedOrderResonce).map((value , key) => {
                                             return (
                                                 <View key={key} >
                                                     {( value['sale_item_rel'].itemcategory != 'EGGS' && !value.has_vat  ) ?
@@ -1531,7 +1616,9 @@ export default function PDFmanager({navigation , text, onOK}) {
 
                                                         </View>
                                                     :
-                                                        <View></View>
+                                                        <View>
+                                                        
+                                                    </View>
                                                     }
                                                 </View>
                                             )
@@ -1548,56 +1635,88 @@ export default function PDFmanager({navigation , text, onOK}) {
                                     :
                                         <View></View>
                                     }
-                                <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20}}>
-                                    <Text style={{fontWeight: 'bold',width: 100}}></Text>
-                                    <Text style={{fontWeight: 'bold'}}></Text>
-                                    <Text style={{fontWeight: 'bold'}}>Grand Total:</Text>
-                                    <Text style={{fontWeight: 'bold'}}>£{(VatProductTotal + WithoutVatProductTotal).toFixed(2)}</Text>
+                                    <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',paddingHorizontal: 20,marginTop: 20}}>
+                                        <Text style={{fontWeight: 'bold',width: 100}}></Text>
+                                        <Text style={{fontWeight: 'bold'}}></Text>
+                                        <Text style={{fontWeight: 'bold'}}>Grand Total:</Text>
+                                        <Text style={{fontWeight: 'bold'}}>£{(VatProductTotal + WithoutVatProductTotal).toFixed(2)}</Text>
+                                    </View>
+                                    {( undeliveredItems != undefined)?
+                                        (undeliveredItems.length > 0) ? 
+                                            <View>
+                                                <Text style={{textAlign: 'center',marginTop: 30,marginBottom: 10}}>******** <Text style={{fontWeight: 'bold',fontSize: 18}}>Un Delivered</Text> ********</Text>
+                                                <View style={{ flex: 0.2, flexDirection:'row',justifyContent: 'space-between',borderTopColor: 'black', borderTopWidth: 1,paddingHorizontal: 20,borderBottomColor:'black',borderLeftColor:'transparent',borderRightColor:'transparent',borderWidth: 1 ,padding: 10}}>
+                                                    <Text style={{fontWeight: 'bold'}}>Name</Text>
+                                                    {/* <Text style={{fontWeight: 'bold'}}>Price</Text> */}
+                                                    {/* <Text style={{fontWeight: 'bold'}}>VAT</Text> */}
+                                                    <Text style={{fontWeight: 'bold'}}>Qty</Text>
+                                                </View>
+                                                <View style={{marginTop: 10}}>
+                                                </View>
+
+                                                {undeliveredItems.map((value , key) => {
+                                                    return (
+                                                        <View key={key} >
+                                                            <View key={key} style={{ borderBottomColor: '#ededed', borderBottomWidth: 1,paddingVertical: 15 }}>
+                                                                <View key={key} style={{flex: 0.2,flexDirection: 'row',justifyContent:'space-between',paddingHorizontal: 20}}>
+                                                                    {/* <Text style={{ width: '100%',marginLeft: 20}}><Text style={{ fontWeight: 'bold' }}></Text>{value['sale_item_rel'].name}</Text> */}
+
+                                                                    <Text style={{ }}>{value['sale_item_rel'].name}</Text>
+                                                                    <Text style={{ }}>{(parseFloatt(value['qty'])).toFixed(2)}</Text>
+                                                                </View>
+                                                            </View>
+                                                        </View>
+                                                    )
+                                                })}
+                                            </View>
+                                            
+                                        : null
+                                    : 
+                                        null
+                                    }
+                                    
+                                </View>
+                            </ScrollView>
+
+                        </View>
+                        <View style={{}}>
+                            <View style={{ height: '50%',width: '100%' }}>
+                                <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
+                                    Signature
+                                </Text>
+                                <View style={styles.container}>
+                                    <SignatureScreen
+                                        ref={ref}
+                                        onOK={handleSignature} 
+                                    />
                                 </View>
                             </View>
-                        </ScrollView>
 
-                    </View>
-                    <View style={{}}>
-                        <View style={{ height: '50%',width: '100%' }}>
-                            <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
-                                Signature
-                            </Text>
-                            <View style={styles.container}>
-                                <SignatureScreen
-                                    ref={ref}
-                                    onOK={handleSignature} 
-                                />
+                            <View  style={{ width: '100%' }}>
+                                <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
+                                    Remarks
+                                </Text>
+                                <Input placeholder="Add Remarks" value={remarks} allowFontScaling={false} onChange={(value) => {setRemarks(value.nativeEvent.text)}}/>
+                            </View>
+                            <View  style={{ flex: 1 ,width: '100%' }}>
+                                        
+                                {(saveOrderActivIndictor)? 
+                                    <ActivityIndicator  color={Colors.primary} size="large" /> 
+                                : 
+                                    // <Button title="Print dumy" onPress={() => {setSaveOrderActivIndictor(true);  dummyPrint() }} />
+                                    <Button title="Print" onPress={() => {setSaveOrderActivIndictor(true);  printReceipt() }} />
+                                }
+                                <Pressable title="Get Ports" onPress={() => {portDiscovery()}} ></Pressable>
+                                <Pressable title="Get Ports" onPress={() => {connect()}} ></Pressable>
                             </View>
                         </View>
-
-                        <View  style={{ width: '100%' }}>
-                            <Text style={{fontSize: 20, color: 'black', fontWeight: '700',backgroundColor: 'lightgrey',textAlign: 'center'}}>
-                                Remarks
-                            </Text>
-                            <Input placeholder="Add Remarks" value={remarks} allowFontScaling={false} onChange={(value) => {setRemarks(value.nativeEvent.text)}}/>
-                        </View>
-                        <View  style={{ flex: 1 ,width: '100%' }}>
-                                    
-                            {(saveOrderActivIndictor)? 
-                                <ActivityIndicator  color={Colors.primary} size="large" /> 
-                            : 
-                                // <Button title="Print dumy" onPress={() => {setSaveOrderActivIndictor(true);  dummyPrint() }} />
-                                <Button title="Print" onPress={() => {setSaveOrderActivIndictor(true);  printReceipt() }} />
-                            }
-                            <Pressable title="Get Ports" onPress={() => {portDiscovery()}} ></Pressable>
-                            <Pressable title="Get Ports" onPress={() => {connect()}} ></Pressable>
-                        </View>
                     </View>
-                </View>
-
             }
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => {
-                Alert.alert("Modal has been closed.");
                 setModalVisible(!modalVisible);
                 }}
             >

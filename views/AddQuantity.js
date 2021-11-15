@@ -135,7 +135,7 @@ import { KeyboardAvoidingView } from 'react-native';
 		
 		function selectedLoadedItemsByQty() {
 			setLoadedActivityIndicator(true)
-			
+	
 			AsyncStorage.getItem('VATStatus').then((data) => {
 				if( data == 'true' ){
 					AsyncStorage.setItem('currentVATstatus' , '1');
@@ -150,10 +150,10 @@ import { KeyboardAvoidingView } from 'react-native';
 
 				setLoadedData(selectedItemFromItemsScreen);	
 
-
+				
 				getCartItemDetails(JSON.stringify(selectedItemFromItemsScreen)).then((res) => {
-					let productData = res.data.data;
 
+					let productData = res.data.data;
 					for(let i = 0; i < productData.length ; i++){
 						let myData = Object.values(productData)[i]; 
 						if( Object.values(myData)[0]['itemcategory'] == 'EGGS' || Object.values(myData)[0]['itemcategory'] == 'eggs' ){
@@ -207,13 +207,13 @@ import { KeyboardAvoidingView } from 'react-native';
 
 				for(let i = 0 ; i < data.length ; i++ ){
 					if( processedData[data[i].dnum+'__'+data[i].sitem] != undefined){	
-						if( data[i].qty > 0 ){
+						if( data[i].qty != 0 ){
 							processedData[ data[i].dnum+'__'+data[i].sitem ] = data[i];
 						}else{
 							delete processedData[ data[i].dnum+'__'+data[i].sitem ];
 						}
 					}else{
-						if( data[i].qty > 0 ){
+						if( data[i].qty != 0 ){
 							processedData[ data[i].dnum+'__'+data[i].sitem ] = data[i];
 						}else{
 							delete processedData[ data[i].dnum+'__'+data[i].sitem ];
@@ -280,7 +280,6 @@ import { KeyboardAvoidingView } from 'react-native';
 						transparent={true}
 						visible={modalVisible}
 						onRequestClose={() => {
-						Alert.alert("Modal has been closed.");
 						setModalVisible(!modalVisible);
 						}}
 					>
@@ -305,7 +304,6 @@ import { KeyboardAvoidingView } from 'react-native';
 									transparent={true}
 									visible={true}
 									onRequestClose={(  ) => {
-											Alert.alert("Modal has been closed.");
 									}} >
 
 									<View style={styles.centeredView}>
@@ -397,31 +395,32 @@ import { KeyboardAvoidingView } from 'react-native';
 														{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val?.sale_price) )}
 														
 														{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val?.VATstatus ,"dnum":val?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val?.order_qty,"credit":"NO","sale_price":val?.sale_price}) : ''}
-														return(
-
-															<AddQty 
-																savedSalePrice={beforeUpdPrice}
-																updatePriceDataTest={(value) => {setMytest(value)}}
-																valuetem={valuetem} 
-																data={data} 
-																selectedItemFromItemsScreen={selectedItemFromItemsScreen} 
-																key={generateRandString()} 
-																val={val} 
-																keyboard={(value) => { setIsKeyboardOpen(value)}}
-																updatedDataRes={(myUpdatedData) => { 
-																	setUpdatedFinalData(myUpdatedData);
-																}} 
-																updatedObjectRed={(myUupdatedObjectRed) => { 
-																	setSelectedItemFromItemsScreen(myUpdatedData) 
-																}} 
-																updatedPrice={ (price) => { 
-																	setMyTotalPrice(price)
-																} }
-																updateMyObjectData={ (myRecord) => { 
-																	// console.log(myRecord) 
-																}}
-															></AddQty>
-														)
+														if( valuetem != 0 && valuetem != '0' ){
+															return(
+																<AddQty 
+																	savedSalePrice={beforeUpdPrice}
+																	updatePriceDataTest={(value) => {setMytest(value)}}
+																	valuetem={valuetem} 
+																	data={data} 
+																	selectedItemFromItemsScreen={selectedItemFromItemsScreen} 
+																	key={generateRandString()} 
+																	val={val} 
+																	keyboard={(value) => { setIsKeyboardOpen(value)}}
+																	updatedDataRes={(myUpdatedData) => { 
+																		setUpdatedFinalData(myUpdatedData);
+																	}} 
+																	updatedObjectRed={(myUupdatedObjectRed) => { 
+																		setSelectedItemFromItemsScreen(myUpdatedData) 
+																	}} 
+																	updatedPrice={ (price) => { 
+																		setMyTotalPrice(price)
+																	} }
+																	updateMyObjectData={ (myRecord) => { 
+																		// console.log(myRecord) 
+																	}}
+																></AddQty>
+															)
+														}
 													}
 												})}
 											</View>

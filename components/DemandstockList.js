@@ -11,18 +11,13 @@ import {
 	Pressable,
 	FlatList
 } from 'react-native';
-import {Card, ListItem, Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Input} from 'react-native-elements';
 
 import {Colors} from './Colors';
 import {widthToDp, heightToDp} from '../utils/Responsive';
-import MainScreen from '../layout/MainScreen';
-import DashboardCard from './DashboardCard';
 import { useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { generateRandString, getPriorityDrivers, getPrioritySortedDrivers, getTodaySale, getVehicleLoadCount, imagePrefix } from '../api/apiService';
-import { ActivityIndicator } from 'react-native';
+import { imagePrefix } from '../api/apiService';
 // import GetLocation from 'react-native-get-location'
 
 export default function DemandstockList({navigation , route, data, savedData,savedLoadData}) {
@@ -31,8 +26,6 @@ export default function DemandstockList({navigation , route, data, savedData,sav
 	const [ updater , setUpdater ] = useState(false);
 
 	useEffect(() => {
-		console.log('data')
-		console.log(data)
 		if( savedLoadData != null && savedLoadData != undefined ){
 			setupdateSt(savedLoadData)
 		}
@@ -52,14 +45,18 @@ export default function DemandstockList({navigation , route, data, savedData,sav
 		}else{
 			updateSt[data.id] = 1;
 		}
-
 		updaterSeter();
 		setupdateSt(updateSt)
 		savedData(updateSt)
 	}
 
 	function decrementProduct(data) {
-		updateSt[data.id] = (updateSt[data.id]-1);  
+		if( data.id in updateSt ){
+			updateSt[data.id] = (updateSt[data.id]-1);  
+		}else{
+			updateSt[data.id] = 0;
+		}
+		// updateSt[data.id] = (updateSt[data.id]-1);  
 		
 		updaterSeter();
 		setupdateSt(updateSt)
