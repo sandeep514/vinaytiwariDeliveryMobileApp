@@ -28,7 +28,9 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 		setNewData(data)
 		setSelectedItem(selectedItemFromItemsScreen)
 		setbeforeUpdatePrice(savedSalePrice)
-	})
+
+		// updatedDataRes(newData)
+	} , [])
 
     function generateRandString(){
         return (Math.random() * (999999999 - 1) + 1).toFixed(0);
@@ -87,25 +89,24 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 		let myData = newData;
 		let newQty = 0;
 		let objectData = selectedItem;
+		
+		if( qty != '' ){
+			newQty = qty
+		}
 
 		if( dnum in objectData){
 			objectData[dnum]['value'] = qty;
 			setSelectedItem(objectData)
 			updateMyObjectData(objectData)
 		}
-
-		if( qty != '' ){
-			newQty = qty
-		}
-
 		if( myData != undefined){
 			for( let i= 0 ; i < myData.length; i++ ){
 				if(myData[i][dnum] != undefined){
 					if( myData[i][dnum].id == itemId){
-						myData[i][dnum].order_qty = newQty;
-
-						setNewData(myData)
+						myData[i][dnum].order_qty = qty;
 						updatedDataRes(myData)
+						setNewData(myData)
+
 						// AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(myData))
 
 						// if( changestate == false){
@@ -120,6 +121,63 @@ export default AddQty = ({ val ,data , selectedItemFromItemsScreen , updatedPric
 		}	
 	}
 
+	function updateQty_back(dnum , itemId , qty ){
+		let myData = newData;
+		let newQty = 0;
+		let objectData = selectedItem;
+
+		if( dnum in objectData){
+			objectData[dnum]['value'] = qty;
+			setSelectedItem(objectData)
+			updateMyObjectData(objectData)
+		}
+
+		if( qty != '' ){
+			newQty = qty
+		}
+
+		if( myData != undefined){
+			let parseMyres = {};
+			for( let i= 0 ; i < myData.length; i++ ){
+				if(myData[i][dnum] != undefined){
+					if( myData[i][dnum].id == itemId){
+						myData[i][dnum].order_qty = newQty;
+
+						setNewData(myData)
+						updatedDataRes(myData)
+						AsyncStorage.getItem('beforeUpdatePrice').then((myres) => {
+
+							if( myres != null ){
+								if( JSON.parse(myres).length != 0 ){
+									let parseMyres = [];
+									parseMyres = JSON.parse(myres);
+									parseMyres[dnum] = newQty;
+									AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(parseMyres))
+								}else{
+									parseMyres[dnum] = newQty;
+
+									AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(parseMyres))
+								}
+							}else{
+									let parseMyres = [];
+									parseMyres[dnum] = newQty;
+									AsyncStorage.setItem('beforeUpdatePrice' , JSON.stringify(parseMyres))
+								}
+
+							return false							
+						})
+
+						// if( changestate == false){
+						// 	setChangeState(true)
+						// }else{
+						// 	setChangeState(false)
+						// }
+						// return false
+					}
+				}
+			}
+		}	
+	}
 	function updatePrice(dnum , itemId , qty ){
 		let myData = newData;
 		let newQty = 0;

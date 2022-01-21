@@ -260,8 +260,6 @@ export const checkIfBuyerHasVAT = ( buyerId ) => {
 export const getCartItemDetails = ( postedData ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-cart-item-details' , { data : postedData}).then((response) => {
-			console.log(response.data.data)
-
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -331,6 +329,7 @@ export const BeforeOrderDetails = ( postedData ) => {
 export const getSaleItemByInvoice = ( invoiceNo ) => {
 	return new Promise( (resolve , reject) => {
 		apiClient.post('get-sale-item-by-invoice' , { invoiceNumber : invoiceNo}).then((response) => {
+			console.log(response.data.data)
 			if(response.data.status == true){
 				resolve(response);
 			}else{
@@ -375,7 +374,6 @@ export const saveNewLoad = ( data ) => {
 				reject(response.data.error);
 			}
 		});
-		
 	});
 };
 

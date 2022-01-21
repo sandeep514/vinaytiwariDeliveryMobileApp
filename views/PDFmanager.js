@@ -255,7 +255,7 @@ export default function PDFmanager({navigation , text, onOK}) {
         )
     }, []);
     function handleBackButtonClick() {
-        navigation.navigate('Dashboard');
+        navigation.push('Dashboard');
     }
     function parseIntt(string){
         return parseInt(string);
@@ -1018,8 +1018,7 @@ export default function PDFmanager({navigation , text, onOK}) {
                     setSaveOrderActivIndictor(false)
                     // AsyncStorage.setItem('orderSaveReponce', JSON.stringify(res.data.data));
                     // AsyncStorage.setItem('orderSaveBuyer', JSON.stringify(res.data.buyer));
-                    
-                    navigation.navigate('Dashboard');
+                    navigation.push('Dashboard');
 
                     alert('Order has been placed successfully');
                     setModalVisible(true)

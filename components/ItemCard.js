@@ -6,6 +6,7 @@
 	import {Colors} from '../components/Colors';
 	import {widthToDp, heightToDp} from '../utils/Responsive';
 	let selectedLoadArray = {};
+	let selectedLoadArrayWithoutloadname = {};
 	
 
 	const DashboardCard = ({ backgroundColor, cardName, imageUrl, onPress, styleData, qty, cardId ,loadName , selectedData ,salePrice , refresh}) => {
@@ -19,10 +20,16 @@
 		const [ ganeratingLoadLoader , setGenerateLoader ] = useState(false);
 
 		const win = Dimensions.get('window');
+		
 		useEffect(() => {
 			AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
 				setselectedBuyerId(buyerId);
 			});
+			
+			if(selectedLoadArray.length != 0 ){
+				selectedLoadArray = {}
+				selectedLoadArrayWithoutloadname = {}
+			}
 			// alert(loadName)
 			// if( selectedData.indexOf(0) === -1 ){
 			// }else{
@@ -40,33 +47,45 @@
 			// AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
 			// 	selectedLoadArray = JSON.parse(res);
 			// })
-			return() => { selectedLoadArray = {}; AsyncStorage.removeItem('itemsAddedInCart'); AsyncStorage.setItem('selectedLoadedItemsByQty', JSON.stringify({})); }
+			return() => { selectedLoadArray = {};selectedLoadArrayWithoutloadname = {}; AsyncStorage.removeItem('itemsAddedInCart'); AsyncStorage.removeItem('cartItems'); AsyncStorage.setItem('selectedLoadedItemsByQty', JSON.stringify({})); }
 			// AsyncStorage.setItem('selectedLoadedItemsByQty', JSON.stringify({}));
-		},[])
-		function getPendingOrderResponce () {
-			AsyncStorage.getItem('cartItems').then((data) => {
-				if( data != null ){
-					let myRecords = {};
-					let myRecordsFinal = {};
-					let relData = JSON.parse(data);
-					if( data != undefined ){
-						for(let i = 0 ; i < relData.length; i++){
-							let dnum = relData[i].dnum;
-							let sitem = relData[i].sitem;
-							let qty = relData[i].qty;
-							
-							myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
-							myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
-							AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal) )
+		},[]);
 
-							AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+		function getPendingOrderResponce () {
+			AsyncStorage.getItem('selectedBuyer').then((buyerId) => {
+				AsyncStorage.getItem('cartItems').then((data) => {
+					if( data != null ){
+						let myRecords = {};
+						let myRecordsFinal = {};
+						let myRecordsFinalWithoutLoadnumber = {};
+						let relData = JSON.parse(data);
+	
+						if( data != undefined ){
+							for(let i = 0 ; i < relData.length; i++){
+								let dnum = relData[i].dnum;
+								let sitem = relData[i].sitem;
+								let qty = relData[i].qty;
+								
+								myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
+								myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'buyerId' :  buyerId, 'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
+
+								myRecordsFinalWithoutLoadnumber[relData[i].sitem] = {'buyerId' :  buyerId, 'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
+								AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal) )
+								// AsyncStorage.setItem('selectedLoadedItemsByQtyWithoutLoadnumber' , JSON.stringify(myRecordsFinalWithoutLoadnumber) )
+	
+								AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+							}
+							setCartData(myRecords)
+							selectedLoadArray= myRecordsFinal;
+							selectedLoadArrayWithoutloadname= myRecordsFinalWithoutLoadnumber;
 						}
-						setCartData(myRecords)
-						selectedLoadArray = myRecordsFinal;
 					}
-				}
-			})
+				})
+			});
+
+			
 		}
+		
 		function DirectUpdateQTY(loadName , cardId ,qty){
 			if( qty.substring(0 ,1) == '.' ){
 				qty = '0'+qty;
@@ -82,6 +101,7 @@
 
 			AsyncStorage.getItem('selectedBuyerRouteId').then((buyerId) => {
 				selectedLoadArray[loadName+'__'+cardId] = {'value' : qty,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
+				selectedLoadArrayWithoutloadname[cardId] = {'value' : qty,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerId};
 				setUpdateQtyofItem(selectedLoadArray)
 				selectedData(selectedLoadArray)
 				
@@ -104,6 +124,7 @@
 			setMyLatestData(myLatestData+1);
 			if( selectedLoadArray[loadedName] != undefined ){
 				selectedLoadArray[loadedName].value = (parseFloat(selectedLoadArray[loadedName].value)+1);
+				selectedLoadArrayWithoutloadname[cardId].value = (parseFloat(selectedLoadArrayWithoutloadname[cardId].value)+1);
 				setUpdateQtyofItem(selectedLoadArray)
 				selectedData(selectedLoadArray)
 
@@ -114,6 +135,7 @@
 				// AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
 			}else{
 				selectedLoadArray[loadName+'__'+cardId] = {value: 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : selectedBuyerId};
+				selectedLoadArrayWithoutloadname[cardId] = {value: 1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : selectedBuyerId};
 				setUpdateQtyofItem(selectedLoadArray)
 				selectedData(selectedLoadArray)
 
@@ -152,6 +174,7 @@
 			if( selectedLoadArray[loadedName] != undefined ){
 				// if( selectedLoadArray[loadedName].value != 0 ){
 					selectedLoadArray[loadedName].value = (selectedLoadArray[loadedName].value-1);
+					selectedLoadArrayWithoutloadname[cardId].value = (selectedLoadArrayWithoutloadname[cardId].value-1);
 					// if( (selectedLoadArray[loadedName].value) <= 0 ){
 					// 	delete selectedLoadArray[loadedName];
 					// }
@@ -163,6 +186,7 @@
 				// 	delete selectedLoadArray[loadedName];
 				// }
 					selectedLoadArray[loadName+'__'+cardId] = {'value' : -1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerIds};
+					selectedLoadArrayWithoutloadname[cardId] = {'value' : -1 ,'cardId' : cardId,'VATstatus': false, 'buyerId' : buyerIds};
 
 				setUpdateQtyofItem(selectedLoadArray)
 				selectedData(selectedLoadArray)
@@ -192,9 +216,6 @@
 				</View>
 				{(qty == 'true') ?
 					<View>
-							
-						
-						
 						<View style={[(win.width > 550) ? styles.cardBackgroundtab : styles.cardBackground, {backgroundColor: backgroundColor} , styleData]}>
 							<View style={styles.itemImageContainer}>
 								<Image source={{uri:imageUrl}} style={(win.width > 550) ? styles.itemImageTab : styles.itemImage} />
@@ -213,8 +234,7 @@
 								</View>
 								<View style={ (win.width > 550) ? {width: '60%'} : {width: '60%'} }>
 
-									<TextInput keyboardType="numeric" defaultValue={ (selectedLoadArray != undefined && selectedLoadArray[loadName+'__'+cardId] != undefined)? (selectedLoadArray[loadName+'__'+cardId].value).toString() : '0' } 
-										key={cardId} placeholder="Qty" style={{textAlign: 'center',color: '#000'}} onChange={(value) => { (value.nativeEvent.text != '') ? DirectUpdateQTY(loadName , cardId , value.nativeEvent.text) : '' }} />
+									<TextInput keyboardType="numeric" defaultValue={ (selectedLoadArrayWithoutloadname != undefined && selectedLoadArrayWithoutloadname[cardId] != undefined)? (selectedLoadArrayWithoutloadname[cardId].value).toString() : '0' } key={cardId} placeholder="Qty" style={{textAlign: 'center',color: '#000'}} onChange={(value) => { (value.nativeEvent.text != '') ? DirectUpdateQTY(loadName , cardId , value.nativeEvent.text) : '' }} />
 								</View>
 								<View  style={ (win.width > 550) ? {width: '20%'} : {width: '20%'} }>
 									<Pressable onPress={ () => { addQtyItem( loadName , cardId ) } } style={{backgroundColor: Colors.primary,padding:7, height: 50}}>

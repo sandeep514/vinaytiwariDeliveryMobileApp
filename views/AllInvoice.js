@@ -51,7 +51,7 @@ const [printingIndicator , setPrintingIndicator] = useState(false);
 const [ActInd , setActInd] = useState(false);
 const [creaditStatus , setCreditStatus] = useState(initalPaymentStatus);
 const [saveOrderActivIndictor , setSaveOrderActivIndictor] = useState(false);
-const [selectedLoadCount , setSelectedLoadCount] = useState();
+const [selectedLoadCount , setSelectedLoadCount] = useState([]);
 const [undeliveredItems , setUndeliveredItems] = useState();
 const [ device ,setDevice ] = useState();
 const [ isBluetoothEnabled ,setisBluetoothEnabled ] = useState(false);
@@ -66,15 +66,16 @@ var paired = [];
 useEffect(() => {
     getListInvoice();
     getPrinterNameByDriver();
+    console.log("i am here");
 } , []);
 
 function getListInvoice(){
     setLoadedData(true);
     AsyncStorage.getItem('selectedVehicleNo').then((value) => {
-        let selectedVehNo  = value;
+        let selectedVehNo = value;
         AsyncStorage.getItem('user_id').then((value) => {
-            let driverId =  value;
-            getListInvoices(driverId , selectedVehNo).then((data) => {
+            let driverId = value;
+            getListInvoices( driverId, selectedVehNo ).then((data) => {
                 setLoadedData(false);
                 setSelectedLoadCount(data.data.data)
                 setUndeliveredItems(data.data.undeliverdItems);
@@ -911,8 +912,8 @@ printDesign = async (data , invoiceNo , buyerName, buyerAddress , buyerPhone) =>
 
 function searchBuyer(text){
     searchBuyerByInvoiceNumber(text).then((res) => {
-        setSelectedLoadCount(res.data.data)
-    })
+        setSelectedLoadCount(res.data.data);
+    });
 }
 
 function ViewPrintableReciept(data){
@@ -941,7 +942,7 @@ return (
                         <FlatList
                             contentContainerStyle={{justifyContent: 'space-between'}}
                             data={selectedLoadCount}
-                            keyExtractor={item => item[0].id}
+                            keyExtractor={(item , index) => index}
                             showsVerticalScrollIndicator ={false}
                             showsHorizontalScrollIndicator={false}
                             renderItem={({ item }) => (

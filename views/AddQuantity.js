@@ -23,7 +23,7 @@
 	import { useRef } from 'react';
 	import { CheckBox } from 'react-native-elements'
 	import AddQty from '../components/AddQty';
-import { KeyboardAvoidingView } from 'react-native';
+	import { KeyboardAvoidingView } from 'react-native';
 
 	const win = Dimensions.get('window');
 
@@ -88,9 +88,11 @@ import { KeyboardAvoidingView } from 'react-native';
 		// } , [latestPrice]);
 		useEffect(() => {
 			if( selectedItemFromItemsScreen != undefined ){
+				console.log("jnjknk");
 				selectedLoadedItemsByQty();
 			}
 		} , [selectedItemFromItemsScreen])
+
 		useEffect(() => {
 			AsyncStorage.getItem('selectedInvoiceId').then((id) => {
 
@@ -223,6 +225,9 @@ import { KeyboardAvoidingView } from 'react-native';
 				resolve(Object.values(processedData))
 			})
 		}
+		function updateFinal (data) {
+			setUpdatedFinalData(data);
+		}
 
 		function showConfirmationModel(){
 			setModalVisible(true);
@@ -230,7 +235,6 @@ import { KeyboardAvoidingView } from 'react-native';
 
 		function SaveOrders(){	
 			// setSaveOrderActivIndictor(true)
-
 			Keyboard.dismiss();
 
 			// return false;
@@ -395,23 +399,23 @@ import { KeyboardAvoidingView } from 'react-native';
 														{setTotalAmount = (parseFloat(setTotalAmount) + parseFloat(valuetem * val?.sale_price) )}
 														
 														{(selectedBuyerId != '') ? setUpdatedDataArray.push({'VATStatus' : val?.VATstatus ,"dnum":val?.loadId,"route":selectedRoute,"vehicle":selectedVehicle,"driver":selectedDriver,"buyer":selectedBuyerId,"sitem":currentSelectedId,"qty":val?.order_qty,"credit":"NO","sale_price":val?.sale_price}) : ''}
-														if( valuetem != 0 && valuetem != '0' ){
+														// if( valuetem != 0 && valuetem != '0' ){
 															return(
 																<AddQty 
 																	savedSalePrice={beforeUpdPrice}
 																	updatePriceDataTest={(value) => {setMytest(value)}}
-																	valuetem={valuetem} 
-																	data={data} 
-																	selectedItemFromItemsScreen={selectedItemFromItemsScreen} 
-																	key={generateRandString()} 
-																	val={val} 
+																	valuetem={valuetem}
+																	data={data}
+																	selectedItemFromItemsScreen={selectedItemFromItemsScreen}
+																	key={generateRandString()}
+																	val={val}
 																	keyboard={(value) => { setIsKeyboardOpen(value)}}
-																	updatedDataRes={(myUpdatedData) => { 
-																		setUpdatedFinalData(myUpdatedData);
-																	}} 
-																	updatedObjectRed={(myUupdatedObjectRed) => { 
-																		setSelectedItemFromItemsScreen(myUpdatedData) 
-																	}} 
+																	updatedDataRes={(myUpdatedData) => {
+																		updateFinal(myUpdatedData);
+																	}}
+																	updatedObjectRed={(myUupdatedObjectRed) => {
+																		setSelectedItemFromItemsScreen(myUpdatedData)
+																	}}
 																	updatedPrice={ (price) => { 
 																		setMyTotalPrice(price)
 																	} }
@@ -420,7 +424,7 @@ import { KeyboardAvoidingView } from 'react-native';
 																	}}
 																></AddQty>
 															)
-														}
+														// }
 													}
 												})}
 											</View>

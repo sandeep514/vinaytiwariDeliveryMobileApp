@@ -101,6 +101,8 @@ export default function ItemsScreenWithQty({navigation , route}) {
 
 	// const [listUndelivered , setListUndelivered] = useState();	
 	useEffect(() => {
+		console.log("here");
+
 		if( route.params != undefined ){
 			if(route.params.mySelectedItems != undefined){
 				setSelectedItemsFromLoads(route.params.mySelectedItems);

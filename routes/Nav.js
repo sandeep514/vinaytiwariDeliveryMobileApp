@@ -135,7 +135,7 @@ export default function Nav() {
 						headerRight: () => (
 							<View style={{flexDirection: 'row'}}>
 								<Pressable style={{backgroundColor: Colors.yellow , padding: 8,borderRadius: 5,marginVertical: 10,marginRight: 5}} onPress={() => {
-									navigation.navigate('Todayinvoices')
+									navigation.push('Todayinvoices')
 								}}>
 									<Text style={{color: '#000'}}>Today's</Text>
 								</Pressable>

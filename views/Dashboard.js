@@ -102,7 +102,7 @@ export default function Dashboard({navigation , route}) {
 					cardName={userName}
 					icon="user"
 					onPress={() => {
-						navigation.navigate('Profile');
+						navigation.push('Profile');
 					}}
 				/>
 				<DashboardCard
@@ -110,7 +110,7 @@ export default function Dashboard({navigation , route}) {
 					cardName={selectedVehicle}
 					icon="truck"
 					onPress={() => {
-						navigation.navigate('VehicleScreen');
+						navigation.push('VehicleScreen');
 					}}
 				/>
 				<DashboardCard
@@ -120,7 +120,7 @@ export default function Dashboard({navigation , route}) {
 					displayBadge={true}
 					badgeValue={(selectedVehicleCount) ? selectedVehicleCount: <ActivityIndicator size="small" color="white"></ActivityIndicator> }
 					onPress={() => {
-						navigation.navigate('Items');
+						navigation.push('Items');
 					}}
 				/>
 				<DashboardCard
@@ -152,7 +152,7 @@ export default function Dashboard({navigation , route}) {
 				
 			</View>
 			
-			{/* <Pressable style={{padding: 10,backgroundColor: 'green'}} onPress={() => { navigation.navigate('Demandstock') }}>
+			{/* <Pressable style={{padding: 10,backgroundColor: 'green'}} onPress={() => { navigation.push('Demandstock') }}>
 				<Text style={{textAlign: 'center',color: 'white',fontSize: 20}}>Generate New Load</Text>
 			</Pressable> */}
 

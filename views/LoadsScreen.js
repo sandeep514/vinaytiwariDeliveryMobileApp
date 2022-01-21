@@ -130,7 +130,7 @@ export default function LoadsScreen({navigation , route}) {
 						// });		
 						AsyncStorage.getItem('selectedLoadsNumbers').then((res) => {
 							if(JSON.parse(res).length){
-								navigation.navigate('Dashboard',{params : "here"})
+								navigation.push('Dashboard',{params : "here"})
 							}else{
 								alert("Please select any load.");
 							}

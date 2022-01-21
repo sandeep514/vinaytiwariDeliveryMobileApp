@@ -6,7 +6,7 @@ import MainScreen from '../layout/MainScreen';
 import {heightToDp} from '../utils/Responsive';
 // import MapView, { Marker } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getPriorityDrivers, saveSortedPriority  } from '../api/apiService';
+import { getPriorityDrivers, getSaleItemByInvoice, saveSortedPriority  } from '../api/apiService';
 import { Text } from 'react-native';
 import ItemComponent from './component/inputcomponent';
 // import { BoardRepository , Board } from 'react-native-draganddrop-board'
@@ -42,7 +42,9 @@ import ItemComponent from './component/inputcomponent';
         const [reloader , setReloader] = useState(false);
         const [sortedLists , setSortedLists] = useState({});
         const [newUpdatedList , setNewUpdatedList] = useState([]);
-        // let boardRepository = new BoardRepository(route.params.myRoutes);
+        const [ActInd , setActInd] = useState(false);
+
+	    // let boardRepository = new BoardRepository(route.params.myRoutes);
         useEffect(() => {
 			getRoutes();
 		} , [reloader])
@@ -70,6 +72,40 @@ import ItemComponent from './component/inputcomponent';
             return ( AsyncStorage.removeItem('selectedInvoiceId') , AsyncStorage.removeItem('newSortedArray') )
         } , [])
 
+		function gotoCart(invoiceNo, selectedBuyer) {
+			setActInd(true)
+			getSaleItemByInvoice(invoiceNo).then((data) => {
+
+        	setActInd(false)
+				AsyncStorage.setItem('cartItems' , JSON.stringify(data.data.data));
+	
+				AsyncStorage.setItem('selectedInvoiceId' , invoiceNo);
+				AsyncStorage.setItem('selectedBuyer' , (selectedBuyer).toString());
+				let myRecords = {};
+				let myRecordsFinal = {};
+				let relData = data.data.data;
+
+
+				if( data != undefined ){
+
+					for(let i = 0 ; i < relData.length; i++){
+						let dnum = relData[i].dnum;
+						let sitem = relData[i].sitem;
+						let qty = relData[i].qty;
+	
+						myRecords[relData[i].dnum+'_'+relData[i].sitem] = qty;
+						myRecordsFinal[relData[i].dnum+'__'+relData[i].sitem] = {'buyerId' : selectedBuyer, 'value' : JSON.parse(qty) , 'cardId' :relData[i].sitem,'VATstatus': false };
+
+						AsyncStorage.setItem('undeliveredItems' , JSON.stringify(myRecordsFinal))
+						AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(myRecordsFinal))
+						AsyncStorage.setItem('itemsAddedInCart' , JSON.stringify(myRecords))
+					}
+				}
+				navigation.push('ItemsScreenWithQty' , { mySelectedItems: myRecordsFinal});
+				// navigation.push('AddQuantity' , { mySelectedItems: myRecordsFinal});
+			})
+		}
+
 		const getBuyerIds = (data) => {
 			let sortedList = [];
 			return new Promise((resolve , reject) => {
@@ -90,12 +126,10 @@ import ItemComponent from './component/inputcomponent';
                     getPriorityDrivers(driverid , routeId).then((res) => {
                         setHasRoutes(true)
                         setListRoute(res.data.data);
-						getBuyerIds(res.data.data).then((res) => {
-							setSortedLists(res);
-							console.log(res)
-						}).catch((err) => {
-							console.log(err);
-						})
+                        getBuyerIds(res.data.data).then((res) => {
+                          setSortedLists(res);
+                        }).catch((err) => {
+                        })
                     } , (err) =>{
     
                     })
@@ -118,10 +152,16 @@ import ItemComponent from './component/inputcomponent';
         const [active, setActive] = new useState();
 
         const listClicked = (listData) => {
-            setActive(listData.id);
-            AsyncStorage.setItem( 'selectedBuyerRouteId', (listData.id).toString());
-            AsyncStorage.setItem( 'selectedBuyerRouteName', listData.name);
-
+			if(  'latest_invoice' in listData ){
+				setActive(listData.id);
+				AsyncStorage.setItem( 'selectedBuyerRouteName', listData.name);	
+				AsyncStorage.setItem( 'selectedBuyerRouteId', (listData.id).toString());
+				gotoCart(listData.latest_invoice , listData.id)
+			}else{				
+				setActive(listData.id);
+				AsyncStorage.setItem( 'selectedBuyerRouteId', (listData.id).toString());
+				AsyncStorage.setItem( 'selectedBuyerRouteName', listData.name);	
+			}
             // setcoordinates([{} ,{    latitude: parseFloat(listData.latitude),
             //                         longitude: parseFloat(listData.longitude),
             //                         latitudeDelta: 1,
@@ -137,17 +177,13 @@ import ItemComponent from './component/inputcomponent';
                 AsyncStorage.getItem('user_id').then((driverid) => {
 					saveSortedPriority( sortedLists , driverid , routeId).then((res) => {
 						setSaveLoader(false);
-						console.log(res);
 						if(reloader) {
-							console.log("here");
 							setReloader(false)
 						}else{
-							console.log("kjnjknk");
 							setReloader(true)
 						}
 						
 					}).catch((err) => {
-						console.log(err);
 					});
 				})
 			});
@@ -215,6 +251,13 @@ import ItemComponent from './component/inputcomponent';
                   />
                 </Pressable>
               </View>
+			  	{(ActInd == true) ?
+					<View style={{ flex:1,position:'absolute',justifyContent:'center',height:'100%',width: '100%',backgroundColor: '#ededed',zIndex:9999,opacity: 0.5}} >
+						<ActivityIndicator size="large" color={Colors.primary} />
+					</View>
+				:
+					null
+				}
               <View style={{padding: 0, margin: 0}}>
                 <ScrollView>
                   {hasRoutes != false && listRoute != undefined ? (
@@ -236,7 +279,7 @@ import ItemComponent from './component/inputcomponent';
 							key={i}
 							bottomDivider>
 								<View style={{padding: 0 , margin: 0,width: 60,marginTop: 15,height: 60}}>
-									<ItemComponent defaultImage={((l.priority)).toString()} listItems={sortedLists} sortedItm={(sortItems) => { console.log("here"), setSortedLists(sortItems) }} buyerId={l.id} />
+									<ItemComponent defaultImage={((l.priority)).toString()} listItems={sortedLists} sortedItm={(sortItems) => { setSortedLists(sortItems) }} buyerId={l.id} />
 								</View>
 							<Image
 								source={require('../assets/images/map.png')}
