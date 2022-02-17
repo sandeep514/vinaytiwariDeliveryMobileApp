@@ -124,6 +124,7 @@ import ItemComponent from './component/inputcomponent';
             AsyncStorage.getItem('selectedRoute').then((routeId) => {
                 AsyncStorage.getItem('user_id').then((driverid) => {
                     getPriorityDrivers(driverid , routeId).then((res) => {
+						console.log(res.data.data)
                         setHasRoutes(true)
                         setListRoute(res.data.data);
                         getBuyerIds(res.data.data).then((res) => {
