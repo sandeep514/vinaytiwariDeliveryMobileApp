@@ -421,9 +421,9 @@ export const SaveOrder = postedData => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       if (res == 'true') {
-        try{
+        try {
           apiClient
-            .post("save-order", {
+            .post('save-order', {
               data: postedData,
             })
             .then(response => {
@@ -433,9 +433,9 @@ export const SaveOrder = postedData => {
                 reject(response?.data?.error);
               }
             });
-        }catch (e) {
+        } catch (e) {
           reject(e);
-          console.error(e.message());
+          console.error(e);
         }
       }
     });
