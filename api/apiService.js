@@ -44,7 +44,7 @@ export const checkLogin = postedData => {
             password: postedData.password,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
               reject('Wrong User Details.');
@@ -62,7 +62,7 @@ export const getVehicle = () => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       apiClient.get('get-vehicles').then(response => {
-        if (response.data.status == true) {
+        if (response?.data?.status == true) {
           resolve(response.data.data);
         } else {
           reject('No vehicle available right now.');
@@ -127,7 +127,7 @@ export const getVehicleLoads = () => {
 // export const getVehicleLoads = () => {
 // 	return new Promise( (resolve , reject) => {
 // 		apiClient.get('get-vehicles' ).then( (response) => {
-// 			if( response.data.status == true ) {
+// 			if( response?.data?.status == true ) {
 // 				resolve(response.data.data);
 // 			}else{
 // 				reject('No vehicle available right now.');
@@ -146,10 +146,10 @@ export const getItemsByVehicleAndLoads = (vehicheId, load_numbers) => {
             load_numbers: JSON.parse(load_numbers),
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -167,12 +167,10 @@ export const getVehicleLoadCount = (vehicheId, load_numbers) => {
             load_numbers: JSON.parse(load_numbers),
           })
           .then(response => {
-            if (response.data.status == true) {
-              console.log('hbnj');
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              console.log('kjnk');
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -187,10 +185,10 @@ export const getSavedNotes = () => {
       AsyncStorage.getItem('vehicle_no').then(value => {
         vehicheNumber = value;
         apiClient.get('get-vehile-notes/' + vehicheNumber).then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
       });
@@ -210,10 +208,10 @@ export const SaveVehicleNotes = newComment => {
             comments: newComment,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       });
@@ -231,10 +229,10 @@ export const updatePaymentStatus = (invoice, status) => {
             payment_type: status,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -249,10 +247,10 @@ export const getTodaySale = (vehicheNumber, driverId) => {
       apiClient
         .get('get-today-sales/' + vehicheNumber + '/' + driverId)
         .then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
     });
@@ -267,10 +265,10 @@ export const getPriorityDrivers = (driverId, routeId) => {
       apiClient
         .get('get-buyer-priortity-by-driver/' + driverId + '/' + routeId)
         .then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
     });
@@ -282,10 +280,10 @@ export const getBuyerInvoices = buyerId => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       apiClient.get('get-buyer-invoices/' + buyerId).then(response => {
-        if (response.data.status == true) {
+        if (response?.data?.status == true) {
           resolve(response);
         } else {
-          reject(response.data.error);
+          reject(response?.data?.error);
         }
       });
     });
@@ -303,10 +301,10 @@ export const updateTypeOfinvoice = (invoice, status) => {
             payment_type: status,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -320,10 +318,10 @@ export const getPrioritySortedDrivers = (driverId, routeId) => {
       apiClient
         .get('get-buyer-priority-by-driver-sorted/' + driverId + '/' + routeId)
         .then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
     });
@@ -337,10 +335,10 @@ export const getListInvoices = (driverId, vehicheId) => {
       apiClient
         .get('get-sales-details/' + driverId + '/' + vehicheId)
         .then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
     });
@@ -352,10 +350,10 @@ export const checkIfBuyerHasVAT = buyerId => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       apiClient.get('check-buyer-has-vat/' + buyerId).then(response => {
-        if (response.data.status == true) {
+        if (response?.data?.status == true) {
           resolve(response);
         } else {
-          reject(response.data.error);
+          reject(response?.data?.error);
         }
       });
     });
@@ -372,10 +370,10 @@ export const getCartItemDetails = postedData => {
             data: postedData,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -389,10 +387,10 @@ export const updateDriverForsale = postedData => {
     CheckConnectivity().then(res => {
       if (res == 'true') {
         apiClient.post('update-driver-for-sale', postedData).then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
       }
@@ -408,10 +406,10 @@ export const getPendingSales = postedData => {
         apiClient
           .post('get-pending-sales', JSON.stringify(postedData))
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response.data);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -429,10 +427,10 @@ export const SaveOrder = postedData => {
             data: postedData,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -449,10 +447,10 @@ export const BeforeOrderDetails = postedData => {
           data: postedData,
         })
         .then(response => {
-          if (response.data.status == true) {
+          if (response?.data?.status == true) {
             resolve(response);
           } else {
-            reject(response.data.error);
+            reject(response?.data?.error);
           }
         });
     });
@@ -470,10 +468,10 @@ export const getSaleItemByInvoice = invoiceNo => {
           })
           .then(response => {
             console.log(response.data.data);
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -491,10 +489,10 @@ export const searchBuyerByInvoiceNumber = invoiceNo => {
             invoiceNumber: invoiceNo,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -513,10 +511,10 @@ export const saveSortedPriority = (sortedArray, driverId, routeId) => {
             routeId: routeId,
           })
           .then(response => {
-            if (response.data.status == 'success') {
+            if (response?.data?.status == 'success') {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -533,10 +531,10 @@ export const saveNewLoad = data => {
             data: data,
           })
           .then(response => {
-            if (response.data.status == true) {
+            if (response?.data?.status == true) {
               resolve(response);
             } else {
-              reject(response.data.error);
+              reject(response?.data?.error);
             }
           });
       }
@@ -548,10 +546,10 @@ export const getSalesItemsForLoad = () => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       apiClient.get('get-sale-items-for-load').then(response => {
-        if (response.data.status == true) {
+        if (response?.data?.status == true) {
           resolve(response);
         } else {
-          reject(response.data.error);
+          reject(response?.data?.error);
         }
       });
     });
@@ -562,10 +560,10 @@ export const getItemRequirement = () => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       apiClient.get('get-items-requirement').then(response => {
-        if (response.data.status == true) {
+        if (response?.data?.status == true) {
           resolve(response.data.data);
         } else {
-          reject(response.data.error);
+          reject(response?.data?.error);
         }
       });
     });

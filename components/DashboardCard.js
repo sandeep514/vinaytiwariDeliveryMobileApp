@@ -1,19 +1,12 @@
-import React, {Component} from 'react';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableHighlight,
-  Pressable,
-} from 'react-native';
-import {Badge, ListItem, Button, ScrollView} from 'react-native-elements';
+import React from 'react';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {Colors} from '../components/Colors';
-import {widthToDp, heightToDp} from '../utils/Responsive';
+import {heightToDp} from '../utils/Responsive';
 
-export default DashboardCard = ({
+const DashboardCard = ({
   backgroundColor,
   cardName,
   icon,
@@ -93,3 +86,5 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 });
+
+export default DashboardCard;
