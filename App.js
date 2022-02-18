@@ -1,11 +1,17 @@
 import React from 'react';
 import Nav from './routes/Nav';
 
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://ff37d5a526dc466492c466cef6a3dcde@o1147172.ingest.sentry.io/6217087',
+});
+
 //Debugger Configuration Start
 // To see all the requests in the chrome Dev tools in the network tab.
-XMLHttpRequest = GLOBAL.originalXMLHttpRequest
-  ? GLOBAL.originalXMLHttpRequest
-  : GLOBAL.XMLHttpRequest;
+XMLHttpRequest = GLOBAL?.originalXMLHttpRequest
+  ? GLOBAL?.originalXMLHttpRequest
+  : GLOBAL?.XMLHttpRequest;
 
 // fetch logger
 global._fetch = fetch;
@@ -16,8 +22,7 @@ global.fetch = function (uri, options, ...args) {
 };
 
 //Debugger Configuration End
-
-export default function App() {
-
+const App = () => {
   return <Nav />;
-}
+};
+export default Sentry.wrap(App);
