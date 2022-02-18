@@ -1,7 +1,7 @@
 import {Dimensions, PixelRatio} from 'react-native';
 
 let {width, height} = Dimensions.get('window');
-console.log(Dimensions.get('window'));
+
 const widthToDp = (orignalWidth = 0) => {
   let mappedWidth =
     typeof orignalWidth === 'number' ? orignalWidth : parseFloat(orignalWidth);
@@ -15,7 +15,7 @@ const heightToDp = (orignalHeight = 0) => {
       : parseFloat(orignalHeight);
   return PixelRatio.roundToNearestPixel((height * mappedHeight) / 100);
 };
-const fontToDp = (fontSize) => {
+const fontToDp = fontSize => {
   const heightPercent = (fontSize * height) / height;
   return Math.round(heightPercent);
 };

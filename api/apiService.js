@@ -9,11 +9,10 @@ export const imagePrefix = 'https://delivery-app.ripungupta.com/';
 export const CheckConnectivity = () => {
   return new Promise((resolve, reject) => {
     NetInfo.fetch().then(state => {
-      console.log(state);
       if (state.isConnected == true || state.isConnected == 'true') {
         resolve('true');
       } else {
-        alert('no internet connection');
+        alert('Internet connection not available!');
         reject();
         return false;
       }
@@ -467,7 +466,6 @@ export const getSaleItemByInvoice = invoiceNo => {
             invoiceNumber: invoiceNo,
           })
           .then(response => {
-            console.log(response.data.data);
             if (response?.data?.status == true) {
               resolve(response);
             } else {

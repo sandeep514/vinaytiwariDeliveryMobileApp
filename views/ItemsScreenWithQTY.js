@@ -75,8 +75,6 @@ export default function ItemsScreenWithQty({navigation, route}) {
 
   // const [listUndelivered , setListUndelivered] = useState();
   useEffect(() => {
-    console.log('here');
-
     if (route.params != undefined) {
       if (route.params.mySelectedItems != undefined) {
         setSelectedItemsFromLoads(route.params.mySelectedItems);
@@ -88,9 +86,6 @@ export default function ItemsScreenWithQty({navigation, route}) {
 
     AsyncStorage.getItem('user_id').then(userId => {
       if (userId != 13 && userId != '13') {
-        // setHasUndeliveredItems(true);
-        // let undeliveredItems = {"LOAD-20-03-2021-246__134":{"value":5,"cardId":134,"VATstatus":false},"LOAD-20-03-2021-246__311":{"value":6,"cardId":311,"VATstatus":false}};
-        // AsyncStorage.setItem('undeliveredItems' , JSON.stringify(undeliveredItems));
       }
     });
     // setListUndelivered(undeliveredItems)
@@ -113,8 +108,7 @@ export default function ItemsScreenWithQty({navigation, route}) {
         let load_numbers = value;
         getItemsByVehicleAndLoads(vehicheId, load_numbers).then(
           res => {
-            console.log(res.data.data);
-            setListItems(res.data.data);
+            setListItems(res?.data?.data);
             setActiveIndicatorLoader(false);
             setActiveIndicatorLoaderImages(true);
             setTimeout(() => {

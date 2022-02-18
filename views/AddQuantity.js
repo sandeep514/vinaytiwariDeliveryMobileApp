@@ -472,7 +472,6 @@ export default function AddQuantity({navigation, route}) {
                               setMyTotalPrice(price);
                             }}
                             updateMyObjectData={myRecord => {
-                              // console.log(myRecord)
                             }}
                           />
                         );

@@ -67,7 +67,6 @@ export default function ViewPDF({navigation, route, text, onOK}) {
     getSaleItemByInv(route.params.invoiceNo).then(result => {
       setSavedBuyerData(result.data[0].buyer_rel);
       let parsedData = result.data;
-      console.log(parsedData);
       setSavedOrderResponce(parsedData);
       setundeliveredItems(result.undeliverdItems);
       for (let i = 0; i < parsedData.length; i++) {

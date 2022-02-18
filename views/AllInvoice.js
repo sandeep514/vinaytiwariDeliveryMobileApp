@@ -148,7 +148,7 @@ export default function AddQuantity({navigation}) {
                     },
                   )
                   .catch(function (error) {
-                    console.log(
+                    console.error(
                       'There has been a problem with your fetch operation: ' +
                         error.message,
                     );
@@ -242,7 +242,7 @@ export default function AddQuantity({navigation}) {
             }
           })
           .catch(function (error) {
-            console.log(
+            console.error(
               'There has been a problem with your fetch operation: ' +
                 error.message,
             );
@@ -251,7 +251,7 @@ export default function AddQuantity({navigation}) {
           });
       })
       .catch(function (error) {
-        console.log(
+        console.error(
           'There has been a problem with your fetch operation: ' +
             error.message,
         );
@@ -769,7 +769,7 @@ export default function AddQuantity({navigation}) {
                       ViewPrintableReciept(item);
                     }}
                     PrintReceiptState={item => {
-                      console.log(item), printReceipt(item);
+                       printReceipt(item);
                     }}
                   />
                 )}

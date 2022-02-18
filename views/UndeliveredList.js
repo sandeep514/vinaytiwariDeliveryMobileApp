@@ -114,7 +114,7 @@ export default function UndeliveredList({navigation, route}) {
         setActiveIndicatorLoader(false);
       })
       .catch(err => {
-        console.log('here is a error: '.err);
+        console.error('here is a error: '.err);
       });
   };
 
