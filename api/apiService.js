@@ -421,17 +421,22 @@ export const SaveOrder = postedData => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       if (res == 'true') {
-        apiClient
-          .post('save-order', {
-            data: postedData,
-          })
-          .then(response => {
-            if (response?.data?.status == true) {
-              resolve(response);
-            } else {
-              reject(response?.data?.error);
-            }
-          });
+        try{
+          apiClient
+            .post("save-order", {
+              data: postedData,
+            })
+            .then(response => {
+              if (response?.data?.status == true) {
+                resolve(response);
+              } else {
+                reject(response?.data?.error);
+              }
+            });
+        }catch (e) {
+          reject(e);
+          console.error(e.message());
+        }
       }
     });
   });
