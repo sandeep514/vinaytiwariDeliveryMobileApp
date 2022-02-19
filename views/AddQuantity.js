@@ -116,12 +116,12 @@ export default function AddQuantity({navigation, route}) {
 
     getCartItemDetails(JSON.stringify(selectedItemFromItemsScreen)).then(
       res => {
-        let productData = res.data.data;
+        let productData = res?.data?.data;
         for (let i = 0; i < productData.length; i++) {
           let myData = Object.values(productData)[i];
           if (
-            Object.values(myData)[0].itemcategory == 'EGGS' ||
-            Object.values(myData)[0].itemcategory == 'eggs'
+            Object.values(myData)[0]?.itemcategory == 'EGGS' ||
+            Object.values(myData)[0]?.itemcategory == 'eggs'
           ) {
             setHasNonVatProducts(true);
           } else {
