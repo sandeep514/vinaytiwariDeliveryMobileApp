@@ -51,23 +51,8 @@ const DashboardCard = ({
       selectedLoadArray = {};
       selectedLoadArrayWithoutloadname = {};
     }
-    // alert(loadName)
-    // if( selectedData.indexOf(0) === -1 ){
-    // }else{
-    // }
-
     getPendingOrderResponce();
-    // AsyncStorage.getItem('itemsAddedInCart').then((data) => {
-    // 	if( data != null ){
-    // 	}
-    // })
 
-    // AsyncStorage.getItem('undeliveredItems').then((items) => {
-
-    // })
-    // AsyncStorage.getItem('selectedLoadedItemsByQty').then((res) => {
-    // 	selectedLoadArray = JSON.parse(res);
-    // })
     return () => {
       selectedLoadArray = {};
       selectedLoadArrayWithoutloadname = {};
@@ -75,7 +60,6 @@ const DashboardCard = ({
       AsyncStorage.removeItem('cartItems');
       AsyncStorage.setItem('selectedLoadedItemsByQty', JSON.stringify({}));
     };
-    // AsyncStorage.setItem('selectedLoadedItemsByQty', JSON.stringify({}));
   }, []);
 
   function getPendingOrderResponce() {
@@ -111,7 +95,6 @@ const DashboardCard = ({
                 'selectedLoadedItemsByQty',
                 JSON.stringify(myRecordsFinal),
               );
-              // AsyncStorage.setItem('selectedLoadedItemsByQtyWithoutLoadnumber' , JSON.stringify(myRecordsFinalWithoutLoadnumber) )
 
               AsyncStorage.setItem(
                 'itemsAddedInCart',
@@ -155,9 +138,7 @@ const DashboardCard = ({
       };
       setUpdateQtyofItem(selectedLoadArray);
       selectedData(selectedLoadArray);
-
       setUpdateQtyofItems(qty);
-      // AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
     });
   }
 
@@ -169,7 +150,6 @@ const DashboardCard = ({
         cartData[loadName + '_' + cardId] = (
           parseInt(cartData[loadName + '_' + cardId]) + 1
         ).toString();
-        // selectedLoadArray[loadedName].value = (parseInt(cartData[loadName+'_'+cardId])+1);
         setCartData(cartData);
       }
     }
@@ -186,8 +166,6 @@ const DashboardCard = ({
       setTimeout(() => {
         setGenerateLoader(false);
       }, 2000);
-
-      // AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
     } else {
       selectedLoadArray[loadName + '__' + cardId] = {
         value: 1,
@@ -207,15 +185,7 @@ const DashboardCard = ({
       setTimeout(() => {
         setGenerateLoader(false);
       }, 2000);
-
-      // AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
     }
-
-    // if( UpdateQtyofItems == undefined ){
-    // 	setUpdateQtyofItems(1);
-    // }else{
-    // 	setUpdateQtyofItems((UpdateQtyofItems+1));
-    // }
   }
 
   function minusQtyItem(loadName, cardId) {
@@ -239,21 +209,13 @@ const DashboardCard = ({
     setMyLatestData(myLatestData - 1);
     // }
     if (selectedLoadArray[loadedName] != undefined) {
-      // if( selectedLoadArray[loadedName].value != 0 ){
       selectedLoadArray[loadedName].value =
         selectedLoadArray[loadedName].value - 1;
       selectedLoadArrayWithoutloadname[cardId].value =
         selectedLoadArrayWithoutloadname[cardId].value - 1;
-      // if( (selectedLoadArray[loadedName].value) <= 0 ){
-      // 	delete selectedLoadArray[loadedName];
-      // }
       setUpdateQtyofItem(selectedLoadArray);
       selectedData(selectedLoadArray);
-      // }
     } else {
-      // if( (selectedLoadArray[loadedName].value-1) <= 0 ){
-      // 	delete selectedLoadArray[loadedName];
-      // }
       selectedLoadArray[loadName + '__' + cardId] = {
         value: -1,
         cardId: cardId,
@@ -270,16 +232,6 @@ const DashboardCard = ({
       setUpdateQtyofItem(selectedLoadArray);
       selectedData(selectedLoadArray);
     }
-
-    // if( UpdateQtyofItems == undefined ){
-    // 	setUpdateQtyofItems(0);
-    // }else{
-    // 	if( UpdateQtyofItems != 0){
-    // 		setUpdateQtyofItems((UpdateQtyofItems-1));
-    // 	}
-    // }
-
-    // AsyncStorage.setItem('selectedLoadedItemsByQty' , JSON.stringify(selectedLoadArray));
   }
 
   return (
