@@ -183,9 +183,13 @@ export default function LoadsScreen({navigation, route}) {
           // ( currentLoadRoute == 'Dashboard' ) ? navigation.navigate('Dashboard') : navigation.navigate('Items')
           // });
           AsyncStorage.getItem('selectedLoadsNumbers').then(res => {
-            if (JSON.parse(res).length) {
-              navigation.push('Dashboard', {params: 'here'});
-            } else {
+            if(JSON.parse(res) != null && JSON.parse(res) != undefined) {
+              if (JSON.parse(res).length > 0) {
+                navigation.push('Dashboard', {params: 'here'});
+              } else {
+                alert('Please select any load.');
+              }
+            }else {
               alert('Please select any load.');
             }
           });

@@ -12,9 +12,9 @@ target 'delivery' do
     :hermes_enabled => false
   )
 
-  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
-
   pod 'RNStarPrnt', :path => '../node_modules/react-native-star-prnt'
+
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
   target 'deliveryTests' do
     inherit! :complete

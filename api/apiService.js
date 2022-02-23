@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {ToastAndroid} from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { ToastAndroid } from 'react-native';
+import { StarPRNT } from 'react-native-star-prnt';
 import apiClient from './client';
-import {StarPRNT} from 'react-native-star-prnt';
 
 export const imagePrefix = 'https://delivery-app.ripungupta.com/';
 
@@ -421,22 +421,18 @@ export const SaveOrder = postedData => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
       if (res == 'true') {
-        try {
-          apiClient
-            .post('save-order', {
-              data: postedData,
-            })
-            .then(response => {
-              if (response?.data?.status == true) {
-                resolve(response);
-              } else {
-                reject(response?.data?.error);
-              }
-            });
-        } catch (e) {
-          reject(e);
-          console.error(e);
-        }
+        apiClient
+          .post('save-order', {
+            data: postedData,
+          })
+          .then(response => {
+            if (response?.data?.status == true) {
+              resolve(response);
+            } else {
+              console.error(response?.data?.error);
+              reject(response?.data?.error);
+            }
+          });
       }
     });
   });

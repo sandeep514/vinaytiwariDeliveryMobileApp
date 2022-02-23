@@ -1,26 +1,27 @@
-import React, {useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableHighlight,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import {ListItem} from 'react-native-elements';
-
-import {Colors} from '../components/Colors';
-import {heightToDp} from '../utils/Responsive';
-import MainScreen from '../layout/MainScreen';
-import DashboardCard from '../components/DashboardCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ListItem } from 'react-native-elements';
 import {
   generateRandString,
   getPriorityDrivers,
   getTodaySale,
-  getVehicleLoadCount,
+  getVehicleLoadCount
 } from '../api/apiService';
+import { Colors } from '../components/Colors';
+import DashboardCard from '../components/DashboardCard';
+import MainScreen from '../layout/MainScreen';
+import { heightToDp } from '../utils/Responsive';
+
 // import GetLocation from 'react-native-get-location'
 
 export default function Dashboard({navigation, route}) {
@@ -54,10 +55,14 @@ export default function Dashboard({navigation, route}) {
   }
 
   useEffect(() => {
-    // AsyncStorage.getAllKeys()
-    // .then((keys)=> AsyncStorage.multiGet(keys)
-    //             .then((data) => console.log(data)));
-
+    ToastAndroid.showWithGravityAndOffset(
+      'Welcome to Taurus Digital ocean server',
+      ToastAndroid.LONG,
+      ToastAndroid.BOTTOM,
+      0,
+      20,
+    );
+    alert('Testing Digital ocean server');
     AsyncStorage.getItem('selectedVehicleNo').then(value => {
       let vehicheId = value;
       AsyncStorage.getItem('selectedLoadsNumbers').then(value => {
