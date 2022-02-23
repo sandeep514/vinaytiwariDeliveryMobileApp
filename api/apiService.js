@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { ToastAndroid } from 'react-native';
-import { StarPRNT } from 'react-native-star-prnt';
-import apiClient from './client';
+import axios from 'axios';
+import {ToastAndroid} from 'react-native';
+import {StarPRNT} from 'react-native-star-prnt';
+import apiClient, {BASE_URL} from './client';
 
 export const imagePrefix = 'https://delivery-app.ripungupta.com/';
 
@@ -258,18 +259,27 @@ export const getTodaySale = (vehicheNumber, driverId) => {
 
 // https://staging.tauruspress.co.uk/backend/public/api/get-buyer-priortity-by-driver/12/4
 //get Today sale
+let cancelToken;
 export const getPriorityDrivers = (driverId, routeId) => {
   return new Promise((resolve, reject) => {
     CheckConnectivity().then(res => {
-      apiClient
-        .get('get-buyer-priortity-by-driver/' + driverId + '/' + routeId)
-        .then(response => {
-          if (response?.data?.status == true) {
-            resolve(response);
-          } else {
-            reject(response?.data?.error);
-          }
-        });
+      if (res == 'true') {
+        if (cancelToken) {
+          cancelToken.cancel();
+        }
+        cancelToken = axios.CancelToken.source();
+        apiClient
+          .get('get-buyer-priortity-by-driver/' + driverId + '/' + routeId, {
+            cancelToken: cancelToken.token,
+          })
+          .then(response => {
+            if (response?.data?.status == true) {
+              resolve(response);
+            } else {
+              reject(response?.data?.error);
+            }
+          });
+      }
     });
   });
 };
@@ -370,6 +380,10 @@ export const getCartItemDetails = postedData => {
           })
           .then(response => {
             if (response?.data?.status == true) {
+              console.log(
+                '------------------- Get cart item details --------------------',
+              );
+              console.log('response', response);
               resolve(response);
             } else {
               reject(response?.data?.error);

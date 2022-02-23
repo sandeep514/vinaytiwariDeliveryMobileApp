@@ -6,6 +6,7 @@ import {Input} from 'react-native-elements';
 import {Colors} from './Colors';
 import {heightToDp} from '../utils/Responsive';
 import {imagePrefix} from '../api/apiService';
+import FastImage from 'react-native-fast-image';
 // import GetLocation from 'react-native-get-location'
 
 export default function DemandstockList({
@@ -60,8 +61,12 @@ export default function DemandstockList({
   return (
     <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
       <View style={{width: '20%', alignItems: 'center'}}>
-        <Image
-          source={{uri: imagePrefix + '/' + data.img}}
+        <FastImage
+          source={{
+            uri: imagePrefix + '/' + data.img,
+            priority: FastImage.priority.high,
+          }}
+          resizeMethod="scale"
           style={styles.productImage}
         />
       </View>

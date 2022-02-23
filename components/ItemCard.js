@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Colors} from '../components/Colors';
 import {heightToDp, widthToDp} from '../utils/Responsive';
+import FastImage from 'react-native-fast-image';
 
 let selectedLoadArray = {};
 let selectedLoadArrayWithoutloadname = {};
@@ -261,8 +262,9 @@ const DashboardCard = ({
               styleData,
             ]}>
             <View style={styles.itemImageContainer}>
-              <Image
-                source={{uri: imageUrl}}
+              <FastImage
+                source={{uri: imageUrl, priority: FastImage.priority.high}}
+                resizeMethod="scale"
                 style={win.width > 550 ? styles.itemImageTab : styles.itemImage}
               />
               <Text
@@ -367,8 +369,9 @@ const DashboardCard = ({
             styleData,
           ]}>
           <View style={styles.itemImageContainer}>
-            <Image
-              source={{uri: imageUrl}}
+            <FastImage
+              source={{uri: imageUrl, priority: FastImage.priority.high}}
+              resizeMethod="scale"
               style={win.width > 550 ? styles.itemImageTab : styles.itemImage}
             />
           </View>
