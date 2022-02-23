@@ -24,6 +24,7 @@
     "react-native-draganddrop-board": "^1.0.4",
     "react-native-eject": "^0.1.2",
     "react-native-elements": "^3.4.2",
+    "react-native-fast-image": "^8.5.11",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-safe-area-context": "^3.3.2",
