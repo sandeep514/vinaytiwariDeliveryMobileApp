@@ -10,6 +10,7 @@ import { getPriorityDrivers, getSaleItemByInvoice, saveSortedPriority  } from '.
 import { Text } from 'react-native';
 import ItemComponent from './component/inputcomponent';
 // import { BoardRepository , Board } from 'react-native-draganddrop-board'
+import ClearCache from 'react-native-clear-cache';
 
 	const data = [
 		{
@@ -46,8 +47,12 @@ import ItemComponent from './component/inputcomponent';
 
 	    // let boardRepository = new BoardRepository(route.params.myRoutes);
         useEffect(() => {
-			getRoutes();
-		} , [reloader])
+			ClearCache.clearAppCache(data => {
+				// alert(data) 
+				// will alert the new size
+			});
+         	getRoutes();
+        } , [reloader])
         useEffect(() => {
 
             AsyncStorage.removeItem('selectedLoadedItemsByQty');
