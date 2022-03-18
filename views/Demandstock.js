@@ -9,7 +9,7 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 } from 'react-native';
-
+ 
 import {Colors} from '../components/Colors';
 import {widthToDp, heightToDp} from '../utils/Responsive';
 import MainScreen from '../layout/MainScreen';
